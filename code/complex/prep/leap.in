@@ -1,0 +1,12 @@
+source leaprc.protein.ff14SB
+source leaprc.water.tip3p
+source leaprc.gaff2
+loadamberparams BTN.frcmod
+loadamberprep BTN.prep
+pdb = loadpdb 1stp-prepped.pdb
+check pdb
+solvateBox pdb TIP3PBOX 14 iso
+savepdb pdb solvated.pdb
+saveamberparm pdb solvated.parm7 solvated.rst7
+quit
+
