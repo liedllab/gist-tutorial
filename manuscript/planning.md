@@ -1,28 +1,36 @@
 # Chapters
 * Prerequisites
-* GIST implementations: CPU / PME / GPU / GIGIST
-    * How to use them
-    * what to use
 * GIST convergence / simulation setup
-    * time
-    * frames
-    * restraints
-        * strength
-        * hydrogen?
+   * time
+   * frames
+   * restraints
+      * strength
+      * hydrogen?
+   * clustering
+   * Run MD of streptavidin + biotin + complex
+* GIST implementations: CPU / PME / GPU / GIGIST
+   * How to use them
+   * what to use
+   * Run GIST of streptavidin + biotin + complex
 * GIST post-processing
-    * computed quantities
-    * double counting
-    * dens/norm
-    * software
-        * gistpp
-        * gisttools
+   * computed quantities
+   * double counting
+   * dens/norm
+   * software
+      * gistpp
+      * gisttools
+   * dG of biotin
+   * binding pocket analysis
+   * binding free energy
 * GIST extensions
-    * multiple solvents
-        * usage
-        * convergence
-    * mixtures / salt
-        * energy, MD with counter ions
-        * entropy:
-            * first order: GIST
-            * second order: extensions, Python etc.
+   * multiple solvents
+      * usage
+      * convergence
+      * show a quick example?
+   * mixtures / salt
+      * energy, MD with counter ions
+      * entropy:
+         * first order: GIST
+         * second order: extensions, Python etc.
+      * easiest example: counter ions!
 
