@@ -20,10 +20,10 @@ biotin/equil/EQUIL-DONE.rst: biotin/equil/ biotin/solvated.parm7 biotin/pre-equi
 streptavidin/equil/EQUIL-DONE.rst: streptavidin/equil/ streptavidin/solvated.parm7 streptavidin/pre-equil.ncrst
 	cd streptavidin/equil && ../../$(SCRIPTS_DIR)/equilibration.py -R ../solvated.parm7 ../pre-equil.ncrst
 
-streptavidin/solvated.parm7 streptavidin/pre-equil.ncrst: streptavidin/ $(SCRIPTS_DIR)/cpptraj_remove_mol.sh complex/equil/solvated.parm7 complex/equil/EQUIL-DONE.rst
+streptavidin/solvated.parm7 streptavidin/pre-equil.ncrst: streptavidin/ $(SCRIPTS_DIR)/cpptraj_remove_mol.sh complex/solvated.parm7 complex/equil/EQUIL-DONE.rst
 	$(word 2,$^) complex/solvated.parm7 complex/equil/EQUIL-DONE.rst 2 streptavidin/solvated.parm7 streptavidin/pre-equil.ncrst
 
-biotin/solvated.parm7 biotin/pre-equil.ncrst: biotin/ $(SCRIPTS_DIR)/cpptraj_remove_mol.sh complex/equil/solvated.parm7 complex/equil/EQUIL-DONE.rst
+biotin/solvated.parm7 biotin/pre-equil.ncrst: biotin/ $(SCRIPTS_DIR)/cpptraj_remove_mol.sh complex/solvated.parm7 complex/equil/EQUIL-DONE.rst
 	$(word 2,$^) complex/solvated.parm7 complex/equil/EQUIL-DONE.rst 1 biotin/solvated.parm7 biotin/pre-equil.ncrst
 
 complex/equil/EQUIL-DONE.rst: complex/solvated.parm7 complex/equil/solvated.rst7
