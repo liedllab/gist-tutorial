@@ -5,6 +5,12 @@ SCRIPTS_DIR := scripts
 .PHONY: all
 all: 
 
+.PHONY: gist-inputs
+gist-inputs: biotin/gist/run-gist.sh streptavidin/gist/run-gist.sh complex/gist/run-gist.sh
+
+%/gist/run-gist.sh: scripts/run-gist.sh
+	cp $^ $@
+
 .PHONY: gist-md-inputs
 gist-md-inputs: biotin/gist/run-md.sh streptavidin/gist/run-md.sh complex/gist/run-md.sh
 
