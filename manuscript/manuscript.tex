@@ -66,6 +66,11 @@
 \datereceived{Day Month Year}
 \dateaccepted{Day Month Year}
 
+
+%%% Shortcuts and macros
+\newcommand{\dgsolv}{\Delta G_\textup{solv}}
+\newcommand{\software}{\emph}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ARTICLE START
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,43 +104,58 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 
 \section{Introduction}
 
-Here you would explain what problem you are tackling and briefly motivate your work.
-
-In this particular template, we have removed most of the usage examples which occur in \texttt{sample-document.tex} to provide a minimal template you can modify; however, we retain a couple of examples illustrating more unusual features of our templates/article class, such as the checklists, and information on algorithms and pseudocode.
-
-Keep in mind, as you prepare your manuscript, that you should plan for a representative image  which will be used to highlight your article on the journal website and publications. Usually, this would be one of your figures, but it must also be uploaded separately upon article submission. We give specific guidelines for this image on the journal website in the section on article submission (see \url{https://livecomsjournal.github.io/authors/policies/index.html#article-submission}).
-
-Additionally, for well-formatted manuscripts, we recommend that you let LaTeX handle figure/table placement for you as much as possible, so please avoid specifying strenuous float instructions like `[h!]` and `[H]` as much as possible.
+%Here you would explain what problem you are tackling and briefly motivate your work.
+%
+%In this particular template, we have removed most of the usage examples which occur in \texttt{sample-document.tex} to provide a minimal template you can modify; however, we retain a couple of examples illustrating more unusual features of our templates/article class, such as the checklists, and information on algorithms and pseudocode.
+%
+%Keep in mind, as you prepare your manuscript, that you should plan for a representative image  which will be used to highlight your article on the journal website and publications. Usually, this would be one of your figures, but it must also be uploaded separately upon article submission. We give specific guidelines for this image on the journal website in the section on article submission (see \url{https://livecomsjournal.github.io/authors/policies/index.html#article-submission}).
+%
+%Additionally, for well-formatted manuscripts, we recommend that you let LaTeX handle figure/table placement for you as much as possible, so please avoid specifying strenuous float instructions like `[h!]` and `[H]` as much as possible.
 
 \subsection{Scope}
 
-Tutorials should endeavor to cover the specific task at hand, and also highlight how the steps might need to be modified (or additional care might need to be taken at particular points) to handle more general cases.
-
-The scope of the tutorial, as well as the expected proficiencies / outcomes for researchers who complete the tutorial, should be clearly defined.
-This will often happen in a specific section or subsection in the article itself.
+%Tutorials should endeavor to cover the specific task at hand, and also highlight how the steps might need to be modified (or additional care might need to be taken at particular points) to handle more general cases.
+%
+%The scope of the tutorial, as well as the expected proficiencies / outcomes for researchers who complete the tutorial, should be clearly defined.
+%This will often happen in a specific section or subsection in the article itself.
 
 \section{Prerequisites}
 
-Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
+%Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
 
 \subsection{Background knowledge}
-Tutorials should clearly define what concepts or abilities researchers will need to complete the tutorial (e.g., some proficiency in Python; experience with Jupyter notebooks; knowledge of classical MD; etc).
+%Tutorials should clearly define what concepts or abilities researchers will need to complete the tutorial (e.g., some proficiency in Python; experience with Jupyter notebooks; knowledge of classical MD; etc).
 
 \subsection{Software/system requirements}
-Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
+%Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
 
-\section{Content and links}
 
-A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
-You will likely want to reference your GitHub repository as a central point to access all of this information, and then the GitHub repository may link out to other content as needed.
+
+\section{Theory}
+GIST is an implementation of Inhomogeneous Solvation Theory (IST) \cite{Lazaridis1998} that calculates the free energy of solvation $\dgsolv$ on a 3-dimensional grid.
+It was first devised by Nguyen et al. \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
+Here, we only provide a short overview of the theory behind GIST.
+For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020}\cite{Chen2021}
+\section{GIST study of streptavidin/biotin}
+
+%\section{Content and links}
+%
+%A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
+%You will likely want to reference your GitHub repository as a central point to access all of this information, and then the GitHub repository may link out to other content as needed.
 
 \section{Checklists}
-Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
-Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
-One example is shown here.
+%Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
+%Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
+%One example is shown here.
 
 % Here is a single-column checklist that consists of multiple sub-checklists
 \begin{Checklists}
+	
+\begin{checklist}{Simulation settings}
+\end{checklist}
+
+\begin{checklist}{Obtaining absolute $\Delta G_\textup{solv}$ }
+\end{checklist}
 
 \begin{checklist}{A list}
 \textbf{Single-column checklists are also straightforward by removing the asterisk}
@@ -145,15 +165,15 @@ One example is shown here.
 \item And finally
 \end{itemize}
 \end{checklist}
-
-\begin{checklist}{Another list}
-\textbf{This is some further description.}
-\begin{itemize}
-\item First thing
-\item Also remember
-\item And finally
-\end{itemize}
-\end{checklist}
+%
+%\begin{checklist}{Another list}
+%\textbf{This is some further description.}
+%\begin{itemize}
+%\item First thing
+%\item Also remember
+%\item And finally
+%\end{itemize}
+%\end{checklist}
 
 \end{Checklists}
 
@@ -214,7 +234,7 @@ FMS acknowledges the support of NSF grant CHE-1111111.
 \section*{Author Information}
 \makeorcid
 
-\bibliography{livecoms-sample}
+\bibliography{bibliography}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% APPENDICES
