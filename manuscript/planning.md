@@ -1,4 +1,14 @@
-# Chapters
+# Oder of the manuscript
+
+* Introduction
+* Prerequisites
+* Theory
+* Tutorial (streptavidin/biotin)
+* Checklists
+
+This list does not necessarily need to match the order that we put in the manuscript.
+
+# Topics
 * Prerequisites
 * GIST convergence / simulation setup
    * time
