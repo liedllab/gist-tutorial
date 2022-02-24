@@ -1,5 +1,6 @@
-# Oder of the manuscript
+# Order of the manuscript
 
+* Abstract
 * Introduction
 * Prerequisites
 * Theory
@@ -10,14 +11,14 @@ This list does not necessarily need to match the order that we put in the manusc
 
 # Topics
 * Prerequisites
-* GIST convergence / simulation setup
+* GIST convergence / simulation setup - Valentin
    * time
    * frames
    * restraints
       * strength
       * hydrogen?
    * clustering
-   * Run MD of streptavidin + biotin + complex
+   * Run MD of streptavidin + biotin + complex - best practices setup
 * GIST implementations: CPU / PME / GPU / GIGIST
    * How to use them
    * what to use
@@ -30,8 +31,8 @@ This list does not necessarily need to match the order that we put in the manusc
       * gistpp
       * gisttools
    * dG of biotin
-   * binding pocket analysis
-   * binding free energy
+   * binding pocket analysis - VMD/Pymol grids, project to atoms
+   * binding free energy - whole protein, or cut
 * GIST extensions
    * multiple solvents
       * usage
