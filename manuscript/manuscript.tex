@@ -70,6 +70,9 @@
 %%% Shortcuts and macros
 \newcommand{\dgsolv}{\Delta G_\textup{solv}}
 \newcommand{\software}{\emph}
+\newcommand{\todo}{\textcolor{red}}
+
+\newenvironment{code}{\par \noindent \ttfamily}{}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ARTICLE START
@@ -113,7 +116,14 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 %Additionally, for well-formatted manuscripts, we recommend that you let LaTeX handle figure/table placement for you as much as possible, so please avoid specifying strenuous float instructions like `[h!]` and `[H]` as much as possible.
 
 \subsection{Scope}
+The aim of this tutorial is to provide an example of a GIST workflow that can be easily adapted towards different systems.
+We present a GIST study of the streptavidin-biotin complex, which allows us to show many common aspects of GIST studies.
+We present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
+For both systems, we show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket.
+Furthermore, we compute the contribution of solvation free energy to binding, which requires accurate post-processing of the GIST output to avoid unfavorable summation of bias in the GIST calculation.
+We therefore believe that this example study covers a wide range of applications of the GIST method.
 
+Furthermore, we discuss several technical aspects of GIST analyses, such as the normalization of voxel values and how to deal with double counting of energy contributions. 
 %Tutorials should endeavor to cover the specific task at hand, and also highlight how the steps might need to be modified (or additional care might need to be taken at particular points) to handle more general cases.
 %
 %The scope of the tutorial, as well as the expected proficiencies / outcomes for researchers who complete the tutorial, should be clearly defined.
@@ -137,6 +147,37 @@ It was first devised by Nguyen et al. \cite{Nguyen2012} and its implementation i
 Here, we only provide a short overview of the theory behind GIST.
 For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020}\cite{Chen2021}
 \section{GIST study of streptavidin/biotin}
+
+Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
+\begin{enumerate}
+	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
+	\item visualize local contributions to $\dgsolv$ in the streptavidin binding pocket as well as around biotin.
+\end{enumerate}
+
+\subsection{Streptavidin/Biotin}
+\subsection{Tutorial data}
+We will use the 1STP crystal structure to start our calculations.
+For the sake of simplicity, you can download prepared and solvated Amber topologies and structures based on 1STP by running
+\begin{code}
+git clone git@github.com:liedllab/gist-tutorial.git
+\end{code}
+This will download the tutorial files (including both the manuscript and the examples in the \software{code} folder).
+\subsection{System Preparation and Equilibration}
+When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are two options for dealing with configurational diversity in the structures.
+\todo{Maybe Valentin knows a citation for that?}
+One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the sampled conformations.
+%One can choose to sample only the complex, assuming that all relevant conformations of the dissociated state are also found in the complex.
+%The probability distribution of the dissociated state can be obtained by reweighting the probabilities in the complex using the solvation free energies.
+%Alternatively, one can sample the complex and dissociated states individually.
+%This approach does not require an overlap between the conformational probabilities of the complex and dissociated states.
+%However, it is prone to statistical errors due to uncertainties in the ensembles, and requires the free energy contributions from the internal degrees of freedom of the monomers (in both the complex and the monomer states) to be known. \todo{This paragraph does not fit here well. Maybe put it somewhere else.}
+
+Here, we choose not to include any sampling of the conformational states. It is therefore important that the conformations of the monomers in the complex and dissociated states match exactly. We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. Use this to create monomer topologies of biotin and streptavidin.
+
+
+\subsection{Running GIST}
+\subsection{Visualizing $\dgsolv$}
+\subsection{Contribution of Hydration to Binding}
 
 %\section{Content and links}
 %
