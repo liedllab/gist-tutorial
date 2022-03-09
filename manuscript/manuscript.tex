@@ -72,7 +72,10 @@
 \newcommand{\software}{\emph}
 \newcommand{\todo}{\textcolor{red}}
 
-\newenvironment{code}{\par \noindent \ttfamily}{}
+\newenvironment{code}{\par \noindent \ttfamily \ignorespaces}{\par}
+
+\DeclareSIUnit{\calorie}{cal}
+\DeclareSIUnit{\kcalPerMolASqr}{\kilo\calorie\per\mole\per\angstrom\squared}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ARTICLE START
@@ -163,6 +166,12 @@ git clone git@github.com:liedllab/gist-tutorial.git
 \end{code}
 This will download the tutorial files (including both the manuscript and the examples in the \software{code} folder).
 \subsection{System Preparation and Equilibration}
+If you want to skip this section, run 
+\begin{code}
+	make equilibration-targets
+\end{code}
+in the code folder. This assumes that you have Python and Amber set up properly and that \software{pmemd.cuda} is in the PATH.
+
 When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are two options for dealing with configurational diversity in the structures.
 \todo{Maybe Valentin knows a citation for that?}
 One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the sampled conformations.
@@ -172,10 +181,21 @@ One can choose to sample the complex and dissociated states individually, or to 
 %This approach does not require an overlap between the conformational probabilities of the complex and dissociated states.
 %However, it is prone to statistical errors due to uncertainties in the ensembles, and requires the free energy contributions from the internal degrees of freedom of the monomers (in both the complex and the monomer states) to be known. \todo{This paragraph does not fit here well. Maybe put it somewhere else.}
 
-Here, we choose not to include any sampling of the conformational states. It is therefore important that the conformations of the monomers in the complex and dissociated states match exactly. We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. Use this to create monomer topologies of biotin and streptavidin.
+Here, we choose not to include any sampling of the conformational states. 
+It is therefore important that the conformations of the monomers in the complex and dissociated states match exactly. 
+We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
 
+Use the \software{equilibration.py} script (or your own) to perform short NVT and NpT equilibration runs on the starting structure.
+Note that the barostat might interfere with restrained equilibration of the complex, since different molecules are moved relative to each other when the volume changes.
+But since our equilibration script also contains unrestrained pressure equilibration, we should not run into any trouble.
+
+Then split the equilibrated structure into biotin and streptavidin parts using \software{cpptraj\_remove\_mol.sh}.
+After that, you can use \software{equilibration.py -R} to run short restrained equilibrations (where only the water is allowed to move) on the individual systems.
 
 \subsection{Running GIST}
+
+Now, you can run restrained MD simulations based on the equilibrated structures for subsequent GIST analyses. We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place. We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}. A simulation length of at least \SIrange{10}{20}{\nano\second} is recommended, to obtain statistically independent snapshots of the water.
+
 \subsection{Visualizing $\dgsolv$}
 \subsection{Contribution of Hydration to Binding}
 
