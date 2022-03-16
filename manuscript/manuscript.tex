@@ -20,6 +20,8 @@
 \usepackage[italic]{mathastext}
 \graphicspath{{figures/}}
 
+\usepackage{listings}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% IMPORTANT USER CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -72,7 +74,10 @@
 \newcommand{\software}{\emph}
 \newcommand{\todo}{\textcolor{red}}
 
-\newenvironment{code}{\par \noindent \ttfamily \ignorespaces}{\par}
+\lstdefinestyle{code}{
+	basicstyle=\ttfamily
+}
+\lstset{style=code}
 
 \DeclareSIUnit{\calorie}{cal}
 \DeclareSIUnit{\kcalPerMolASqr}{\kilo\calorie\per\mole\per\angstrom\squared}
@@ -161,15 +166,15 @@ Here, we aim to guide the reader through a GIST analysis of the streptavidin-bio
 \subsection{Tutorial data}
 We will use the 1STP crystal structure to start our calculations.
 For the sake of simplicity, you can download prepared and solvated Amber topologies and structures based on 1STP by running
-\begin{code}
+\begin{lstlisting}
 git clone git@github.com:liedllab/gist-tutorial.git
-\end{code}
+\end{lstlisting}
 This will download the tutorial files (including both the manuscript and the examples in the \software{code} folder).
 \subsection{System Preparation and Equilibration}
 If you want to skip this section, run 
-\begin{code}
-	make equilibration-targets
-\end{code}
+\begin{lstlisting}
+make equilibration-targets
+\end{lstlisting}
 in the code folder. This assumes that you have Python and Amber set up properly and that \software{pmemd.cuda} is in the PATH.
 
 When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are two options for dealing with configurational diversity in the structures.
@@ -183,7 +188,16 @@ One can choose to sample the complex and dissociated states individually, or to 
 
 Here, we choose not to include any sampling of the conformational states. 
 It is therefore important that the conformations of the monomers in the complex and dissociated states match exactly. 
-We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
+Use \software{cpptraj} to produce biotin and streptavidin structures based on the complex by stripping the respective other molecule like this:
+\begin{lstlisting}
+parm complex/solvated.parm7
+trajin complex/equil/EQUIL-DONE.rst
+strip ^2 parmout streptavidin/solvated.parm7
+trajout streptavidin/pre-equil.ncrst
+\end{lstlisting}
+(Adapt for biotin as necessary.)
+
+%We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
 
 Use the \software{equilibration.py} script (or your own) to perform short NVT and NpT equilibration runs on the starting structure.
 Note that the barostat might interfere with restrained equilibration of the complex, since different molecules are moved relative to each other when the volume changes.
@@ -192,10 +206,41 @@ But since our equilibration script also contains unrestrained pressure equilibra
 Then split the equilibrated structure into biotin and streptavidin parts using \software{cpptraj\_remove\_mol.sh}.
 After that, you can use \software{equilibration.py -R} to run short restrained equilibrations (where only the water is allowed to move) on the individual systems.
 
-\subsection{Running GIST}
+\subsection{Running MD for GIST}
 
-Now, you can run restrained MD simulations based on the equilibrated structures for subsequent GIST analyses. We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place. We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}. A simulation length of at least \SIrange{10}{20}{\nano\second} is recommended, to obtain statistically independent snapshots of the water.
+Now, you can run restrained MD simulations based on the equilibrated structures for subsequent GIST analyses.
+We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place.
+We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}.
+A simulation length of at least \SIrange{10}{20}{\nano\second} is recommended, to obtain statistically independent snapshots of the water.
 
+An example Amber input file for GIST might look like this:
+\begin{lstlisting}
+	
+\end{lstlisting}
+\subsection{Running the GIST analysis}
+
+For easier post-processing, we will use grids that contain the whole molecule.
+This could in theory be avoided for streptavidin and the complex, since only the surrounding of the biotin molecule (i.e., the binding pocket) is required for the analysis.
+We also recommend that you center the molecule in space.
+For each system (biotin, streptavidin, complex), produce a centered pdb file using \software{cpptraj}:
+\begin{lstlisting}
+parm ../solvated.parm7
+trajin EQUIL-DONE.rst
+autoimage !(:WAT) origin
+strip :WAT
+trajout equil-centered.pdb
+\end{lstlisting}
+Then, find the extent (minimum and maximum) of the x-, y-, and z-coordinates for each system.
+This can be done e.g., using the \software{mdtraj} package in Python.
+\begin{lstlisting}[basicstyle=\ttfamily]
+import mdtraj as md
+pdb = md.load("equil-centered.pdb")
+min = pdb.xyz[0].min(0) * 10.
+max = pdb.xyz[0].max(0) * 10.
+print(*list(zip("xyz", min, max)), sep="\n")
+\end{lstlisting}
+Then, decide on grid dimensions for every system.
+For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{7}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+7)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
 \subsection{Visualizing $\dgsolv$}
 \subsection{Contribution of Hydration to Binding}
 
@@ -211,7 +256,7 @@ Now, you can run restrained MD simulations based on the equilibrated structures 
 
 % Here is a single-column checklist that consists of multiple sub-checklists
 \begin{Checklists}
-	
+
 \begin{checklist}{Simulation settings}
 \end{checklist}
 
