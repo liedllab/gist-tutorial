@@ -75,7 +75,7 @@
 \newcommand{\todo}{\textcolor{red}}
 
 \lstdefinestyle{code}{
-	basicstyle=\ttfamily
+	basicstyle=\ttfamily\footnotesize
 }
 \lstset{style=code}
 
@@ -232,9 +232,11 @@ trajout equil-centered.pdb
 \end{lstlisting}
 Then, find the extent (minimum and maximum) of the x-, y-, and z-coordinates for each system.
 This can be done e.g., using the \software{mdtraj} package in Python.
-\begin{lstlisting}[basicstyle=\ttfamily]
+\begin{lstlisting}
 import mdtraj as md
 pdb = md.load("equil-centered.pdb")
+# mdtraj converts to nm.
+# *10 to convert back to Angstrom.
 min = pdb.xyz[0].min(0) * 10.
 max = pdb.xyz[0].max(0) * 10.
 print(*list(zip("xyz", min, max)), sep="\n")
