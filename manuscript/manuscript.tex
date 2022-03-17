@@ -120,6 +120,25 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 
 
 \section{Introduction}
+\todo{ (vah) Sources and better description of all these methods, more literature research, better flow }
+
+
+Solvation thermodynamics govers any process involving solutes in a solvent.
+Solutes are constantly interacting with their environment, necessitating a good description of these interactions for accurate computational predictions. 
+Especially the interaction with water is of utmost importance, as many biological processes occur in a aquaeous environment. 
+The free energy of solvation thereby influences real-world problems of interest such as hydrophobic effects, the binding of a ligand to a protein, protein-protein interactions, protein dynamics or even more generally, a protein's fold.
+The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of different methods.   
+Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
+More recently, machine learning approaches and QM/MM approaches are trying to bridge the gap to computationally less demanding methods while keeping the accuracy of ab initio QM methods.
+Molecular mechanics based approaches tackle this problem by describing the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
+This allows for the treatment of even large biological systems. 
+Implicit solvent methods such as MM/PBSA  or MM/GBSA can quickly provide results for a large amount of supplied structures, but yield inaccurate results when compared to more rigorous explicit solvent methods. Somewhat inbetween the implicit solvent methods and the fully explicit solvent methods are Reference Interaction Site Models such as 3D-RISM. 
+Starting with an explicit water model, 3D-RISM foregoes the explicit simulation and uses 3D solvent distributions based on the Ornstein--Zernike integral equations to predict solvation thermodynamics instead.
+The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute structure.
+The most statisticaly rigorous of the explicit solvent MM methods are alchemical methods such as FEP or TI. 
+Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
+However, the seperation of enthalpic and entropic contributtions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
+In this tutorial, the Grid Inhomogenous Solvation Theory (GIST) is used. It is based on Lazaridis' Inhomogenous Solvation Theory (IST), solving the arising integral equations on a grid. This allows for a full localization of entropic and enthalpic contributions on the grid around the solute. Recent improvements to the method have improved the calculation speed tremendously, allowing for the treatment of large macromolecules of biological interest such as proteases or antibodies. For small organic molecules, the method provides results compareable to TI in accuracy, provided some small correction factor is applied. 
 
 %Here you would explain what problem you are tackling and briefly motivate your work.
 %
