@@ -74,8 +74,14 @@
 \newcommand{\software}{\emph}
 \newcommand{\todo}{\textcolor{red}}
 
-\lstdefinestyle{code}{
+\lstset{
 	basicstyle=\ttfamily\footnotesize
+}
+\lstdefinestyle{code}{}
+\lstdefinestyle{python}{
+	language=Python,
+	stringstyle=\color[rgb]{1.0, 0, 0},
+	commentstyle=\color[rgb]{0, 0, 0.6}
 }
 \lstset{style=code}
 
@@ -138,7 +144,23 @@ Furthermore, we discuss several technical aspects of GIST analyses, such as the 
 %This will often happen in a specific section or subsection in the article itself.
 
 \section{Prerequisites}
+Before doing this tutorial, the reader should have a solid background knowledge of molecular dynamics (MD) simulations, as well as basic knowledge of Python, and should be familiar with working on the command line.
 
+A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub.
+Older versions of the Amber simulation engine can be used as well.
+If no Amber installation is available, the MD can be performed using Gromacs.
+In that case, we recommend preparing the structures and topologies using AmberTools and then converting to Gromacs using \software{acpype.py}.
+In that way, a full Amber topology is available for the GIST analysis.
+
+Furthermore, a recent Python version (>3.6) should be available with the following packages.
+
+To run the MD simulation, a PC with recent GPU is recommended.
+If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
+
+\begin{itemize}
+	\item \software{gisttools} (and its prerequisites)
+	\item \software{mdtraj}
+\end{itemize}
 %Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
 
 \subsection{Background knowledge}
@@ -215,7 +237,34 @@ A simulation length of at least \SIrange{10}{20}{\nano\second} is recommended, t
 
 An example Amber input file for GIST might look like this:
 \begin{lstlisting}
-	
+restrained 100 ns NpT
+&cntrl
+  ntx=5, irest=1,
+  ioutfm=1,
+  ntb=2, iwrap=1,
+  ntr=1, restraint_wt=100.0,
+    restraintmask=\"!@H=&!:WAT\",
+  ntp=1, pres0=1.0, taup=1.0,
+  ntc=2, ntf=2,
+  ntt=3, tempi=300.0, temp0=300.0, gamma_ln=2,
+  nstlim=50000000, dt=0.002,
+  ntwr=50000, ntwx=5000,
+  ntpr=5000,
+/
+\end{lstlisting}
+Note that these are very standard MD settings except for the line that defines the restraints.
+
+Run the MD using \software{pmemd.cuda}:
+\begin{lstlisting}
+pmemd.cuda \
+	-O \
+	-i 100ns-npt-restraint.in \
+	-o md-01.out \
+	-p solvated.parm7 \
+	-c EQUIL-DONE.rst \
+	-x md-01.nc \
+	-r md-01.ncrst \
+	-ref EQUIL-DONE.rst
 \end{lstlisting}
 \subsection{Running the GIST analysis}
 
@@ -224,17 +273,17 @@ This could in theory be avoided for streptavidin and the complex, since only the
 We also recommend that you center the molecule in space.
 For each system (biotin, streptavidin, complex), produce a centered pdb file using \software{cpptraj}:
 \begin{lstlisting}
-parm ../solvated.parm7
-trajin EQUIL-DONE.rst
+parm solvated.parm7
+trajin md-01.nc 1 1 1
 autoimage !(:WAT) origin
 strip :WAT
-trajout equil-centered.pdb
+trajout solute-centered.pdb
 \end{lstlisting}
 Then, find the extent (minimum and maximum) of the x-, y-, and z-coordinates for each system.
 This can be done e.g., using the \software{mdtraj} package in Python.
-\begin{lstlisting}
+\begin{lstlisting}[style=python]
 import mdtraj as md
-pdb = md.load("equil-centered.pdb")
+pdb = md.load("solute-centered.pdb")
 # mdtraj converts to nm.
 # *10 to convert back to Angstrom.
 min = pdb.xyz[0].min(0) * 10.
@@ -243,6 +292,27 @@ print(*list(zip("xyz", min, max)), sep="\n")
 \end{lstlisting}
 Then, decide on grid dimensions for every system.
 For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{7}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+7)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
+We note that this centered grid is usually larger than it needs to be in some directions.
+If you want to save some extra memory and calculation time, feel free to align the grid more precisely to the minimum and maximum coordinates, or use a smaller grid that only covers the binding pocket.
+You can also rotate the molecule by its principal axes to fit the cuboid grid more exactly.
+However, this needs to be done \emph{before} the MD run, since rotating the trajectory damages the periodic box information.
+
+Now, you can finally run the actual GIST analysis. Center the molecule exactly in the same way as above, to make sure that its position matches the grid parameters that you decided on.
+We recommend using either the PME or GPU implementation of GIST, depending on whether you have a fast GPU.
+A further advantage of the PME implementation is that it matches the energy calculation of the MD engine more closely.
+\todo{At the time of writing, it is important to use an up-to-date version of PME-GIST, or the Esw-Eww decomposition will not be available. Maybe remove this for the final version, when Amber22 is out.}
+\begin{lstlisting}
+parm solvated.parm7
+trajin md-01.nc
+autoimage !(:WAT) origin
+# remove the "pme" option if you want to use the GPU
+gist griddim 100 100 100 out gistoutlong.dat \
+  refdens 0.03287 pme
+# other settings you might want to change
+# (those are the defaults)
+# gridcntr 0 0 0 gridspacn 0.5 temp 300
+\end{lstlisting}
+\subsection{Reference Values and Radial Convergence}
 \subsection{Visualizing $\dgsolv$}
 \subsection{Contribution of Hydration to Binding}
 
