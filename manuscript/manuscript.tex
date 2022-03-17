@@ -148,6 +148,42 @@ Here, we only provide a short overview of the theory behind GIST.
 For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020}\cite{Chen2021}
 \section{GIST study of streptavidin/biotin}
 
+\subsection{Inhomegeneous Solvation Theory}
+
+\subsection{Solvation Entropy}
+
+\begin{equation}
+    \Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
+\end{equation}
+
+\begin{equation}
+    \Delta S_\textit{solv} \approx \Delta S_\textit{sw} \equiv -k_\textit{B} \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int g_\textit{sw} \left(\textbf{r}, \omega \right) d\textbf{r}d\omega
+\end{equation}
+
+\subsection{Entropy Calculations in Cpptraj}
+\subsubsection{Translational and Orientatonal Entropy}
+
+\begin{equation}
+    g_\textit{vox} \left( \textbf{r}, \mathbf{\omega} \right) \approx g_\textit{vox} \left( \textbf{r})g_\textit{vox}(\mathbf{\omega} \right)
+\end{equation}
+
+\begin{equation}
+        S_{k}^\textit{trans} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r} \right) + \gamma \right)
+\end{equation}
+
+\begin{equation}
+        S_{k}^\textit{orient} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \mathbf {\omega} \right) + \gamma \right)
+\end{equation}
+
+\subsubsection{Sixth Order Entropy}
+\begin{equation}
+    S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r}, \mathbf {\omega} \right) + \gamma \right)
+\end{equation}
+
+
+\subsection{Solvation Energy}
+\subsubsection{PME implementation}
+
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
 \begin{enumerate}
 	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
