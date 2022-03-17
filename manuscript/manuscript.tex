@@ -306,13 +306,64 @@ parm solvated.parm7
 trajin md-01.nc
 autoimage !(:WAT) origin
 # remove the "pme" option if you want to use the GPU
-gist griddim 100 100 100 out gistoutlong.dat \
+gist griddim 100 100 100 out gist.dat \
   refdens 0.03287 pme
 # other settings you might want to change
 # (those are the defaults)
 # gridcntr 0 0 0 gridspacn 0.5 temp 300
 \end{lstlisting}
 \subsection{Reference Values and Radial Convergence}
+All GIST quantities should be expressed relative to bulk. In practice, this is not problematic for the entropies, since they are computed relative to a distribution of randomly oriented molecules at the reference density.
+The solute-solvent energy Esw is also no problem, because it naturally tends to zero in bulk. 
+However, the solvent-solvent energy Eww needs to be referenced.
+
+The Amber manual provides reference energies for several solvents.
+However, the exact reference value is different when using PME-GIST, and also depends on the box size.
+For exact analyses such as computing the total $\dgsolv$ of a compound, it is important to compute an exact reference energy.
+
+The most accurate method to compute a reference energy is to run a separate GIST calculations with the same energy method (PME/GPU) and a similar box size, and then compute the average solvent-solvent energy per molecule.
+
+\begin{equation}
+\label{eq_ewwref}
+E_{ww}^\textit{ref} = \frac{\int{E_{ww}} \mathrm{d}x}{\left<N_\textit{solvent}\right>}
+  = \frac{\sum_\textit{voxels}E_{ww}^\textit{dens} V_\textit{vox}}{\sum_\textit{voxels}{N_\textit{solvent}} / N_\textit{frames}}
+\end{equation}
+
+Alternatively, one can note that the solvent-solvent energy in a sufficiently large GIST grid converges to the correct bulk value at large distance to the solute.
+This means that the reference energy can be obtained from a large GIST grid by binning the voxels by their distance to the solute, and evaluate Equation \ref{eq_ewwref} within each bin.
+If this value converges to a constant, this can be used as $E_{ww}^\textit{ref}$.
+
+\software{gisttools} contains functionality to perform this analysis easily.
+There is also a method ``detect\_reference\_value'' that automatically tries to find the converged value fo the rdf.
+Although it has a simple convergence check built-in, it is always recommended to check the convergence by hand as well.
+
+\begin{lstlisting}[style=python]
+import gisttools as gt
+import matplotlib.pyplot as plt
+gist = gt.gist.load_gist_file(
+    "gist.dat", struct="solute-centered.pdb")
+bins, eww = gist.rdf("Eww_unref", bins=100, rmax=20.)
+_, n = gist.rdf(
+    "population", bins=100, rmax=20., col_suffix="")
+plt.plot(
+    bins,
+    eww / (n/gist.n_frames/gist.grid.voxel_volume))
+eww_auto = gist.detect_reference_value().values[0]
+plt.axhline(eww_auto, color='k')
+plt.gca().set(
+    xlabel='distance [A]', ylabel='E_ww per mol')
+plt.show()
+\end{lstlisting}
+
+The expected output of this code is shown in Figure \ref{fig_ewwref}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/Eww_convergence.eps}
+	\caption{Convergence of $E_{ww}$ with increasing distance to the solute. The horizontal line shows the automatically computed reference energy.}
+	\label{fig_ewwref}
+\end{figure}
+
 \subsection{Visualizing $\dgsolv$}
 \subsection{Contribution of Hydration to Binding}
 
