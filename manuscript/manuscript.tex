@@ -73,6 +73,7 @@
 \newcommand{\dgsolv}{\Delta G_\textup{solv}}
 \newcommand{\software}{\emph}
 \newcommand{\todo}{\textcolor{red}}
+\newcommand\inlinecode{\texttt}
 
 \lstset{
 	basicstyle=\ttfamily\footnotesize
@@ -389,7 +390,7 @@ This means that the reference energy can be obtained from a large GIST grid by b
 If this value converges to a constant, this can be used as $E_{ww}^\textit{ref}$.
 
 \software{gisttools} contains functionality to perform this analysis easily.
-There is also a method ``detect\_reference\_value'' that automatically tries to find the converged value fo the rdf.
+There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value fo the rdf.
 Although it has a simple convergence check built-in, it is always recommended to check the convergence by hand as well.
 
 \begin{lstlisting}[style=python]
@@ -397,12 +398,9 @@ import gisttools as gt
 import matplotlib.pyplot as plt
 gist = gt.gist.load_gist_file(
     "gist.dat", struct="solute-centered.pdb")
-bins, eww = gist.rdf("Eww_unref", bins=100, rmax=20.)
-_, n = gist.rdf(
-    "population", bins=100, rmax=20., col_suffix="")
-plt.plot(
-    bins,
-    eww / (n/gist.n_frames/gist.grid.voxel_volume))
+bins, eww = gist.rdf(
+    "Eww_unref", bins=100, rmax=20., normalize="norm")
+plt.plot(bins, eww)
 eww_auto = gist.detect_reference_value().values[0]
 plt.axhline(eww_auto, color='k')
 plt.gca().set(
@@ -415,11 +413,73 @@ The expected output of this code is shown in Figure \ref{fig_ewwref}.
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/Eww_convergence.eps}
-	\caption{Convergence of $E_{ww}$ with increasing distance to the solute. The horizontal line shows the automatically computed reference energy.}
+	\caption{Convergence of $E_{ww}$ with increasing distance to the solute. The horizontal line shows the automatically computed reference energy. Computed from the complex calculation.}
 	\label{fig_ewwref}
 \end{figure}
 
+After choosing an appropriate reference value, we need to subtract this value from Eww.
+Make sure to subtract the reference from the normalized (\_norm) data.
+In \software{gisttools}, this is done simply by setting \inlinecode{gist.eww\_ref}.
+In \software{gistpp}, this can be done as follows: \todo{This might become invalid with future GIST versions, depending on whether we adopt the COM as molecular center.}
+
+\begin{lstlisting}
+rho0=0.03287465
+neg_eww_ref=9.533
+gistpp -op multconst -i gist-gO.dx -opt const $rho0 \
+    -o gist-gO-abs.dx 
+gistpp -op div -i gist-Eww-dens.dx -i2 gist-gO-abs.dx \
+    -o gist-Eww-norm.dx
+gistpp -op addconst -i gist-Eww-norm.dx \
+    -opt const $neg_eww_ref -o gist-Eww-ref-norm.dx
+gistpp -op mult -i gist-Eww-ref-norm.dx \
+    -i2 gist-gO-abs.dx -o gist-Eww-ref-dens.dx
+\end{lstlisting}
+
+Now, add all free energy contributions to obtain the spatially resolved $\dgsolv$.
+In \software{gisttools}, this is done automatically (simply use the \inlinecode{A\_dens} and \inlinecode{A\_norm} columns).
+In \software{gistpp}, use the \inlinecode{add} command, with the same syntax as the \inlinecode{div} command used above.
+After that, check whether your free energy contributions become negligible at high distances to the solute.
+In a plot like Figure \ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
+However, it is more informative to plot the cumulative free energy contribution against the distance to the solute, to check the convergence.
+It the curve flattens out, this is your final $\dgsolv$.
+If it does not, you might need to tweak the Eww reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
+
+\begin{lstlisting}[style=python]
+import gisttools as gt
+import matplotlib.pyplot as plt
+# adapt eww_ref!
+gist = gt.gist.load_gist_file("gist.dat",
+    struct="solute-centered.pdb", eww_ref=-9.533)
+bins, (dg, eww, esw, s) = gist.rdf(
+    ["A_dens", "Esw_dens", "Eww_dens", "dTSsix_dens"],
+    bins=100, rmax=20., normalize="none")
+plt.plot(bins, np.cumsum(dg), label="dG")
+plt.plot(bins, np.cumsum(eww), label="Eww")
+plt.plot(bins, np.cumsum(esw), label="Esw")
+plt.plot(bins, np.cumsum(s), label="dS")
+\end{lstlisting}
+
+The expected output of this code is shown in Figure \ref{fig_radial_convergence}.
+In this case, both the Eww energy and the entropy are not perfectly flat, indicating that the reference value is not optimal.
+The slow energy convergence indicates that a non-optimal reference value was used, but is also complicated by the fact that a charged solute is used without neutralizing counter ions.
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/A_E_S_convergence.eps}
+	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute. All quantities cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}
+	\label{fig_radial_convergence}
+\end{figure}
+
 \subsection{Visualizing $\dgsolv$}
+Next, we want to visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
+You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST.
+With \software{gistpp}, you can use the file from the convergence check. Additional OpenDX files can be produced using \inlinecode{gistpp -op makedx}.
+With \software{gisttools}, you can create one using e.g., \inlinecode{gist.save\_dx("A\_dens", "A\_dens.dx")}.
+
+Visualize the free energy, the total energy, and the entropy, at several iso-levels.
+The expected result is shown in Figure ???.
+
 \subsection{Contribution of Hydration to Binding}
 
 %\section{Content and links}
