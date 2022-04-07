@@ -192,47 +192,79 @@ If the reader prefers to skip the MD and GIST calculation, we also provide the G
 
 
 \section{Theory}
-GIST is an implementation of Inhomogeneous Solvation Theory (IST) \cite{Lazaridis1998} that calculates the free energy of solvation $\dgsolv$ on a 3-dimensional grid.
-It was first devised by Nguyen et al. \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
+GIST is an implementation of Inhomogeneous Solvation Theory (IST) \cite{Lazaridis1998} that discretizes  the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
+It was first devised by Nguyen et al. \cite{Nguyen2012} to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
 Here, we only provide a short overview of the theory behind GIST.
 For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020}\cite{Chen2021}
-\section{GIST study of streptavidin/biotin}
 
-\subsection{Inhomegeneous Solvation Theory}
 
 \subsection{Solvation Entropy}
+The solvation entropy of a system is totality of the contribution of the  solute-water entropy and the water-water entropy. 
 
 \begin{equation}
-    \Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
+	\Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
+\end{equation}
+Here the solvation entropy is approximated from the contribution of solute-water interaction. 
+\textbf{STILLNEEDS REVISON + ADD CITATIONS} The quantity $k_\textit{b}$represents the Boltzman constant, 
+$\rho^\textit{o}$ is the bulk number density, $g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
+pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
+$\omega$ is the Euler angle, and the factor $\frac{1}{8\pi^2}$ is the normalization constant. In bulk and in regions where the orientational 
+entropy is uniform, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order solvation entropy of 
+bulk to be zero. Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
+the solvation entropy to be an approximation of the integral around the solute atom. 
+
+\begin{equation}
+	\Delta S_\textit{solv} \approx \Delta S_\textit{sw} \equiv -k_\textit{B} \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int g_\textit{sw} \left(\textbf{r}, \omega \right) d\textbf{r}d\omega
 \end{equation}
 
+The solvation entropy is further broken down in terms of the contribution from translational and orientational terms.
 \begin{equation}
-    \Delta S_\textit{solv} \approx \Delta S_\textit{sw} \equiv -k_\textit{B} \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int g_\textit{sw} \left(\textbf{r}, \omega \right) d\textbf{r}d\omega
+	\Delta S_\textit{solv} = \Delta S_\textit{trans} + \Delta S_\textit{orient}
 \end{equation}
 
 \subsection{Entropy Calculations in Cpptraj}
-\subsubsection{Translational and Orientatonal Entropy}
+In \software{cpptraj} the calculation of  solvation entropy is handled into two methods.
 
+The first method assumes that the position ($r$) is independent of the orientation ($\omega$). This approximation allows for the 
+splitting of the contributions of the translational and the orientational entropy. The nearest neighbor (NN) approach is used to 
+evaluate each expression where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is the Euler's constant 
+that accounts for the bias in naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate. In the nearest neighbor
+estimate, a voxel is considered to be a neighboring voxel when it shares any vertices of the voxel of interest. 
 \begin{equation}
-    g_\textit{vox} \left( \textbf{r}, \mathbf{\omega} \right) \approx g_\textit{vox} \left( \textbf{r})g_\textit{vox}(\mathbf{\omega} \right)
+	g_\textit{vox} \left( \textbf{r}, \mathbf{\omega} \right) \approx g_\textit{vox} \left( \textbf{r})g_\textit{vox}(\mathbf{\omega} \right)
 \end{equation}
 
 \begin{equation}
-        S_{k}^\textit{trans} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r} \right) + \gamma \right)
+	S_{k}^\textit{trans} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r} \right) + \gamma \right)
 \end{equation}
 
+
 \begin{equation}
-        S_{k}^\textit{orient} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \mathbf {\omega} \right) + \gamma \right)
+	S_{k}^\textit{orient} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \mathbf {\omega} \right) + \gamma \right)
 \end{equation}
 
-\subsubsection{Sixth Order Entropy}
+The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation) 
+using the nearest-neighbor approach. Unlike the first method, the nearest neighbor estimate for the sixth-order entropy considers all the water 
+found within the same and neighboring voxels.  
 \begin{equation}
-    S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r}, \mathbf {\omega} \right) + \gamma \right)
+	S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r}, \mathbf {\omega} \right) + \gamma \right)
 \end{equation}
 
 
 \subsection{Solvation Energy}
-\subsubsection{PME implementation}
+\begin{equation}
+	\Delta E_\textit{solv} = \Delta E_\textit{sw} + \Delta E_\textit{ww}
+\end{equation}
+
+\begin{equation}
+	\Delta E_\textit{sw} = \rho^\textit{o} \int g_\textit{sw}\left(\textbf{r}\right) \Delta E_\textit{sw} \left(\textbf{r}\right) d\textbf{r}
+\end{equation}
+
+\begin{equation}
+	\Delta E_\textit{ww} = \rho^\textit{o} \int g_\textit{sw}\left(\textbf{r}\right) \Delta E_\textit{ww} \left(\textbf{r}\right) d\textbf{r}
+\end{equation}
+
+\subsection{PME implementation}
 
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
 \begin{enumerate}
