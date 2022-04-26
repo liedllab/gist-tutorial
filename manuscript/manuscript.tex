@@ -420,7 +420,7 @@ The expected output of this code is shown in Figure \ref{fig_ewwref}.
 After choosing an appropriate reference value, we need to subtract this value from Eww.
 Make sure to subtract the reference from the normalized (\_norm) data.
 In \software{gisttools}, this is done simply by setting \inlinecode{gist.eww\_ref}.
-In \software{gistpp}, this can be done as follows: \todo{This might become invalid with future GIST versions, depending on whether we adopt the COM as molecular center.}
+In \software{gistpp}, this can be done as follows: \todo{This might become invalid with future GIST versions, depending on whether we adopt the COM as molecular center.} \todo{Better use the population.}
 
 \begin{lstlisting}
 rho0=0.03287465
@@ -477,11 +477,135 @@ You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from G
 With \software{gistpp}, you can use the file from the convergence check. Additional OpenDX files can be produced using \inlinecode{gistpp -op makedx}.
 With \software{gisttools}, you can create one using e.g., \inlinecode{gist.save\_dx("A\_dens", "A\_dens.dx")}.
 
+It might also be interesting to visualize the average energy of a water molecule at each grid voxel.
+This quantity is given by 2*Eww + Esw.
+The energy referencing leads to non-zero normalized values where the population is zero.
+While this is irrelevant for further post-processing, it is advantageous for visualization to set those empty regions to zero.
+A .dx file can be produced using gisttools as follows:
+
+\begin{lstlisting}[style=python]
+import gisttools as gt
+gist = gt.gist.load_gist_file("gist.dat",
+    struct="solute-centered.pdb", eww_ref=-9.533)
+gist['E_norm'] = gist['Eww_norm'] * 2 + gist['Esw_norm']
+gist.loc[gist['population'] == 0, 'E_norm'] = 0
+gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
+\end{lstlisting}
+
 Visualize the free energy, the total energy, and the entropy, at several iso-levels.
-The expected result is shown in Figure ???.
+An minimal PyMOL input might look like this:
+
+\begin{lstlisting}
+load solute-centered.pdb
+show sticks, resname BTN
+as surface, not resname BTN
+load gist-gO.dx, gO
+isosurface gO_high, gO, 2.
+\end{lstlisting}
+
+Adapt the above PyMOL script to visualize the average energy per solvent at a positive and a negative isolevel, as well as regions of negative entropy per solvent.
+The expected representation of the streptavidin binding pocket is shown in Figure \ref{fig_binding_pocket_pymol}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/binding_pocket_S_-2_E_-2_E_3.png}
+	\caption{Free energy contributions in the streptavidin binding pocket. Red: high solvent energy (at +3 kcal/mol). Blue: low solvent energy (at -2 kcal/mol). Green: low solvent entropy $T\Delta S^{six}$ (at -2 kcal/mol).}
+	\label{fig_binding_pocket_pymol}
+\end{figure}
+
+You should find that there are several regions in the binding pocket that feature a high solvent energy and/or low solvent entropy.
+However, such regions also exist outside of the binding pocket, and there are also low-energy regions within the binding pocket.
+Therefore, the strong affinity to biotin can not be explained solely by the hydration contribution, and the direct interaction energy also needs to be taken into account.
 
 \subsection{Contribution of Hydration to Binding}
+In the next step, calculate the $\dgsolv$ contributions around the biotin ligand in each of the three systems (biotin, streptavidin, and complex).
+Note that our integration region does not fully reach into bulk, but also comprises regions that are close to the streptavidin protein. 
+Therefore, our results for each system will depend on the exact position of the integration boundary. 
+To avoid inconsistencies, it is important to choose exactly the same integration region for each system.
+Although we kept the systems rigid, the center of mass might have been shifted during pressure equilibration.
+Therefore, we align the complex structure to the streptavidin system and use the shifted biotin coordinates to define the integration region.
 
+We recommend using a \software{Jupyter Notebook} for the following analyses, although they can also be done in a script or an interactive Python prompt.
+The code is not explained in detail here, but should be clear after reading the previous sections.
+
+Load the files and double check the frame numbers and reference density.
+\begin{lstlisting}[style=python]
+import numpy as np
+from gisttools.gist import load_gist_file
+import matplotlib.pyplot as plt
+
+compl = load_gist_file('complex/gist/gist.dat', \
+    struct='complex/gist/solute-centered.pdb')
+print(compl.n_frames, compl.rho0)
+biotin = load_gist_file('biotin/gist/gist.dat', \
+    struct='biotin/gist/solute-centered.pdb')
+print(biotin.n_frames, biotin.rho0)
+strept = load_gist_file('streptavidin/gist/gist.dat', \
+    struct='streptavidin/gist/solute-centered.pdb')
+print(strept.n_frames, strept.rho0)
+\end{lstlisting}
+
+Assign reference energies and check them for plausibility.
+\begin{lstlisting}[style=python]
+biotin.eww_ref = biotin.detect_reference_value()
+print("Biotin:", biotin.eww_ref)
+strept.eww_ref = strept.detect_reference_value()
+print("Streptavidin:", strept.eww_ref)
+compl.eww_ref = compl.detect_reference_value()
+print("Complex:", compl.eww_ref)
+\end{lstlisting}
+
+Subtract a reference entropy from the dTSsix columns.
+\begin{lstlisting}[style=python]
+def reference_entropy(gf):
+    if 'dTSsix_unref_norm' not in gf.data.columns:
+        gf['dTSsix_unref_norm'] = gf['dTSsix_norm']
+        gf['dTSsix_unref_dens'] = gf['dTSsix_dens']
+    gf['dTSsix_norm'] = gf['dTSsix_unref_norm'] \
+        - gf.detect_reference_value('dTSsix_unref_dens')
+    gf['dTSsix_dens'] = gf.norm2dens(gf['dTSsix_norm'])
+reference_entropy(biotin)
+reference_entropy(strept)
+reference_entropy(compl)
+\end{lstlisting}
+
+Compute the atom positions that define the integration region.
+For the streptavidin integral, we align the complex structure onto the streptavidin structure and then use the biotin positions as centers.
+Note that we use \software{mdtraj} here, since \software{gisttools} stores the reference structure as a \inlinecode{mdtraj.Trajectory} object, but any other library for post-processing of trajectories works as well.
+\begin{lstlisting}[style=python]
+col = 'dTSsix_dens'
+def select(traj, sel):
+    "Slice a Trajectory by selection mask."
+    return traj.atom_slice(traj.top.select(sel))
+# we multiply by 10 to convert nm to Angstrom.
+compl_x = select(compl.struct, biotin_mask).xyz[0] * 10.
+biotin_x = select(biotin.struct, biotin_mask).xyz[0] * 10.
+aligned = compl.struct[:].superpose(strept.struct, \
+    atom_indices=strept.struct.top.select(strept_mask))
+aligned = select(aligned, biotin_mask)
+strept_x = aligned.xyz[0] * 10.
+
+bins, biotin_rdf = biotin.rdf( \
+    col, centers=biotin_x, bins=100, rmax=24)
+bins, strept_rdf = strept.rdf( \
+    col, centers=strept_x, bins=100, rmax=24)
+bins, compl_rdf = compl.rdf( \
+    col, centers=compl_x, bins=100, rmax=24)
+\end{lstlisting}
+
+Now, subtract the monomer rdfs from the complex, and compute the integrals.
+If you also visualize the individual rdfs, you will notice that the difference converges much better with increasing radius than the contributions.
+This is because the cutoff contains regions that are close to the atom, since the integration region does not comprise the whole protein.
+\begin{lstlisting}[style=python]
+difference = compl_rdf - biotin_rdf - strept_rdf
+cutoff = 12
+integral = difference[bins < cutoff].sum()
+print("Integral = {}".format(integral))
+plt.plot(bins, np.cumsum(difference))
+plt.axvline(cutoff)
+plt.xlabel('distance to biotin [A]')
+plt.ylabel('dG contribution [kcal/mol]')
+\end{lstlisting}
 %\section{Content and links}
 %
 %A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
@@ -563,7 +687,7 @@ see the GitHub issue tracking and changelog at \githubrepository.
 For a more detailed description of contributions from the community and others, see the GitHub issue tracking and changelog at \githubrepository.
 
 \section*{Potentially Conflicting Interests}
-%%%%%%%
+%%%%%%%j
 %Declare any potentially competing interests, financial or otherwise
 %%%%%%%
 
