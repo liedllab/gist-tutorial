@@ -202,16 +202,32 @@ found within the same and neighboring voxels.
 
 
 \subsection{Solvation Energy}
+The solvation energy is readily calculated by summing up the contributions of the water-water interaction and the water-solute interaction.
 \begin{equation}
 	\Delta E_\textit{solv} = \Delta E_\textit{sw} + \Delta E_\textit{ww}
 \end{equation}
 
 \begin{equation}
-	\Delta E_\textit{sw} = \rho^\textit{o} \int g_\textit{sw}\left(\textbf{r}\right) \Delta E_\textit{sw} \left(\textbf{r}\right) d\textbf{r}
+	\Delta E_\textit{sw} \equiv \frac{1}{8\pi^2} \int g_\textit{sw}\left(\omega|\textbf{r}\right) U_\textit{sw}\left(\textbf{r}, \omega\right) d\omega
 \end{equation}
 
+Similar to the entropy integrals, the solute-water solvation energy integral also decays with increasing distance from the solute. Hence, the solvation energy can be approximated by local spatial integrals. However, there is a complication arising from this approximation. Water molecules outside the region of interest will also be accounted for in the pairwise water term. For example, given two different regions $R_a$ and $R_b$, will not sum up to the total energy of the two regions due to double counting. 
+
 \begin{equation}
-	\Delta E_\textit{ww} = \rho^\textit{o} \int g_\textit{sw}\left(\textbf{r}\right) \Delta E_\textit{ww} \left(\textbf{r}\right) d\textbf{r}
+\begin{aligned}
+	\Delta E_\textit{ww} \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}\left(\omega|\textbf{r}\right) \\
+	& \times \left[g_\textit{sw}\left(\textbf{r}^\prime , \omega^\prime \right) - g^o_\textit{ww} \left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime \right)\right] \\
+	& \times U_\textit{ww}\left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime\right)d\omega d\textbf{r}^\prime d\omega^\prime
+\end{aligned}
+\end{equation}
+There are two ways in which this double counting was accounted for in the original paper. First, using the water-displacement method. This method is applicable when a determining the energetic cost of kicking out a water molecule. 
+\begin{equation}
+	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
+\end{equation}
+
+The second method uses normalized-water properties to account the difference in water properties of two different regions. The normalized water property is defined as the water property per water molecule. 
+\begin{equation}
+	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
 \end{equation}
 
 \subsection{PME implementation}
