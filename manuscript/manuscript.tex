@@ -124,22 +124,30 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 \todo{ (vah) Sources and better description of all these methods, more literature research, better flow }
 
 
-Solvation thermodynamics govers any process involving solutes in a solvent.
-Solutes are constantly interacting with their environment, necessitating a good description of these interactions for accurate computational predictions. 
+Solvation thermodynamics govern any process involving solutes in a solvent.
+Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
 Especially the interaction with water is of utmost importance, as many biological processes occur in a aquaeous environment. 
-The free energy of solvation thereby influences real-world problems of interest such as hydrophobic effects, the binding of a ligand to a protein, protein-protein interactions, protein dynamics or even more generally, a protein's fold.
+The free energy of solvation thereby strongly influences real-world problems of interest such as hydrophobic effects, the binding of a ligand to a protein, protein-protein interactions, protein dynamics or even more generally, a protein's fold. 
 The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of different methods.   
 Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
 More recently, machine learning approaches and QM/MM approaches are trying to bridge the gap to computationally less demanding methods while keeping the accuracy of ab initio QM methods.
-Molecular mechanics based approaches tackle this problem by describing the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
-This allows for the treatment of even large biological systems. 
-Implicit solvent methods such as MM/PBSA  or MM/GBSA can quickly provide results for a large amount of supplied structures, but yield inaccurate results when compared to more rigorous explicit solvent methods. Somewhat inbetween the implicit solvent methods and the fully explicit solvent methods are Reference Interaction Site Models such as 3D-RISM. 
-Starting with an explicit water model, 3D-RISM foregoes the explicit simulation and uses 3D solvent distributions based on the Ornstein--Zernike integral equations to predict solvation thermodynamics instead.
+Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
+This allows for the treatment of even large biological systems like fully solvated proteins. 
+Implicit solvent methods such as MM/PBSA  or MM/GBSA can quickly provide results for a large amount of supplied structures, but yield inaccurate results when compared to more rigorous explicit solvent methods. Somewhat inbetween the implicit solvent methods and the fully explicit solvent methods are Reference Interaction Site Models. One of these methods, 3D-RISM, foregoes the explicit simulation and uses 3D solvent distributions based on the Ornstein--Zernike integral equations to predict solvation thermodynamics instead.
 The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute structure.
 The most statisticaly rigorous of the explicit solvent MM methods are alchemical methods such as FEP or TI. 
 Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
-However, the seperation of enthalpic and entropic contributtions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
-In this tutorial, the Grid Inhomogenous Solvation Theory (GIST) is used. It is based on Lazaridis' Inhomogenous Solvation Theory (IST), solving the arising integral equations on a grid. This allows for a full localization of entropic and enthalpic contributions on the grid around the solute. Recent improvements to the method have improved the calculation speed tremendously, allowing for the treatment of large macromolecules of biological interest such as proteases or antibodies. For small organic molecules, the method provides results compareable to TI in accuracy, provided some small correction factor is applied. 
+However, the seperation of enthalpic and entropic contributions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
+In this tutorial, the Grid Inhomogenous Solvation Theory (GIST) is applied to calculate solution thermodynamic properties of interest. 
+GIST is based on Lazaridis' Inhomogenous Solvation Theory (IST), solving the arising integral equations on a grid. 
+This is highly advantegous compared to other IST-based methods such as e.g. WaterMap,\todo{Add more methdods!} as this is not restricted to high-occopancy solvation sites but provides a 
+By simulating the dynamics of a solvent around the solute, GIST calculates thermodynamic properties for a standard solvation process as described by Ben-Naim.
+The method allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
+For small organic molecules in water, the method provided results compareable to TI in accuracy, assuming some small correction factor to the entropy is applied. 
+Recent improvements to the method have improved the calculation speed tremendously, allowing for the treatment of larger systems of biological interest such as proteases or antibodies. 
+Other improvements worked on decreasing differences in the treatment of long-range interaction energies between GIST and popular molecular dynamics engines. 
+Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution. 
+While previous tutorials gave insightful pointers as to how to setup and run GIST calculations, the post-processing of such calculations was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address the recent improvements to the method.
 
 %Here you would explain what problem you are tackling and briefly motivate your work.
 %
@@ -150,45 +158,53 @@ In this tutorial, the Grid Inhomogenous Solvation Theory (GIST) is used. It is b
 %Additionally, for well-formatted manuscripts, we recommend that you let LaTeX handle figure/table placement for you as much as possible, so please avoid specifying strenuous float instructions like `[h!]` and `[H]` as much as possible.
 
 \subsection{Scope}
-The aim of this tutorial is to provide an example of a GIST workflow that can be easily adapted towards different systems.
-We present a GIST study of the streptavidin-biotin complex, which allows us to show many common aspects of GIST studies.
+
+The tutorial provides an example of a GIST workflow that can be easily adapted towards different systems. 
+In addition to a short introduction to the method and the theory behind it an overview of the various different flavours of GIST methods is provided.
+Towards this, a GIST study of the streptavidin-biotin complex is presented, which reflects on many common aspects of GIST studies.
 We present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
 For both systems, we show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket.
-Furthermore, we compute the contribution of solvation free energy to binding, which requires accurate post-processing of the GIST output to avoid unfavorable summation of bias in the GIST calculation.
-We therefore believe that this example study covers a wide range of applications of the GIST method.
+The contribution of solvation free energy to binding is computed, which requires accurate post-processing of the GIST output to avoid unfavorable summation of bias in the GIST calculation.
+We believe that this example study covers a wide range of applications of the GIST method.
+Furthermore, we discuss several technical aspects  and typical pitfalls of GIST analyses, such as the normalization of voxel values and how to deal with double counting of energy contributions. 
+Additionally, we provide a python library to unify the analysis of GIST data produced by various versions of GIST and make the post-processing of GIST results more accessible.
 
-Furthermore, we discuss several technical aspects of GIST analyses, such as the normalization of voxel values and how to deal with double counting of energy contributions. 
+After completing this tutorial, we expect the reader to be able to implement their own GIST study. 
+
 %Tutorials should endeavor to cover the specific task at hand, and also highlight how the steps might need to be modified (or additional care might need to be taken at particular points) to handle more general cases.
 %
 %The scope of the tutorial, as well as the expected proficiencies / outcomes for researchers who complete the tutorial, should be clearly defined.
 %This will often happen in a specific section or subsection in the article itself.
 
 \section{Prerequisites}
-Before doing this tutorial, the reader should have a solid background knowledge of molecular dynamics (MD) simulations, as well as basic knowledge of Python, and should be familiar with working on the command line.
+\todo{ (vah)  Improve flow and logical progression of prerquisites.}
 
+%Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
+
+\subsection{Background knowledge}
+This tutorial is aimed at advanced users with a solid background knowledge of molecular dynamics (MD) simulations. The user should be able to run MD simulations and work with their output data.
+Previous knowledge of the method is not necessary, but we recommend the perusal of the primary sources on the method outlined in the Theory section. 
+
+The presented analyses are run in Python.
+A working understanding of Python is therefore necessary to follow the tutorial. 
+A Jupyter notebook showing directly the herein presented analyses is provided as well. 
+To easily follow the analyses an understanding of working with Jupyter notebooks is therefore beneficial, though not strictly necessary.
+
+\subsection{Software/system requirements}
+%Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
+GIST's main implementation is part of the MD analysis software \software{cpptraj} as part of the AmberTools software suite.
 A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub.
-Older versions of the Amber simulation engine can be used as well.
-If no Amber installation is available, the MD can be performed using Gromacs.
-In that case, we recommend preparing the structures and topologies using AmberTools and then converting to Gromacs using \software{acpype.py}.
+The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations. 
+If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}, we recommend GROMACS.
+If using GROMACS, we propose to prepare the structures and topologies using AmberTools and then converting to GROMACS using \software{acpype.py}.
 In that way, a full Amber topology is available for the GIST analysis.
 
 Furthermore, a recent Python version (>3.6) should be available with the following packages.
-
-To run the MD simulation, a PC with recent GPU is recommended.
-If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
-
 \begin{itemize}
 	\item \software{gisttools} (and its prerequisites)
 	\item \software{mdtraj}
 \end{itemize}
-%Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
-
-\subsection{Background knowledge}
-%Tutorials should clearly define what concepts or abilities researchers will need to complete the tutorial (e.g., some proficiency in Python; experience with Jupyter notebooks; knowledge of classical MD; etc).
-
-\subsection{Software/system requirements}
-%Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
-
+If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations. A Jupyter notebook showing the herein presented analyses is provided as well, necessitating a current installation of Jupyter to run.
 
 
 \section{Theory}
