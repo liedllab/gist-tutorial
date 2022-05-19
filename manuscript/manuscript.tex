@@ -13,6 +13,11 @@
 % Omit the bestpractices option to remove the marking as a LiveCoMS paper.
 % Please note that these options may affect formatting.
 
+% NOTES
+% when importing references from EndNote, remove the type = {Journal Article}. It messes with the livecoms bibtex style somehow...
+% Place a \@ between all-caps words and punctuation ("This is a sentence about GIST\@. This is ...")
+% Place a protected space (~) between "Figure" and the reference. The same with tables.
+
 \usepackage{lipsum} % Required to insert dummy text
 \usepackage[version=4]{mhchem}
 \usepackage{siunitx}
@@ -412,6 +417,7 @@ print(*list(zip("xyz", min, max)), sep="\n")
 \end{lstlisting}
 Then, decide on grid dimensions for every system.
 For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{7}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+7)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
+\todo{this does not work with the default gisttools values for the automatic detection of the energy reference. Better use a larger value. }
 We note that this centered grid is usually larger than it needs to be in some directions.
 If you want to save some extra memory and calculation time, feel free to align the grid more precisely to the minimum and maximum coordinates, or use a smaller grid that only covers the binding pocket.
 You can also rotate the molecule by its principal axes to fit the cuboid grid more exactly.
@@ -450,7 +456,7 @@ E_{ww}^\textit{ref} = \frac{\int{E_{ww}} \mathrm{d}x}{\left<N_\textit{solvent}\r
 \end{equation}
 
 Alternatively, one can note that the solvent-solvent energy in a sufficiently large GIST grid converges to the correct bulk value at large distance to the solute.
-This means that the reference energy can be obtained from a large GIST grid by binning the voxels by their distance to the solute, and evaluate Equation \ref{eq_ewwref} within each bin.
+This means that the reference energy can be obtained from a large GIST grid by binning the voxels by their distance to the solute, and evaluate Equation~\ref{eq_ewwref} within each bin.
 If this value converges to a constant, this can be used as $E_{ww}^\textit{ref}$.
 
 \software{gisttools} contains functionality to perform this analysis easily.
@@ -463,7 +469,7 @@ import matplotlib.pyplot as plt
 gist = gt.gist.load_gist_file(
     "gist.dat", struct="solute-centered.pdb")
 bins, eww = gist.rdf(
-    "Eww_unref", bins=100, rmax=20., normalize="norm")
+    "Eww_unref_norm", bins=100, rmax=20., normalize="norm")
 plt.plot(bins, eww)
 eww_auto = gist.detect_reference_value().values[0]
 plt.axhline(eww_auto, color='k')
@@ -504,7 +510,7 @@ In \software{gistpp}, use the \inlinecode{add} command, with the same syntax as 
 After that, check whether your free energy contributions become negligible at high distances to the solute.
 In a plot like Figure~\ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
 However, it is more informative to plot the cumulative free energy contribution against the distance to the solute, to check the convergence.
-It the curve flattens out, this is your final $\dgsolv$.
+It the curve flattens out, this is your final $\dgsolv$\@.
 If it does not, you might need to tweak the Eww reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
 
 \begin{lstlisting}[style=python]
@@ -513,7 +519,7 @@ import matplotlib.pyplot as plt
 # adapt eww_ref!
 gist = gt.gist.load_gist_file("gist.dat",
     struct="solute-centered.pdb", eww_ref=-9.533)
-bins, (dg, eww, esw, s) = gist.rdf(
+bins, (dg, esw, eww, s) = gist.rdf(
     ["A_dens", "Esw_dens", "Eww_dens", "dTSsix_dens"],
     bins=100, rmax=20., normalize="none")
 plt.plot(bins, np.cumsum(dg), label="dG")
@@ -557,6 +563,7 @@ gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 Visualize the free energy, the total energy, and the entropy, at several iso-levels.
 An minimal PyMOL input might look like this:
 
+% The current font makes the O look like a tofu / placeholder
 \begin{lstlisting}
 load solute-centered.pdb
 show sticks, resname BTN
