@@ -303,6 +303,7 @@ The second method uses normalized-water properties to account the difference in 
 
 \subsection{PME implementation}
 
+\section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
 \begin{enumerate}
 	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
@@ -638,7 +639,7 @@ reference_entropy(compl)
 \end{lstlisting}
 
 Compute the atom positions that define the integration region.
-For the streptavidin integral, we align the complex structure onto the streptavidin structure and then use the biotin positions as centers.
+For the streptavidin integral, we align the complex structure onto streptavidin and then use the biotin positions as centers.
 Note that we use \software{mdtraj} here, since \software{gisttools} stores the reference structure as a \inlinecode{mdtraj.Trajectory} object, but any other library for post-processing of trajectories works as well.
 \begin{lstlisting}[style=python]
 col = 'dTSsix_dens'
@@ -701,12 +702,15 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 
 \begin{table}
 	\caption{Free energy contributions for the monomers and the dimer.}\label{tab_dg_monomers_dimer}
-	\begin{tabular}{lrrrr}
-		System       & E(internal) & $\Delta$E(GIST) & $\Delta$S(GIST) & total \\
-		complex      & -1303.4 & -361.2 & -233.1 & -226.7 \\
-		streptavidin & -1180.7 & -360.8 & -242.4 & -217.1 \\
-		biotin       & -24.0   &  -98.1 &  -35.1 & -161.1 \\
-		Diff         & -98.7   &   97.7 &   44.4 &  -45.4
+	\small
+	\begin{tabular}{lrrrrr}
+		\toprule
+		System       & E(internal) & $\Delta E^\textit{GIST}$ & $\Delta S^\textit{GIST}$ & $\Delta S^\textit{scaled}$ & total \\
+		\midrule
+		complex      & -1303.4 & -361.2 & -233.1 & -139.9 & -192.0 \\
+		streptavidin & -1180.7 & -360.8 & -242.4 & -145.4 & -188.4 \\
+		biotin       & -24.0   &  -98.1 &  -35.1 &  -21.1 & -105.4 \\
+		Diff         & -98.7   &   97.7 &   44.4 &   26.6 &  -27.6
 	\end{tabular}
 \end{table}
 
@@ -715,6 +719,8 @@ This is expected: if the molecules were not able to form any interactions, but i
 
 In this case, we find that the energy of solvation and the internal energy of the complex more or less cancel out, indicating that binding is largely entropy-driven in this case.
 This is somewhat surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions.\cite{mpye2020-biotin-itc}\cite{hyre2006-biotin-itc}
+
+\subsection{Further steps}
 %\section{Content and links}
 %
 %A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
