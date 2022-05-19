@@ -303,6 +303,26 @@ The second method uses normalized-water properties to account the difference in 
 
 \subsection{PME implementation}
 
+In the latest implementation of GIST, the particle mesh ewald (PME) functionaliy was added that decomposed the contributions of the PME-based electrostatic energy and the long-range Lennard-Jones energy to the total solvation energy. This allows  for a faster and more accurate calculation of the solvation energy.
+
+\begin{equation}
+	E_\textit{total} = E_\textit{elec} + E_\textit{lj}
+\end{equation}
+
+In the original version of GIST, the energies are calculated based on the shortest distance or the minimum image convention. In doing so, long range interactions are not accounted for. In the PME functionality, the contribution of the long-range interactions are accounted for.
+
+In terms of the electrostatic energy, in the original version, the electrostatic energy longer than half of the cell's diagonal are not accounted for. In the PME functionality, the long-range interactions are accounted for by decomposing the electrostatic interaction into three parts: the direct term, the reciprocal term, and the correction term. 
+
+\begin{equation}
+	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
+\end{equation}
+
+On the other hand, in PME-GIST, the long-range interactions for the Lennard-Jones contribution are treated by accounting for the short-range and the long-range correction contributions separately. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
+
+\begin{equation}
+	E_\textit{lj} = E_\texit{lj\_short} +  E_\textit{corr}
+\end{equation}
+
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
 \begin{enumerate}
