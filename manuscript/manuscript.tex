@@ -13,6 +13,11 @@
 % Omit the bestpractices option to remove the marking as a LiveCoMS paper.
 % Please note that these options may affect formatting.
 
+% NOTES
+% when importing references from EndNote, remove the type = {Journal Article}. It messes with the livecoms bibtex style somehow...
+% Place a \@ between all-caps words and punctuation ("This is a sentence about GIST\@. This is ...")
+% Place a protected space (~) between "Figure" and the reference. The same with tables.
+
 \usepackage{lipsum} % Required to insert dummy text
 \usepackage[version=4]{mhchem}
 \usepackage{siunitx}
@@ -298,6 +303,7 @@ The second method uses normalized-water properties to account the difference in 
 
 \subsection{PME implementation}
 
+\section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
 \begin{enumerate}
 	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
@@ -363,7 +369,7 @@ restrained 100 ns NpT
   ioutfm=1,
   ntb=2, iwrap=1,
   ntr=1, restraint_wt=100.0,
-    restraintmask=\"!@H=&!:WAT\",
+    restraintmask="!@H=&!:WAT",
   ntp=1, pres0=1.0, taup=1.0,
   ntc=2, ntf=2,
   ntt=3, tempi=300.0, temp0=300.0, gamma_ln=2,
@@ -412,6 +418,7 @@ print(*list(zip("xyz", min, max)), sep="\n")
 \end{lstlisting}
 Then, decide on grid dimensions for every system.
 For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{7}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+7)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
+\todo{this does not work with the default gisttools values for the automatic detection of the energy reference. Better use a larger value. }
 We note that this centered grid is usually larger than it needs to be in some directions.
 If you want to save some extra memory and calculation time, feel free to align the grid more precisely to the minimum and maximum coordinates, or use a smaller grid that only covers the binding pocket.
 You can also rotate the molecule by its principal axes to fit the cuboid grid more exactly.
@@ -450,7 +457,7 @@ E_{ww}^\textit{ref} = \frac{\int{E_{ww}} \mathrm{d}x}{\left<N_\textit{solvent}\r
 \end{equation}
 
 Alternatively, one can note that the solvent-solvent energy in a sufficiently large GIST grid converges to the correct bulk value at large distance to the solute.
-This means that the reference energy can be obtained from a large GIST grid by binning the voxels by their distance to the solute, and evaluate Equation \ref{eq_ewwref} within each bin.
+This means that the reference energy can be obtained from a large GIST grid by binning the voxels by their distance to the solute, and evaluate Equation~\ref{eq_ewwref} within each bin.
 If this value converges to a constant, this can be used as $E_{ww}^\textit{ref}$.
 
 \software{gisttools} contains functionality to perform this analysis easily.
@@ -463,7 +470,7 @@ import matplotlib.pyplot as plt
 gist = gt.gist.load_gist_file(
     "gist.dat", struct="solute-centered.pdb")
 bins, eww = gist.rdf(
-    "Eww_unref", bins=100, rmax=20., normalize="norm")
+    "Eww_unref_norm", bins=100, rmax=20., normalize="norm")
 plt.plot(bins, eww)
 eww_auto = gist.detect_reference_value().values[0]
 plt.axhline(eww_auto, color='k')
@@ -472,13 +479,12 @@ plt.gca().set(
 plt.show()
 \end{lstlisting}
 
-The expected output of this code is shown in Figure \ref{fig_ewwref}.
+The expected output of this code is shown in Figure~\ref{fig_ewwref}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/Eww_convergence.eps}
-	\caption{Convergence of $E_{ww}$ with increasing distance to the solute. The horizontal line shows the automatically computed reference energy. Computed from the complex calculation.}
-	\label{fig_ewwref}
+	\caption{Convergence of $E_{ww}$ with increasing distance to the solute. The horizontal line shows the automatically computed reference energy. Computed from the complex calculation.}\label{fig_ewwref}
 \end{figure}
 
 After choosing an appropriate reference value, we need to subtract this value from Eww.
@@ -503,9 +509,9 @@ Now, add all free energy contributions to obtain the spatially resolved $\dgsolv
 In \software{gisttools}, this is done automatically (simply use the \inlinecode{A\_dens} and \inlinecode{A\_norm} columns).
 In \software{gistpp}, use the \inlinecode{add} command, with the same syntax as the \inlinecode{div} command used above.
 After that, check whether your free energy contributions become negligible at high distances to the solute.
-In a plot like Figure \ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
+In a plot like Figure~\ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
 However, it is more informative to plot the cumulative free energy contribution against the distance to the solute, to check the convergence.
-It the curve flattens out, this is your final $\dgsolv$.
+It the curve flattens out, this is your final $\dgsolv$\@.
 If it does not, you might need to tweak the Eww reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
 
 \begin{lstlisting}[style=python]
@@ -514,7 +520,7 @@ import matplotlib.pyplot as plt
 # adapt eww_ref!
 gist = gt.gist.load_gist_file("gist.dat",
     struct="solute-centered.pdb", eww_ref=-9.533)
-bins, (dg, eww, esw, s) = gist.rdf(
+bins, (dg, esw, eww, s) = gist.rdf(
     ["A_dens", "Esw_dens", "Eww_dens", "dTSsix_dens"],
     bins=100, rmax=20., normalize="none")
 plt.plot(bins, np.cumsum(dg), label="dG")
@@ -523,7 +529,7 @@ plt.plot(bins, np.cumsum(esw), label="Esw")
 plt.plot(bins, np.cumsum(s), label="dS")
 \end{lstlisting}
 
-The expected output of this code is shown in Figure \ref{fig_radial_convergence}.
+The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
 In this case, both the Eww energy and the entropy are not perfectly flat, indicating that the reference value is not optimal.
 The slow energy convergence indicates that a non-optimal reference value was used, but is also complicated by the fact that a charged solute is used without neutralizing counter ions.
 
@@ -531,13 +537,12 @@ The slow energy convergence indicates that a non-optimal reference value was use
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/A_E_S_convergence.eps}
-	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute. All quantities cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}
-	\label{fig_radial_convergence}
+	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute. All quantities cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}\label{fig_radial_convergence}
 \end{figure}
 
 \subsection{Visualizing $\dgsolv$}
 Next, we want to visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
-You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST.
+You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST\@.
 With \software{gistpp}, you can use the file from the convergence check. Additional OpenDX files can be produced using \inlinecode{gistpp -op makedx}.
 With \software{gisttools}, you can create one using e.g., \inlinecode{gist.save\_dx("A\_dens", "A\_dens.dx")}.
 
@@ -545,7 +550,7 @@ It might also be interesting to visualize the average energy of a water molecule
 This quantity is given by 2*Eww + Esw.
 The energy referencing leads to non-zero normalized values where the population is zero.
 While this is irrelevant for further post-processing, it is advantageous for visualization to set those empty regions to zero.
-A .dx file can be produced using gisttools as follows:
+An OpenDX file can be produced using \software{gisttools} as follows:
 
 \begin{lstlisting}[style=python]
 import gisttools as gt
@@ -559,6 +564,7 @@ gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 Visualize the free energy, the total energy, and the entropy, at several iso-levels.
 An minimal PyMOL input might look like this:
 
+% The current font makes the O look like a tofu / placeholder
 \begin{lstlisting}
 load solute-centered.pdb
 show sticks, resname BTN
@@ -568,13 +574,12 @@ isosurface gO_high, gO, 2.
 \end{lstlisting}
 
 Adapt the above PyMOL script to visualize the average energy per solvent at a positive and a negative isolevel, as well as regions of negative entropy per solvent.
-The expected representation of the streptavidin binding pocket is shown in Figure \ref{fig_binding_pocket_pymol}.
+The expected representation of the streptavidin binding pocket is shown in Figure~\ref{fig_binding_pocket_pymol}.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/binding_pocket_S_-2_E_-2_E_3.png}
-	\caption{Free energy contributions in the streptavidin binding pocket. Red: high solvent energy (at +3 kcal/mol). Blue: low solvent energy (at -2 kcal/mol). Green: low solvent entropy $T\Delta S^{six}$ (at -2 kcal/mol).}
-	\label{fig_binding_pocket_pymol}
+	\caption{Free energy contributions in the streptavidin binding pocket. Red: high solvent energy (at +3 kcal/mol). Blue: low solvent energy (at -2 kcal/mol). Green: low solvent entropy $T\Delta S^{six}$ (at -2 kcal/mol).}\label{fig_binding_pocket_pymol}
 \end{figure}
 
 You should find that there are several regions in the binding pocket that feature a high solvent energy and/or low solvent entropy.
@@ -634,7 +639,7 @@ reference_entropy(compl)
 \end{lstlisting}
 
 Compute the atom positions that define the integration region.
-For the streptavidin integral, we align the complex structure onto the streptavidin structure and then use the biotin positions as centers.
+For the streptavidin integral, we align the complex structure onto streptavidin and then use the biotin positions as centers.
 Note that we use \software{mdtraj} here, since \software{gisttools} stores the reference structure as a \inlinecode{mdtraj.Trajectory} object, but any other library for post-processing of trajectories works as well.
 \begin{lstlisting}[style=python]
 col = 'dTSsix_dens'
@@ -670,6 +675,52 @@ plt.axvline(cutoff)
 plt.xlabel('distance to biotin [A]')
 plt.ylabel('dG contribution [kcal/mol]')
 \end{lstlisting}
+
+Compute the energy (Eall) and entropy (dTSsix) contributions separately.
+You will find that the energy is strongly unfavorable to binding, because we do not yet include the interaction energy between biotin and streptavidin.
+
+Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this energy difference.
+We recommend using PME in combination with PME-GIST, but not with GPU-GIST\@.
+An example \software{cpptraj} input might look like:
+\begin{lstlisting}
+parm solvated.parm7
+trajin md-01.nc 1 last 100
+energy complex ^1,2 # etype pme
+energy strept ^1 # etype pme
+energy biotin ^2 # etype pme
+go
+diff = complex[total] - strept[total] - biotin[total]
+writedata energy.dat diff complex[total] \
+strept[total] biotin[total]
+avg(complex[total])
+avg(strept[total])
+avg(biotin[total])
+avg(diff)
+\end{lstlisting}
+
+The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
+
+\begin{table}
+	\caption{Free energy contributions for the monomers and the dimer.}\label{tab_dg_monomers_dimer}
+	\small
+	\begin{tabular}{lrrrrr}
+		\toprule
+		System       & E(internal) & $\Delta E^\textit{GIST}$ & $\Delta S^\textit{GIST}$ & $\Delta S^\textit{scaled}$ & total \\
+		\midrule
+		complex      & -1303.4 & -361.2 & -233.1 & -139.9 & -192.0 \\
+		streptavidin & -1180.7 & -360.8 & -242.4 & -145.4 & -188.4 \\
+		biotin       & -24.0   &  -98.1 &  -35.1 &  -21.1 & -105.4 \\
+		Diff         & -98.7   &   97.7 &   44.4 &   26.6 &  -27.6
+	\end{tabular}
+\end{table}
+
+Even though streptavidin-biotin is known to be a very stable complex, the solvation energy favors the dissociation.
+This is expected: if the molecules were not able to form any interactions, but interacted fully with the water, they would not form a complex.
+
+In this case, we find that the energy of solvation and the internal energy of the complex more or less cancel out, indicating that binding is largely entropy-driven in this case.
+This is somewhat surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions.\cite{mpye2020-biotin-itc}\cite{hyre2006-biotin-itc}
+
+\subsection{Further steps}
 %\section{Content and links}
 %
 %A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
