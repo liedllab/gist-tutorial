@@ -376,21 +376,22 @@ This is not a problem when computing the total free energy of solvation $\dgsolv
 
 \subsection{PME implementation}
 
-In the latest implementation of GIST, the particle mesh ewald (PME) functionaliy was added that decomposed the contributions of the PME-based electrostatic energy and the long-range Lennard-Jones energy to the total solvation energy. This allows  for a faster and more accurate calculation of the solvation energy.
+In the original version of GIST, the energies are calculated based on the the minimum image convention.
+In PME-GIST, the electrostatics are calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the treatment in the Amber MD engine \cite{Chen2021}.
+The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are computed separately.
 
 \begin{equation}
-	E_\textit{total} = E_\textit{elec} + E_\textit{lj}
+	E_\text{total} = E_\text{elec} + E_\text{lj}
 \end{equation}
 
-In the original version of GIST, the energies are calculated based on the shortest distance or the minimum image convention. In doing so, long range interactions are not accounted for. In the PME functionality, the contribution of the long-range interactions are accounted for.
-
-In terms of the electrostatic energy, in the original version, the electrostatic energy longer than half of the cell's diagonal are not accounted for. In the PME functionality, the long-range interactions are accounted for by decomposing the electrostatic interaction into three parts: the direct term, the reciprocal term, and the correction term. 
+In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
+Additionally, there is a correction term $E_\text{corr}$, which corrects for the self-interaction of each solvent molecule in the reciprocal term.
 
 \begin{equation}
 	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
 \end{equation}
 
-On the other hand, in PME-GIST, the long-range interactions for the Lennard-Jones contribution are treated by accounting for the short-range and the long-range correction contributions separately. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
+The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
 
 \begin{equation}
 	E_\textit{lj} = E_\textit{lj\_short} +  E_\textit{corr}
@@ -554,7 +555,7 @@ This means that the reference energy can be obtained from a large GIST grid by b
 If this value converges to a constant, this can be used as $E_{ww}^\textit{ref}$.
 
 \software{gisttools} contains functionality to perform this analysis easily.
-There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value fo the rdf.
+There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value from the rdf.
 Although it has a simple convergence check built-in, it is always recommended to check the convergence by hand as well.
 
 \begin{lstlisting}[style=python]
@@ -604,7 +605,7 @@ In \software{gistpp}, use the \inlinecode{add} command, with the same syntax as 
 After that, check whether your free energy contributions become negligible at high distances to the solute.
 In a plot like Figure~\ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
 However, it is more informative to plot the cumulative free energy contribution against the distance to the solute, to check the convergence.
-It the curve flattens out, this is your final $\dgsolv$\@.
+It the curve flattens out, the converged value is your final $\dgsolv$\@.
 If it does not, you might need to tweak the Eww reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
 
 \begin{lstlisting}[style=python]
@@ -791,6 +792,8 @@ avg(biotin[total])
 avg(diff)
 \end{lstlisting}
 
+It has been shown in literature \cite{Chen2021}\todo{cite Kraml-Waibl paper} that the total solvation entropy in water is best approximated by 0.6 times the first order entropy.
+Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 
 \begin{table}
@@ -811,7 +814,11 @@ Even though streptavidin-biotin is known to be a very stable complex, the solvat
 This is expected: if the molecules were not able to form any interactions, but interacted fully with the water, they would not form a complex.
 
 In this case, we find that the energy of solvation and the internal energy of the complex more or less cancel out, indicating that binding is largely entropy-driven in this case.
-This is somewhat surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions.\cite{mpye2020-biotin-itc}\cite{hyre2006-biotin-itc}
+At first, this is surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions \cite{mpye2020-biotin-itc,hyre2006-biotin-itc}.
+However, we do not take the conformational transition of the streptavidin binding pocket into account.
+Prior computational studies suggest a $\Delta G$ of \SI{-26.6}{\kilo\calorie\per\mole} for the binding of biotin into the closed conformation of streptavidin \cite{Bansal2018-biotin}.
+This indicates that our result is in good agreement with literature.
+However, the conformational changes of the binding pocket would need to be described to improve the agreement with experiments.
 
 \subsection{Further steps}
 %\section{Content and links}
