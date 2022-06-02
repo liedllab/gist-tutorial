@@ -22,7 +22,7 @@
 \usepackage[version=4]{mhchem}
 \usepackage{siunitx}
 \DeclareSIUnit\Molar{M}
-\usepackage[italic]{mathastext}
+\usepackage[italic,LGRgreek]{mathastext}
 \graphicspath{{figures/}}
 
 \usepackage{listings}
@@ -80,6 +80,9 @@
 \newcommand{\todo}{\textcolor{red}}
 \newcommand\inlinecode{\texttt}
 
+% The \neq command looks messy by default. Replace it by our own makeshift version.
+\renewcommand{\neq}{\setbox0\hbox{=}\rlap{\hbox to \wd0{\hss /\hss}}\box0}
+
 \lstset{
 	basicstyle=\ttfamily\footnotesize
 }
@@ -130,28 +133,49 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 
 
 Solvation thermodynamics govern any process involving solutes in a solvent.
-Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
+%Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
 Especially the interaction with water is of utmost importance, as many biological processes occur in a aquaeous environment. 
-The free energy of solvation thereby strongly influences real-world problems of interest such as hydrophobic effects, the binding of a ligand to a protein, protein-protein interactions, protein dynamics or even more generally, a protein's fold. 
-The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of different methods.   
+The free energy of solvation thereby strongly influences real-world problems of interest such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
+
+The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
 Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
-More recently, machine learning approaches and QM/MM approaches are trying to bridge the gap to computationally less demanding methods while keeping the accuracy of ab initio QM methods.
+More recently, QM/MM approaches and potentials based on deep learning \cite{Smith2017-ani} are trying to bridge the gap to computationally less demanding methods while keeping the accuracy of DFT methods.
+
 Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
-This allows for the treatment of even large biological systems like fully solvated proteins. 
-Implicit solvent methods such as MM/PBSA  or MM/GBSA can quickly provide results for a large amount of supplied structures, but yield inaccurate results when compared to more rigorous explicit solvent methods. Somewhat inbetween the implicit solvent methods and the fully explicit solvent methods are Reference Interaction Site Models. One of these methods, 3D-RISM, foregoes the explicit simulation and uses 3D solvent distributions based on the Ornstein--Zernike integral equations to predict solvation thermodynamics instead.
-The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute structure.
-The most statisticaly rigorous of the explicit solvent MM methods are alchemical methods such as FEP or TI. 
-Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
-However, the seperation of enthalpic and entropic contributions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
-In this tutorial, the Grid Inhomogenous Solvation Theory (GIST) is applied to calculate solution thermodynamic properties of interest. 
-GIST is based on Lazaridis' Inhomogenous Solvation Theory (IST), solving the arising integral equations on a grid. 
-This is highly advantegous compared to other IST-based methods such as e.g. WaterMap,\todo{Add more methdods!} as this is not restricted to high-occopancy solvation sites but provides a 
+This allows for the treatment of large biological systems such as proteins in aqueous solution.
+Implicit solvent methods such as MM/PBSA or MM/GBSA can quickly provide results for a large number of structures, but yield inaccurate results when compared to more rigorous explicit solvent methods. 
+On the other hand, the free energy of solvation can be calculated in a statistically rigorous way using explicit solvent simulations combined with alchemical methods such as free energy perturbation (FEP) or thermodynamic integration(TI).
+However, they are unable to provide a spatial interpretation of the results.
+Furthermore, splitting the resulting free energy into contributions for the enthalpy and entropy is challenging \cite{Peter2004-alchemical-entropy}.
+%Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
+%However, the seperation of enthalpic and entropic contributions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
+
+Methods derived from statistical mechanics bridge this gap by providing three-dimensional resolution.
+Two major groups of methods that fall into this group are those based on inhomogeneous solvation theory (IST) \cite{Lazaridis1998} and those based on the Ornstein--Zernike (OZ) equation.
+The most important example of OZ-based methods is the reference interaction site model (RISM) as well as its extension to three dimensions (3D-RISM).
+Those methods compute the 3D solvent distributions by self-consistent solution of the OZ integral equation to predict solvation thermodynamics.
+%The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute structure.
+
+On the other hand, methods based on IST generally use a molecular solvent distribution obtained from an MD simulation to compute the free energy of hydration from its enthalpic and entropic contributions.
+Examples of those methods include grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012,Ramsey2016}, WaterMap, SSTMap \todo{what else?}.
+The main limitation of those methods is that they rely on an infinite expansion of the entropy in terms of the density distribution, which is truncated after the first or, sometimes, the second term.
+Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems.
+
+In this tutorial, GIST is applied to calculate solution thermodynamics properties of interest. 
+
+GIST is based on IST, solving the integral equations on a grid. 
+This approach is more general than other IST-based methods because it accounts for all solvent regions rather than focusing on high-occopancy solvation sites.
 By simulating the dynamics of a solvent around the solute, GIST calculates thermodynamic properties for a standard solvation process as described by Ben-Naim.
 The method allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
-For small organic molecules in water, the method provided results compareable to TI in accuracy, assuming some small correction factor to the entropy is applied. 
-Recent improvements to the method have improved the calculation speed tremendously, allowing for the treatment of larger systems of biological interest such as proteases or antibodies. 
-Other improvements worked on decreasing differences in the treatment of long-range interaction energies between GIST and popular molecular dynamics engines. 
+It has been shown that GIST can produce comparable accuracy to TI by applying a linear correction factor (0.6 for water) to the first-order entropy as follows.
+\begin{equation}
+S^\textit{total} = S^\textit{1st-order} \times f
+\end{equation}
+
+Recent work has improved the calculation speed tremendously, allowing for the treatment of large biological systems such as proteases or antibodies.
+Furthermore, an implementation based on the particle mesh Ewald (PME) method was presented, which improves the consistency between GIST and popular molecular dynamics engines. 
 Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution. 
+
 While previous tutorials gave insightful pointers as to how to setup and run GIST calculations, the post-processing of such calculations was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address the recent improvements to the method.
 
 %Here you would explain what problem you are tackling and briefly motivate your work.
@@ -165,16 +189,16 @@ While previous tutorials gave insightful pointers as to how to setup and run GIS
 \subsection{Scope}
 
 The tutorial provides an example of a GIST workflow that can be easily adapted towards different systems. 
-In addition to a short introduction to the method and the theory behind it an overview of the various different flavours of GIST methods is provided.
+In addition to a short introduction to the method and the theory behind it, an overview of the various different flavors of GIST methods is provided.
 Towards this, a GIST study of the streptavidin-biotin complex is presented, which reflects on many common aspects of GIST studies.
 We present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
-For both systems, we show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket.
+We show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket and around the ligand. \todo{use active voice over passive.}
 The contribution of solvation free energy to binding is computed, which requires accurate post-processing of the GIST output to avoid unfavorable summation of bias in the GIST calculation.
 We believe that this example study covers a wide range of applications of the GIST method.
 Furthermore, we discuss several technical aspects  and typical pitfalls of GIST analyses, such as the normalization of voxel values and how to deal with double counting of energy contributions. 
 Additionally, we provide a python library to unify the analysis of GIST data produced by various versions of GIST and make the post-processing of GIST results more accessible.
 
-After completing this tutorial, we expect the reader to be able to implement their own GIST study. 
+After completing this tutorial, we expect the reader to be able to run their own GIST study. 
 
 %Tutorials should endeavor to cover the specific task at hand, and also highlight how the steps might need to be modified (or additional care might need to be taken at particular points) to handle more general cases.
 %
@@ -187,17 +211,18 @@ After completing this tutorial, we expect the reader to be able to implement the
 %Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
 
 \subsection{Background knowledge}
-This tutorial is aimed at advanced users with a solid background knowledge of molecular dynamics (MD) simulations. The user should be able to run MD simulations and work with their output data.
-Previous knowledge of the method is not necessary, but we recommend the perusal of the primary sources on the method outlined in the Theory section. 
+This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD) simulations.
+The user should be able to run MD simulations and work with their output data.
+Previous experience of GIST is not necessary, but the reader should be familiar with the primary sources on the method outlined in the Theory section. \todo{shouldn't a tutorial be the entry point to a new method?}
 
 The presented analyses are run in Python.
-A working understanding of Python is therefore necessary to follow the tutorial. 
+A basic understanding of Python is therefore necessary to follow the tutorial. 
 A Jupyter notebook showing directly the herein presented analyses is provided as well. 
 To easily follow the analyses an understanding of working with Jupyter notebooks is therefore beneficial, though not strictly necessary.
 
 \subsection{Software/system requirements}
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
-GIST's main implementation is part of the MD analysis software \software{cpptraj} as part of the AmberTools software suite.
+The main implementation of GIST is part of the MD analysis software \software{cpptraj} as part of AmberTools \cite{amber22}.
 A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub.
 The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations. 
 If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}, we recommend GROMACS.
@@ -235,8 +260,12 @@ bulk to be zero. Also, this quantity reaches unity as the distance from the solu
 the solvation entropy to be an approximation of the integral around the solute atom. 
 
 \begin{equation}
-	\Delta S_\textit{solv} \approx \Delta S_\textit{sw} \equiv -k_\textit{B} \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int g_\textit{sw} \left(\textbf{r}, \omega \right) d\textbf{r}d\omega
+	\Delta S_\textit{solv}
+	\approx \Delta S_\textit{sw}
+	\newcommand{\gro}{g_{sw}(\textbf{r},\omega)}
+	\equiv -k_\textit{B} \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int \gro \ln\gro d\textbf{r}d\omega
 \end{equation}
+\todo{We are inconsistent regarding R/kB}
 
 The solvation entropy is further broken down in terms of the contribution from translational and orientational terms.
 \begin{equation}
@@ -252,7 +281,7 @@ evaluate each expression where $N_\textit{k}$ is the number of water molecules f
 that accounts for the bias in naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate. In the nearest neighbor
 estimate, a voxel is considered to be a neighboring voxel when it shares any vertices of the voxel of interest. 
 \begin{equation}
-	g_\textit{vox} \left( \textbf{r}, \mathbf{\omega} \right) \approx g_\textit{vox} \left( \textbf{r})g_\textit{vox}(\mathbf{\omega} \right)
+	g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox} \left( \textbf{r})g_\textit{vox}\omega \right)
 \end{equation}
 
 \begin{equation}
@@ -261,14 +290,14 @@ estimate, a voxel is considered to be a neighboring voxel when it shares any ver
 
 
 \begin{equation}
-	S_{k}^\textit{orient} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \mathbf {\omega} \right) + \gamma \right)
+	S_{k}^\textit{orient} \approx \frac{-R}{N_k} \left( \sum _{i=1}^{N_k} \ln g_{NN, i} ( \omega ) + \gamma \right)
 \end{equation}
 
 The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation) 
 using the nearest-neighbor approach. Unlike the first method, the nearest neighbor estimate for the sixth-order entropy considers all the water 
 found within the same and neighboring voxels.  
 \begin{equation}
-	S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r}, \mathbf {\omega} \right) + \gamma \right)
+	S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r}, \omega \right) + \gamma \right)
 \end{equation}
 
 
@@ -278,49 +307,94 @@ The solvation energy is readily calculated by summing up the contributions of th
 	\Delta E_\textit{solv} = \Delta E_\textit{sw} + \Delta E_\textit{ww}
 \end{equation}
 
-\begin{equation}
-	\Delta E_\textit{sw} \equiv \frac{1}{8\pi^2} \int g_\textit{sw}\left(\omega|\textbf{r}\right) U_\textit{sw}\left(\textbf{r}, \omega\right) d\omega
-\end{equation}
-
-Similar to the entropy integrals, the solute-water solvation energy integral also decays with increasing distance from the solute. Hence, the solvation energy can be approximated by local spatial integrals. However, there is a complication arising from this approximation. Water molecules outside the region of interest will also be accounted for in the pairwise water term. For example, given two different regions $R_a$ and $R_b$, will not sum up to the total energy of the two regions due to double counting. 
+The solute-solvent energy $E_{sw}$ can be expressed in terms of the solvent density and the potential $U_{sw}(\textbf{r},\omega)$ induced by the solute.
+In practice, it is evaluated as the expectation value $\langle\cdot\rangle$ of the pairwise force field energy $U_{ij}$ between all solvent molecules in voxel $k$ and all solute atoms.
 
 \begin{equation}
 \begin{aligned}
-	\Delta E_\textit{ww} \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}\left(\omega|\textbf{r}\right) \\
-	& \times \left[g_\textit{sw}\left(\textbf{r}^\prime , \omega^\prime \right) - g^o_\textit{ww} \left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime \right)\right] \\
-	& \times U_\textit{ww}\left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime\right)d\omega d\textbf{r}^\prime d\omega^\prime
+\label{eq-esw}
+	\Delta E_{sw}(\textbf{r}) \equiv& \frac{1}{8\pi^2} \int g_\textit{sw}\left(\omega|\textbf{r}\right) U_\textit{sw}\left(\textbf{r}, \omega\right) d\omega \\
+	\Delta E_{sw,k}=& \left\langle \sum_i^{\textit{solvent},k} \; \sum_j^\textit{solute} U_{ij}\right\rangle
 \end{aligned}
 \end{equation}
-There are two ways in which this double counting was accounted for in the original paper. First, using the water-displacement method. This method is applicable when a determining the energetic cost of kicking out a water molecule. 
+
+To localize $E_{sw}$ on the three-dimensional grid, every energy term is assigned to the voxel $k$ holding the solvent, and the expectation value in Equation~\ref{eq-esw} is computed per voxel.
+Similar to the entropy integrals, the solute-water solvation energy integral also decays with increasing distance from the solute. Hence, the solvation energy can be approximated by local spatial integrals. 
+
+The solvent-solvent energy $E_{ww}$ is computed in a similar manner.
+Again, it can be expressed in terms of density functions, but is practically computed as a sum over solvent-solvent interactions where one solvent is in voxel $k$.
+In contrast to $E_{sw}$, $E_{ww}$ does not tend to zero in bulk.
+Therefore, a reference energy corresponding to the average energy of a water molecule in bulk needs to be subtracted.
+
+%However, there is a complication arising from this approximation. Water molecules outside the region of interest will also be accounted for in the pairwise water term. For example, given two different regions $R_a$ and $R_b$, will not sum up to the total energy of the two regions due to double counting.
+
 \begin{equation}
-	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
+\begin{aligned}
+	\Delta E_{ww}(\textbf{r}) \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}\left(\omega|\textbf{r}\right) \\
+	& \times \left[g_\textit{sw}\left(\textbf{r}^\prime , \omega^\prime \right) - g^o_\textit{ww} \left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime \right)\right] \\
+	& \times U_\textit{ww}\left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime\right)d\omega d\textbf{r}^\prime d\omega^\prime \\
+	\Delta E_{ww,k} =& \frac{1}{N_k} \left\langle \sum_i^\textit{solvent,k} \; \sum_{j \neq i}^\textit{solvent} U_{ij}\right\rangle - \left\langle E_{ww}^\textit{bulk}\right\rangle
+\end{aligned}
 \end{equation}
 
-The second method uses normalized-water properties to account the difference in water properties of two different regions. The normalized water property is defined as the water property per water molecule. 
+%AFAIK, this was never done, since the pair interaction matrix Eij would have to be written out.
+%There are two ways in which this double counting was accounted for in the original paper. First, using the water-displacement method. This method is applicable when a determining the energetic cost of kicking out a water molecule. 
+%\begin{equation}
+%	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
+%\end{equation}
+
+%The second method uses normalized-water properties to account the difference in water properties of two different regions. The normalized water property is defined as the water property per water molecule. 
+%\begin{equation}
+%	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
+%\end{equation}
+
+When computing the total $E_{ww}$ of the system, double-counting of interactions must be avoided.
+The total solvent-solvent energy of the system is as follows.
+
 \begin{equation}
-	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
+\Delta E_{ww} = \int \frac{\Delta E_{ww}(\textbf{r})}{2} d\textbf{r}
 \end{equation}
+
+When water is replaced from a small region $R$ of interest, such as a single water molecule, almost all interactions are with water molecules outside of this region.
+Therefore, there is no double counting, and the full solvent-solvent energy should be used.
+
+\begin{equation}
+\Delta E_{ww,R} = \int_R E_{ww}(\textbf{r}) d\textbf{r}
+\end{equation}
+
+When the region of interest $R$ comprises more than one molecule, interactions within this region are double-counted while interactions to the outside are not.
+To take this into account, the solvent-solvent energy between each pair of voxels $E_{ww,kl}$ is needed.
+While this is supported by the standard GIST implementation, it is rarely done due to the large size of the $E_{ww,kl}$ matrix.
+
+We note that replacement of a small or medium solvent region would lead to reorganization of the surrounding solvent.
+However, this depends on the local environment and on \emph{what} the molecule would be replaced by.
+Therefore, the effect of reorganization can not be directly included in the GIST method, but must be judged for each case individually.
+This is not a problem when computing the total free energy of solvation $\dgsolv$, since no additional boundary is created.
+\todo{Do we need this paragraph?}
+
+
 
 \subsection{PME implementation}
 
-In the latest implementation of GIST, the particle mesh ewald (PME) functionaliy was added that decomposed the contributions of the PME-based electrostatic energy and the long-range Lennard-Jones energy to the total solvation energy. This allows  for a faster and more accurate calculation of the solvation energy.
+In the original version of GIST, the energies are calculated based on the the minimum image convention.
+In PME-GIST, the electrostatics are calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the treatment in the Amber MD engine \cite{Chen2021}.
+The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are computed separately.
 
 \begin{equation}
-	E_\textit{total} = E_\textit{elec} + E_\textit{lj}
+	E_\text{total} = E_\text{elec} + E_\text{lj}
 \end{equation}
 
-In the original version of GIST, the energies are calculated based on the shortest distance or the minimum image convention. In doing so, long range interactions are not accounted for. In the PME functionality, the contribution of the long-range interactions are accounted for.
-
-In terms of the electrostatic energy, in the original version, the electrostatic energy longer than half of the cell's diagonal are not accounted for. In the PME functionality, the long-range interactions are accounted for by decomposing the electrostatic interaction into three parts: the direct term, the reciprocal term, and the correction term. 
+In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
+Additionally, there is a correction term $E_\text{corr}$, which corrects for the self-interaction of each solvent molecule in the reciprocal term.
 
 \begin{equation}
 	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
 \end{equation}
 
-On the other hand, in PME-GIST, the long-range interactions for the Lennard-Jones contribution are treated by accounting for the short-range and the long-range correction contributions separately. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
+The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
 
 \begin{equation}
-	E_\textit{lj} = E_\texit{lj\_short} +  E_\textit{corr}
+	E_\textit{lj} = E_\textit{lj\_short} +  E_\textit{corr}
 \end{equation}
 
 \section{Tutorial}
@@ -481,7 +555,7 @@ This means that the reference energy can be obtained from a large GIST grid by b
 If this value converges to a constant, this can be used as $E_{ww}^\textit{ref}$.
 
 \software{gisttools} contains functionality to perform this analysis easily.
-There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value fo the rdf.
+There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value from the rdf.
 Although it has a simple convergence check built-in, it is always recommended to check the convergence by hand as well.
 
 \begin{lstlisting}[style=python]
@@ -531,7 +605,7 @@ In \software{gistpp}, use the \inlinecode{add} command, with the same syntax as 
 After that, check whether your free energy contributions become negligible at high distances to the solute.
 In a plot like Figure~\ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
 However, it is more informative to plot the cumulative free energy contribution against the distance to the solute, to check the convergence.
-It the curve flattens out, this is your final $\dgsolv$\@.
+It the curve flattens out, the converged value is your final $\dgsolv$\@.
 If it does not, you might need to tweak the Eww reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
 
 \begin{lstlisting}[style=python]
@@ -718,6 +792,8 @@ avg(biotin[total])
 avg(diff)
 \end{lstlisting}
 
+It has been shown in literature \cite{Chen2021}\todo{cite Kraml-Waibl paper} that the total solvation entropy in water is best approximated by 0.6 times the first order entropy.
+Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 
 \begin{table}
@@ -738,7 +814,11 @@ Even though streptavidin-biotin is known to be a very stable complex, the solvat
 This is expected: if the molecules were not able to form any interactions, but interacted fully with the water, they would not form a complex.
 
 In this case, we find that the energy of solvation and the internal energy of the complex more or less cancel out, indicating that binding is largely entropy-driven in this case.
-This is somewhat surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions.\cite{mpye2020-biotin-itc}\cite{hyre2006-biotin-itc}
+At first, this is surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions \cite{mpye2020-biotin-itc,hyre2006-biotin-itc}.
+However, we do not take the conformational transition of the streptavidin binding pocket into account.
+Prior computational studies suggest a $\Delta G$ of \SI{-26.6}{\kilo\calorie\per\mole} for the binding of biotin into the closed conformation of streptavidin \cite{Bansal2018-biotin}.
+This indicates that our result is in good agreement with literature.
+However, the conformational changes of the binding pocket would need to be described to improve the agreement with experiments.
 
 \subsection{Further steps}
 %\section{Content and links}
