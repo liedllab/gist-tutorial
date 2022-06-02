@@ -379,7 +379,7 @@ This is not a problem when computing the total free energy of solvation $\dgsolv
 In the original version of GIST, the energies are calculated based on the the minimum image convention.
 In PME-GIST, the electrostatics are calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the treatment in the Amber MD engine \cite{Chen2021}.
 The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are computed separately.
-
+\todo{E$_{LJ}$ seems more intuitive to me, need to check what the GIST literature is using -vah}
 \begin{equation}
 	E_\text{total} = E_\text{elec} + E_\text{lj}
 \end{equation}
@@ -390,7 +390,7 @@ Additionally, there is a correction term $E_\text{corr}$, which corrects for the
 \begin{equation}
 	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
 \end{equation}
-
+\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. }
 The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
 
 \begin{equation}
@@ -572,7 +572,7 @@ plt.gca().set(
     xlabel='distance [A]', ylabel='E_ww per mol')
 plt.show()
 \end{lstlisting}
-
+\todo{While not massively important, I don't like that we call the gist object here "gist", as that's the same name as gisttools subpackage gist. "gt.gist.bla" and "gist.bla" therefore look quite similiar, but do very different things. -vah}
 The expected output of this code is shown in Figure~\ref{fig_ewwref}.
 
 \begin{figure}
@@ -581,10 +581,13 @@ The expected output of this code is shown in Figure~\ref{fig_ewwref}.
 	\caption{Convergence of $E_{ww}$ with increasing distance to the solute. The horizontal line shows the automatically computed reference energy. Computed from the complex calculation.}\label{fig_ewwref}
 \end{figure}
 
-After choosing an appropriate reference value, we need to subtract this value from Eww.
+After choosing an appropriate reference value, we need to subtract this value from E$_{ww}$.
 Make sure to subtract the reference from the normalized (\_norm) data.
 In \software{gisttools}, this is done simply by setting \inlinecode{gist.eww\_ref}.
-In \software{gistpp}, this can be done as follows: \todo{This might become invalid with future GIST versions, depending on whether we adopt the COM as molecular center.} \todo{Better use the population.}
+In \software{gistpp}, this can be done as follows: 
+\todo{Is there some official documentation for gistpp? We should probably link that somewhere, I feel that the code presented here is not really helpful/legible without further documentation. -vah}
+\todo{This might become invalid with future GIST versions, depending on whether we adopt the COM as molecular center.} 
+\todo{Better use the population.}
 
 \begin{lstlisting}
 rho0=0.03287465
@@ -607,6 +610,7 @@ In a plot like Figure~\ref{fig_ewwref} based on the \inlinecode{A\_dens} column,
 However, it is more informative to plot the cumulative free energy contribution against the distance to the solute, to check the convergence.
 It the curve flattens out, the converged value is your final $\dgsolv$\@.
 If it does not, you might need to tweak the Eww reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
+\todo{Eww or E$_{ww}$? Doesn't seem consistent so far. -vah}
 
 \begin{lstlisting}[style=python]
 import gisttools as gt
@@ -626,7 +630,7 @@ plt.plot(bins, np.cumsum(s), label="dS")
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
 In this case, both the Eww energy and the entropy are not perfectly flat, indicating that the reference value is not optimal.
 The slow energy convergence indicates that a non-optimal reference value was used, but is also complicated by the fact that a charged solute is used without neutralizing counter ions.
-
+\todo{The reader is left hanging here - what should be done about the convergence issue? Is that bad or can it be ignored? -vah}
 
 \begin{figure}
 	\centering
@@ -707,7 +711,7 @@ strept = load_gist_file('streptavidin/gist/gist.dat', \
     struct='streptavidin/gist/solute-centered.pdb')
 print(strept.n_frames, strept.rho0)
 \end{lstlisting}
-
+\todo{Maybe add more complete print calls? E.g. print('Biotin: Frames=\{biotin.n\_frames\}, Rho=\{biotin.rho0\} -vah)}
 Assign reference energies and check them for plausibility.
 \begin{lstlisting}[style=python]
 biotin.eww_ref = biotin.detect_reference_value()
@@ -719,6 +723,7 @@ print("Complex:", compl.eww_ref)
 \end{lstlisting}
 
 Subtract a reference entropy from the dTSsix columns.
+\todo{Is there actually a reason why this is not in gisttools itself implemented? -vah}
 \begin{lstlisting}[style=python]
 def reference_entropy(gf):
     if 'dTSsix_unref_norm' not in gf.data.columns:
@@ -769,7 +774,7 @@ plt.axvline(cutoff)
 plt.xlabel('distance to biotin [A]')
 plt.ylabel('dG contribution [kcal/mol]')
 \end{lstlisting}
-
+\todo{\$\textbackslash AA\$ should produce an angstrom sign in matplotlib (what a pain to have this printed out in \LaTeX\ tho) -vah}
 Compute the energy (Eall) and entropy (dTSsix) contributions separately.
 You will find that the energy is strongly unfavorable to binding, because we do not yet include the interaction energy between biotin and streptavidin.
 
@@ -795,7 +800,7 @@ avg(diff)
 It has been shown in literature \cite{Chen2021}\todo{cite Kraml-Waibl paper} that the total solvation entropy in water is best approximated by 0.6 times the first order entropy.
 Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
-
+\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah}
 \begin{table}
 	\caption{Free energy contributions for the monomers and the dimer.}\label{tab_dg_monomers_dimer}
 	\small
@@ -819,7 +824,7 @@ However, we do not take the conformational transition of the streptavidin bindin
 Prior computational studies suggest a $\Delta G$ of \SI{-26.6}{\kilo\calorie\per\mole} for the binding of biotin into the closed conformation of streptavidin \cite{Bansal2018-biotin}.
 This indicates that our result is in good agreement with literature.
 However, the conformational changes of the binding pocket would need to be described to improve the agreement with experiments.
-
+\todo{Should we include a short introduction to other solvents with GIST? What about solvent/ion mixtures? Can we somehow distinguish python code from input files optically? -vah}
 \subsection{Further steps}
 %\section{Content and links}
 %
