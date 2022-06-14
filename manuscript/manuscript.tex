@@ -76,7 +76,7 @@
 
 %%% Shortcuts and macros
 \newcommand{\dgsolv}{\Delta G_\textup{solv}}
-\newcommand{\software}{\emph}
+\newcommand{\software}{\texttt}
 \newcommand{\todo}{\textcolor{red}}
 \newcommand\inlinecode{\texttt}
 
@@ -84,7 +84,10 @@
 \renewcommand{\neq}{\setbox0\hbox{=}\rlap{\hbox to \wd0{\hss /\hss}}\box0}
 
 \lstset{
-	basicstyle=\ttfamily\footnotesize
+	basicstyle=\ttfamily\footnotesize,
+	inputencoding=utf8,
+	extendedchars=true,
+	literate={Å}{{\AA}}1
 }
 \lstdefinestyle{code}{}
 \lstdefinestyle{python}{
@@ -131,6 +134,8 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 \section{Introduction}
 \todo{ (vah) Sources and better description of all these methods, more literature research, better flow }
 
+\todo{IMO, our article looks too dry. We should have something nice (e.g., an illustration of the GIST method) on the 1st or 2nd page -fwa.}
+
 
 Solvation thermodynamics govern any process involving solutes in a solvent.
 %Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
@@ -139,41 +144,41 @@ The free energy of solvation thereby strongly influences real-world problems of 
 
 The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
 Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
-More recently, QM/MM approaches and potentials based on deep learning \cite{Smith2017-ani} are trying to bridge the gap to computationally less demanding methods while keeping the accuracy of DFT methods.
+%More recently, QM/MM approaches and potentials based on deep learning \cite{Smith2017-ani} are trying to bridge the gap to computationally less demanding methods while keeping the accuracy of DFT methods.
 
 Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
 This allows for the treatment of large biological systems such as proteins in aqueous solution.
-Implicit solvent methods such as MM/PBSA or MM/GBSA can quickly provide results for a large number of structures, but yield inaccurate results when compared to more rigorous explicit solvent methods. 
-On the other hand, the free energy of solvation can be calculated in a statistically rigorous way using explicit solvent simulations combined with alchemical methods such as free energy perturbation (FEP) or thermodynamic integration(TI).
+Implicit solvent methods such as MM/PBSA or MM/GBSA \cite{Sitkoff1994-pbsa,Kollman2000-mmpbsa} can quickly provide results for a large number of structures, but yield inaccurate results when compared to more rigorous explicit solvent methods \cite{Genheden2015-mmpbsa-review}.
+On the other hand, the free energy of solvation can be calculated in a statistically rigorous way using explicit solvent simulations combined with alchemical methods such as free energy perturbation (FEP) \cite{Zwanzig1954-reweighting} or thermodynamic integration(TI) \cite{Kirkwood1935-ti}.
 However, they are unable to provide a spatial interpretation of the results.
 Furthermore, splitting the resulting free energy into contributions for the enthalpy and entropy is challenging \cite{Peter2004-alchemical-entropy}.
 %Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
 %However, the seperation of enthalpic and entropic contributions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
 
 Methods derived from statistical mechanics bridge this gap by providing three-dimensional resolution.
-Two major groups of methods that fall into this group are those based on inhomogeneous solvation theory (IST) \cite{Lazaridis1998} and those based on the Ornstein--Zernike (OZ) equation.
-The most important example of OZ-based methods is the reference interaction site model (RISM) as well as its extension to three dimensions (3D-RISM).
-Those methods compute the 3D solvent distributions by self-consistent solution of the OZ integral equation to predict solvation thermodynamics.
+Two major groups of methods that fall into this group are those based on inhomogeneous solvation theory (IST) \cite{Lazaridis1998} and those based on the Ornstein--Zernike (OZ) equation \cite{Hansen2013-simple-liquids}.
+The most important example of OZ-based methods is the reference interaction site model (RISM) \cite{Chandler1972-rism} as well as its extension to three dimensions (3D-RISM) \cite{Kovalenko1998-3drism}.
+Those methods compute the solvent distributions by self-consistent solution of the OZ integral equation to predict solvation thermodynamics.
 %The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute structure.
 
 On the other hand, methods based on IST generally use a molecular solvent distribution obtained from an MD simulation to compute the free energy of hydration from its enthalpic and entropic contributions.
-Examples of those methods include grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012,Ramsey2016}, WaterMap, SSTMap \todo{what else?}.
-The main limitation of those methods is that they rely on an infinite expansion of the entropy in terms of the density distribution, which is truncated after the first or, sometimes, the second term.
+Examples of those methods include grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012,Ramsey2016}, WaterMap \cite{Young2007-watermap,Abel2008-watermap}, SSTMap \cite{Haider2018-sstmap}, and STOW \cite{Li2012-stow}.
+The main limitation of those methods is that they rely on an infinite expansion of the entropy in terms of the density distribution, which is truncated after the first or, sometimes, the second \cite{Nguyen2016-gist-second-order,Waibl2022-gist-solvents} term.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems.
 
 In this tutorial, GIST is applied to calculate solution thermodynamics properties of interest. 
 
 GIST is based on IST, solving the integral equations on a grid. 
 This approach is more general than other IST-based methods because it accounts for all solvent regions rather than focusing on high-occopancy solvation sites.
-By simulating the dynamics of a solvent around the solute, GIST calculates thermodynamic properties for a standard solvation process as described by Ben-Naim.
-The method allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
-It has been shown that GIST can produce comparable accuracy to TI by applying a linear correction factor (0.6 for water) to the first-order entropy as follows.
+By simulating the dynamics of a solvent around the solute, GIST calculates thermodynamic properties for a standard solvation process as described by Ben-Naim \cite{ben-naim-book}.
+It allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
+It has been shown that GIST can produce comparable accuracy to TI by applying a linear correction factor (0.6 for water) to the first-order entropy as follows \cite{Chen2021,Waibl2022-gist-solvents}:
 \begin{equation}
 S^\textit{total} = S^\textit{1st-order} \times f
 \end{equation}
 
 Recent work has improved the calculation speed tremendously, allowing for the treatment of large biological systems such as proteases or antibodies.
-Furthermore, an implementation based on the particle mesh Ewald (PME) method was presented, which improves the consistency between GIST and popular molecular dynamics engines. 
+Furthermore, an implementation based on the particle mesh Ewald (PME) \cite{Darden1993-pme} method was presented, which improves the consistency between GIST and popular molecular dynamics engines. 
 Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution. 
 
 While previous tutorials gave insightful pointers as to how to setup and run GIST calculations, the post-processing of such calculations was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address the recent improvements to the method.
@@ -188,13 +193,16 @@ While previous tutorials gave insightful pointers as to how to setup and run GIS
 
 \subsection{Scope}
 
-The tutorial provides an example of a GIST workflow that can be easily adapted towards different systems. 
-In addition to a short introduction to the method and the theory behind it, an overview of the various different flavors of GIST methods is provided.
-Towards this, a GIST study of the streptavidin-biotin complex is presented, which reflects on many common aspects of GIST studies.
-We present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
-We show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket and around the ligand. \todo{use active voice over passive.}
-The contribution of solvation free energy to binding is computed, which requires accurate post-processing of the GIST output to avoid unfavorable summation of bias in the GIST calculation.
+This tutorial provides an example of a GIST workflow that can be easily adapted towards different systems. 
+In addition to a short introduction of the method and the theory behind it, we present an overview of the various different flavors of GIST methods.
+
+Furthermore, a GIST study of the streptavidin-biotin complex is presented, which reflects on many common aspects of GIST studies.
+Using this test system, we present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
+We show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket and around the ligand.
+
+Additionally, we compute the binding contribution of the free energy of solvation, which requires accurate post-processing of the GIST outputs to avoid unfavorable summation of bias in the GIST calculation.
 We believe that this example study covers a wide range of applications of the GIST method.
+
 Furthermore, we discuss several technical aspects  and typical pitfalls of GIST analyses, such as the normalization of voxel values and how to deal with double counting of energy contributions. 
 Additionally, we provide a python library to unify the analysis of GIST data produced by various versions of GIST and make the post-processing of GIST results more accessible.
 
@@ -213,35 +221,41 @@ After completing this tutorial, we expect the reader to be able to run their own
 \subsection{Background knowledge}
 This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD) simulations.
 The user should be able to run MD simulations and work with their output data.
-Previous experience of GIST is not necessary, but the reader should be familiar with the primary sources on the method outlined in the Theory section. \todo{shouldn't a tutorial be the entry point to a new method?}
+Previous experience of GIST is not necessary.
+However, we only provide a short explanation of the theory behind GIST and point the reader towards the primary sources for more detailed information.
 
 The presented analyses are run in Python.
-A basic understanding of Python is therefore necessary to follow the tutorial. 
-A Jupyter notebook showing directly the herein presented analyses is provided as well. 
-To easily follow the analyses an understanding of working with Jupyter notebooks is therefore beneficial, though not strictly necessary.
+While no programming experience should be necessary to follow the tutorial, a basic understanding of Python is advantageous to adjust the code towards different requirements and use-cases. 
+We provide a Jupyter notebook which contains the presented analyses. 
+Therefore, an understanding of Jupyter notebooks is beneficial to reproduce the analyses.
 
 \subsection{Software/system requirements}
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
 The main implementation of GIST is part of the MD analysis software \software{cpptraj} as part of AmberTools \cite{amber22}.
 A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub.
 The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations. 
-If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}, we recommend GROMACS.
-If using GROMACS, we propose to prepare the structures and topologies using AmberTools and then converting to GROMACS using \software{acpype.py}.
-In that way, a full Amber topology is available for the GIST analysis.
+
+If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}.
+If using GROMACS, we propose to prepare the structures and topologies with AmberTools and converting them using \software{acpype.py}.
+In that way, a full Amber topology is available for GIST.
+Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation.
 
 Furthermore, a recent Python version (>3.6) should be available with the following packages.
 \begin{itemize}
 	\item \software{gisttools} (and its prerequisites)
 	\item \software{mdtraj}
 \end{itemize}
-If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations. A Jupyter notebook showing the herein presented analyses is provided as well, necessitating a current installation of Jupyter to run.
+
+We also show examples using the \software{gistpp} program, which can be obtained from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation).
+
+If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations. We also provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses.
 
 
 \section{Theory}
 GIST is an implementation of Inhomogeneous Solvation Theory (IST) \cite{Lazaridis1998} that discretizes  the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
 It was first devised by Nguyen et al. \cite{Nguyen2012} to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
 Here, we only provide a short overview of the theory behind GIST.
-For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020}\cite{Chen2021}
+For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020,Chen2021}
 
 
 \subsection{Solvation Entropy}
@@ -254,7 +268,8 @@ Here the solvation entropy is approximated from the contribution of solute-water
 \textbf{STILLNEEDS REVISON + ADD CITATIONS} The quantity $k_\textit{b}$represents the Boltzman constant, 
 $\rho^\textit{o}$ is the bulk number density, $g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
 pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
-$\omega$ is the Euler angle, and the factor $\frac{1}{8\pi^2}$ is the normalization constant. In bulk and in regions where the orientational 
+$\omega$ represents the Euler angles, and $\frac{1}{8\pi^2}$ is the volume of the orientational space, which acts as a normalization constant.
+In bulk and in regions where the orientational 
 entropy is uniform, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order solvation entropy of 
 bulk to be zero. Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
 the solvation entropy to be an approximation of the integral around the solute atom. 
@@ -333,7 +348,7 @@ Therefore, a reference energy corresponding to the average energy of a water mol
 	\Delta E_{ww}(\textbf{r}) \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}\left(\omega|\textbf{r}\right) \\
 	& \times \left[g_\textit{sw}\left(\textbf{r}^\prime , \omega^\prime \right) - g^o_\textit{ww} \left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime \right)\right] \\
 	& \times U_\textit{ww}\left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime\right)d\omega d\textbf{r}^\prime d\omega^\prime \\
-	\Delta E_{ww,k} =& \frac{1}{N_k} \left\langle \sum_i^\textit{solvent,k} \; \sum_{j \neq i}^\textit{solvent} U_{ij}\right\rangle - \left\langle E_{ww}^\textit{bulk}\right\rangle
+	\Delta E_{ww,k} =& \frac{1}{N_k} \left\langle \sum_i^{\text{solvent},k} \; \sum_{j \neq i}^\text{solvent} U_{ij}\right\rangle - \left\langle E_{ww}^\text{bulk}\right\rangle
 \end{aligned}
 \end{equation}
 
@@ -379,18 +394,18 @@ This is not a problem when computing the total free energy of solvation $\dgsolv
 In the original version of GIST, the energies are calculated based on the the minimum image convention.
 In PME-GIST, the electrostatics are calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the treatment in the Amber MD engine \cite{Chen2021}.
 The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are computed separately.
-\todo{E$_{LJ}$ seems more intuitive to me, need to check what the GIST literature is using -vah}
+\todo{E$_{LJ}$ seems more intuitive to me, need to check what the GIST literature is using -vah. They use $E_{lj}$, but LJ in the text -fwa.}
 \begin{equation}
 	E_\text{total} = E_\text{elec} + E_\text{lj}
 \end{equation}
 
-In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
+In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space using a distance cutoff, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
 Additionally, there is a correction term $E_\text{corr}$, which corrects for the self-interaction of each solvent molecule in the reciprocal term.
 
 \begin{equation}
 	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
 \end{equation}
-\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. }
+%\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. } - ok? -fwa
 The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
 
 \begin{equation}
@@ -521,7 +536,7 @@ However, this needs to be done \emph{before} the MD run, since rotating the traj
 Now, you can finally run the actual GIST analysis. Center the molecule exactly in the same way as above, to make sure that its position matches the grid parameters that you decided on.
 We recommend using either the PME or GPU implementation of GIST, depending on whether you have a fast GPU.
 A further advantage of the PME implementation is that it matches the energy calculation of the MD engine more closely.
-\todo{At the time of writing, it is important to use an up-to-date version of PME-GIST, or the Esw-Eww decomposition will not be available. Maybe remove this for the final version, when Amber22 is out.}
+
 \begin{lstlisting}
 parm solvated.parm7
 trajin md-01.nc
@@ -535,8 +550,8 @@ gist griddim 100 100 100 out gist.dat \
 \end{lstlisting}
 \subsection{Reference Values and Radial Convergence}
 All GIST quantities should be expressed relative to bulk. In practice, this is not problematic for the entropies, since they are computed relative to a distribution of randomly oriented molecules at the reference density.
-The solute-solvent energy Esw is also no problem, because it naturally tends to zero in bulk. 
-However, the solvent-solvent energy Eww needs to be referenced.
+The solute-solvent energy $E_{sw}$ is also no problem, because it naturally tends to zero in bulk. 
+However, the solvent-solvent energy $E_{ww}$ needs to be referenced.
 
 The Amber manual provides reference energies for several solvents.
 However, the exact reference value is different when using PME-GIST, and also depends on the box size.
@@ -581,7 +596,7 @@ The expected output of this code is shown in Figure~\ref{fig_ewwref}.
 	\caption{Convergence of $E_{ww}$ with increasing distance to the solute. The horizontal line shows the automatically computed reference energy. Computed from the complex calculation.}\label{fig_ewwref}
 \end{figure}
 
-After choosing an appropriate reference value, we need to subtract this value from E$_{ww}$.
+After choosing an appropriate reference value, we need to subtract this value from $E_{ww}$.
 Make sure to subtract the reference from the normalized (\_norm) data.
 In \software{gisttools}, this is done simply by setting \inlinecode{gist.eww\_ref}.
 In \software{gistpp}, this can be done as follows: 
@@ -609,8 +624,8 @@ After that, check whether your free energy contributions become negligible at hi
 In a plot like Figure~\ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
 However, it is more informative to plot the cumulative free energy contribution against the distance to the solute, to check the convergence.
 It the curve flattens out, the converged value is your final $\dgsolv$\@.
-If it does not, you might need to tweak the Eww reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
-\todo{Eww or E$_{ww}$? Doesn't seem consistent so far. -vah}
+If it does not, you might need to tweak the $E_{ww}$ reference, or introduce a reference value for the entropy (especially with older versions of \software{cpptraj}).
+% \todo{Eww or E$_{ww}$? Doesn't seem consistent so far. -vah} - let's go with all math mode $E_{ww}$ -fwa
 
 \begin{lstlisting}[style=python]
 import gisttools as gt
@@ -628,9 +643,11 @@ plt.plot(bins, np.cumsum(s), label="dS")
 \end{lstlisting}
 
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
-In this case, both the Eww energy and the entropy are not perfectly flat, indicating that the reference value is not optimal.
-The slow energy convergence indicates that a non-optimal reference value was used, but is also complicated by the fact that a charged solute is used without neutralizing counter ions.
-\todo{The reader is left hanging here - what should be done about the convergence issue? Is that bad or can it be ignored? -vah}
+Both the solvent-solvent energy and the entropy are not perfectly flat, indicating that the reference value is not optimal.
+The slow energy convergence indicates that a non-optimal reference value was used, but is also complicated by the fact that a charged solute is used.
+In this case, both the entropy and $E_{sw}$ can be considered converged around \SI{10}{\angstrom}.
+While this is not true for $E_{ww}$, we will see below that the energy difference upon binding converges more readily than its individual contributions.
+%\todo{The reader is left hanging here - what should be done about the convergence issue? Is that bad or can it be ignored? -vah} - ok? -fwa
 
 \begin{figure}
 	\centering
@@ -660,7 +677,7 @@ gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 \end{lstlisting}
 
 Visualize the free energy, the total energy, and the entropy, at several iso-levels.
-An minimal PyMOL input might look like this:
+A minimal PyMOL input might look like this:
 
 % The current font makes the O look like a tofu / placeholder
 \begin{lstlisting}
@@ -764,6 +781,7 @@ bins, compl_rdf = compl.rdf( \
 Now, subtract the monomer rdfs from the complex, and compute the integrals.
 If you also visualize the individual rdfs, you will notice that the difference converges much better with increasing radius than the contributions.
 This is because the cutoff contains regions that are close to the atom, since the integration region does not comprise the whole protein.
+
 \begin{lstlisting}[style=python]
 difference = compl_rdf - biotin_rdf - strept_rdf
 cutoff = 12
@@ -771,11 +789,11 @@ integral = difference[bins < cutoff].sum()
 print("Integral = {}".format(integral))
 plt.plot(bins, np.cumsum(difference))
 plt.axvline(cutoff)
-plt.xlabel('distance to biotin [A]')
+plt.xlabel('distance to biotin [Å]')
 plt.ylabel('dG contribution [kcal/mol]')
 \end{lstlisting}
-\todo{\$\textbackslash AA\$ should produce an angstrom sign in matplotlib (what a pain to have this printed out in \LaTeX\ tho) -vah}
-Compute the energy (Eall) and entropy (dTSsix) contributions separately.
+% \todo{\$\textbackslash AA\$ should produce an angstrom sign in matplotlib (what a pain to have this printed out in \LaTeX\ tho) -vah} -- Å produces an angstrom sign ;-)
+Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
 You will find that the energy is strongly unfavorable to binding, because we do not yet include the interaction energy between biotin and streptavidin.
 
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this energy difference.
@@ -797,11 +815,11 @@ avg(biotin[total])
 avg(diff)
 \end{lstlisting}
 
-It has been shown in literature \cite{Chen2021}\todo{cite Kraml-Waibl paper} that the total solvation entropy in water is best approximated by 0.6 times the first order entropy.
+It has been shown in literature \cite{Chen2021,Waibl2022-gist-solvents} that the total solvation entropy in water is best approximated by 0.6 times the first order entropy.
 Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
-\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah}
-\begin{table}
+%\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah. Ok? -fwa}
+\begin{table}[h]
 	\caption{Free energy contributions for the monomers and the dimer.}\label{tab_dg_monomers_dimer}
 	\small
 	\begin{tabular}{lrrrrr}
@@ -811,7 +829,8 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 		complex      & -1303.4 & -361.2 & -233.1 & -139.9 & -192.0 \\
 		streptavidin & -1180.7 & -360.8 & -242.4 & -145.4 & -188.4 \\
 		biotin       & -24.0   &  -98.1 &  -35.1 &  -21.1 & -105.4 \\
-		Diff         & -98.7   &   97.7 &   44.4 &   26.6 &  -27.6
+		Diff         & -98.7   &   97.7 &   44.4 &   26.6 &  -27.6 \\
+		\bottomrule
 	\end{tabular}
 \end{table}
 
@@ -826,10 +845,17 @@ This indicates that our result is in good agreement with literature.
 However, the conformational changes of the binding pocket would need to be described to improve the agreement with experiments.
 \todo{Should we include a short introduction to other solvents with GIST? What about solvent/ion mixtures? Can we somehow distinguish python code from input files optically? -vah}
 \subsection{Further steps}
+In this tutorial, we obtained a value for the binding of biotin into the closed conformation of the streptavidin binging pocket.
+To investigate the effect of different conformations on the binding affinity, you can perform molecular dynamics simulations of the complex and/or monomers and perform GIST on multiple cluster representatives.
+To include the effect of the lid closing transition in the binding process, free energy calculation methods such as umbrella sampling can be used.
 %\section{Content and links}
 %
 %A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
 %You will likely want to reference your GitHub repository as a central point to access all of this information, and then the GitHub repository may link out to other content as needed.
+
+\section{Recent developments}
+\subsection{GIST with non-water solvents}
+\subsection{GIST with salt-water mixtures}
 
 \section{Checklists}
 %Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
@@ -837,22 +863,35 @@ However, the conformational changes of the binding pocket would need to be descr
 %One example is shown here.
 
 % Here is a single-column checklist that consists of multiple sub-checklists
-\begin{Checklists}
+\begin{Checklists}[h]
 
 \begin{checklist}{Simulation settings}
-\end{checklist}
-
-\begin{checklist}{Obtaining absolute $\Delta G_\textup{solv}$ }
-\end{checklist}
-
-\begin{checklist}{A list}
-\textbf{Single-column checklists are also straightforward by removing the asterisk}
+\textbf{Each number denotes the minimum setting, with the optimum in brackets.}
 \begin{itemize}
-\item First thing let's do an item which breaks across lines to see how that looks
-\item Also remember
-\item And finally
+	\item Simulation time: \SIrange{10}{20}{\nano\second} (\SI{100}{\nano\second})
+	\item Number of analyzed frames: \num{10000} (\num{100000})
+	\item Restraints: typically \SI{100}{\kcalPerMolASqr} on solute heavy atoms.
 \end{itemize}
 \end{checklist}
+
+\begin{checklist}{Obtaining absolute $\Delta G_\textup{solv}$}
+\begin{itemize}
+	\item Check the radial convergence (see Fig.~\ref{fig_radial_convergence})
+	\item Choose a sufficient distance cutoff
+	\item Choose an optimal $E_{ww}$ reference value
+	\item Tweak simulation length and number of frames to obtain smooth free energy contributions and unbiased (i.e., zero) bulk entropy.
+	\item If necessary, subtract an entropy reference
+\end{itemize}
+\end{checklist}
+
+%\begin{checklist}{A list}
+%\textbf{Single-column checklists are also straightforward by removing the asterisk}
+%\begin{itemize}
+%\item First thing let's do an item which breaks across lines to see how that looks
+%\item Also remember
+%\item And finally
+%\end{itemize}
+%\end{checklist}
 %
 %\begin{checklist}{Another list}
 %\textbf{This is some further description.}
