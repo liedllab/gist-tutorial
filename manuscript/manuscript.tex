@@ -139,7 +139,7 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 
 Solvation thermodynamics govern any process involving solutes in a solvent.
 %Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
-Especially the interaction with water is of utmost importance, as many biological processes occur in a aquaeous environment. 
+Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
 The free energy of solvation thereby strongly influences real-world problems of interest such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
 
 The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
@@ -170,16 +170,17 @@ In this tutorial, GIST is applied to calculate solution thermodynamics propertie
 
 GIST is based on IST, solving the integral equations on a grid. 
 This approach is more general than other IST-based methods because it accounts for all solvent regions rather than focusing on high-occopancy solvation sites.
-By simulating the dynamics of a solvent around the solute, GIST calculates thermodynamic properties for a standard solvation process as described by Ben-Naim \cite{ben-naim-book}.
-It allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
-It has been shown that GIST can produce comparable accuracy to TI by applying a linear correction factor (0.6 for water) to the first-order entropy as follows \cite{Chen2021,Waibl2022-gist-solvents}:
-\begin{equation}
-S^\textit{total} = S^\textit{1st-order} \times f
-\end{equation}
+%By simulating the dynamics of a solvent around the solute, GIST calculates thermodynamic properties for a standard solvation process as described by Ben-Naim \cite{ben-naim-book}.
+It estimates the solvent density from a molecular dynamics (MD) trajectory and allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
+It has been shown that GIST can produce comparable accuracy to TI by approximating the higher-order entropies as a fraction of the first-order entropy (using a factor of \SI{-0.4} for water) \cite{Chen2021,Waibl2022-gist-solvents}.
+%applying a linear correction factor (0.6 for water) to the first-order entropy as follows \cite{Chen2021,Waibl2022-gist-solvents}:
+%\begin{equation}
+%S^\textit{total} = S^\textit{1st-order} \times f
+%\end{equation}
 
 Recent work has improved the calculation speed tremendously, allowing for the treatment of large biological systems such as proteases or antibodies.
 Furthermore, an implementation based on the particle mesh Ewald (PME) \cite{Darden1993-pme} method was presented, which improves the consistency between GIST and popular molecular dynamics engines. 
-Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution. 
+Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution.
 
 While previous tutorials gave insightful pointers as to how to setup and run GIST calculations, the post-processing of such calculations was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address the recent improvements to the method.
 
@@ -233,8 +234,8 @@ Therefore, an understanding of Jupyter notebooks is beneficial to reproduce the 
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
 The main implementation of GIST is part of the MD analysis software \software{cpptraj} as part of AmberTools \cite{amber22}.
 A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub.
-The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations. 
 
+The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations.
 If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}.
 If using GROMACS, we propose to prepare the structures and topologies with AmberTools and converting them using \software{acpype.py}.
 In that way, a full Amber topology is available for GIST.
@@ -252,28 +253,38 @@ If the reader prefers to skip the MD and GIST calculation, we also provide the G
 
 
 \section{Theory}
-GIST is an implementation of Inhomogeneous Solvation Theory (IST) \cite{Lazaridis1998} that discretizes  the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
-It was first devised by Nguyen et al. \cite{Nguyen2012} to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
+GIST is an implementation of inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998} that discretizes the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
+It was first devised by Nguyen et al. \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described by Ramsey et al. \cite{Ramsey2016}. % to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
 Here, we only provide a short overview of the theory behind GIST.
 For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020,Chen2021}
 
 
 \subsection{Solvation Entropy}
-The solvation entropy of a system is totality of the contribution of the  solute-water entropy and the water-water entropy. 
+%The solvation entropy of a system is totality of the contribution of the  solute-water entropy and the water-water entropy. -- this is inconsistent with IST theory (fwa)
 
-\begin{equation}
-	\Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
-\end{equation}
-Here the solvation entropy is approximated from the contribution of solute-water interaction. 
-\textbf{STILLNEEDS REVISON + ADD CITATIONS} The quantity $k_\textit{b}$represents the Boltzman constant, 
-$\rho^\textit{o}$ is the bulk number density, $g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
-pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
-$\omega$ represents the Euler angles, and $\frac{1}{8\pi^2}$ is the volume of the orientational space, which acts as a normalization constant.
-In bulk and in regions where the orientational 
-entropy is uniform, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order solvation entropy of 
-bulk to be zero. Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
-the solvation entropy to be an approximation of the integral around the solute atom. 
+%\begin{equation}
+%	\Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
+%\end{equation}
+%Here the solvation entropy is approximated from the contribution of solute-water interaction. 
+%\textbf{STILLNEEDS REVISON + ADD CITATIONS} The quantity $k_\textit{b}$represents the Boltzman constant, 
+IST expresses the free energy of solvation in terms of the solvent density in a coordinate system defined by the solute.
+The solute is kept fixed in space, following the standard solvation process established by Ben-Naim \cite{ben-naim-book}.
 
+For the entropy, this leads to an infinite expansion of correlations of increasing order.
+In a slightly simplified view, the first order is the solvent density $g_\textit{sw}\left(\textbf{r},\omega \right)$ at each position $\textbf{r}$ and orientation $\omega$.
+The first-order entropy omits all solvent-solvent (and higher) correlations, while the solute-solvent correlation is taken into account because the coordinates are relative to the solute.
+Thus, it is called the solute-water entropy $S_{sw}$.
+%The second order is the pair density, i.e., the probability of finding two solvent molecules in positions $\textbf{r}$ and $\textbf{r}^\prime$.
+
+The solvent density is expressed relative to the bulk density $\rho^\textit{o}$. %$g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
+%pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
+%$\omega$ represents the Euler angles, and 
+The entropy integral is also normalized by $8\pi^2$, which is the volume of the orientational space.
+In bulk or at a high distance to the solute, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order entropy of 
+bulk to be zero. 
+Therefore, no reference entropy needs to be computed unless there is a numeric bias, e.g., when the MD frames are not statistically independent due to insufficient spacing.
+%Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
+%the solvation entropy to be an approximation of the integral around the solute atom. 
 \begin{equation}
 	\Delta S_\textit{solv}
 	\approx \Delta S_\textit{sw}
@@ -290,29 +301,33 @@ The solvation entropy is further broken down in terms of the contribution from t
 \subsection{Entropy Calculations in Cpptraj}
 In \software{cpptraj} the calculation of  solvation entropy is handled into two methods.
 
-The first method assumes that the position ($r$) is independent of the orientation ($\omega$). This approximation allows for the 
-splitting of the contributions of the translational and the orientational entropy. The nearest neighbor (NN) approach is used to 
-evaluate each expression where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is the Euler's constant 
-that accounts for the bias in naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate. In the nearest neighbor
-estimate, a voxel is considered to be a neighboring voxel when it shares any vertices of the voxel of interest. 
-\begin{equation}
-	g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox} \left( \textbf{r})g_\textit{vox}\omega \right)
-\end{equation}
+The first method assumes that the distribution of the orientation $\omega$ is constant within a voxel $k$.
+This allows for the splitting of the contributions of the translational and the orientational entropy. 
+A first nearest neighbor (NN) approach is used to evaluate the density.
+%The translational density $g_{NN}(\textbf{r})$ is expressed in reference to a homogeneous bulk solvent at the reference density, while the orientational density $g_{NN}(\omega)$ is expressed to a random placement of the number of solvents found in this voxel.
+Both the translational ($g_{NN}(\textbf{r})$) and orientational ($g_{NN}(\omega)$) density are computed relative to a bulk solvent at the reference density $\rho^0$.
 
+The average entropy contributions per solvent molecule in voxel $k$ are calculated as
 \begin{equation}
-	S_{k}^\textit{trans} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r} \right) + \gamma \right)
+	S_{k}^\textit{trans} = -R \left( \gamma + \frac{1}{N_\textit{k}} \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}}(\textbf{r}) \right)
 \end{equation}
-
-
+and
 \begin{equation}
-	S_{k}^\textit{orient} \approx \frac{-R}{N_k} \left( \sum _{i=1}^{N_k} \ln g_{NN, i} ( \omega ) + \gamma \right)
+	S_{k}^\textit{orient} = -R \left( \gamma + \frac{1}{N_k} \sum _{i=1}^{N_k} \ln g_{NN, i}(\omega) \right)
+	,
 \end{equation}
+where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is Euler's constant that accounts for the bias in naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate.
 
 The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation) 
-using the nearest-neighbor approach. Unlike the first method, the nearest neighbor estimate for the sixth-order entropy considers all the water 
-found within the same and neighboring voxels.  
+using the nearest-neighbor approach. 
+% Unlike the first method, the nearest neighbor estimate for the sixth-order entropy considers all the water found within the same and neighboring voxels. -- misleading because this is also done for S_trans (fwa)
+
 \begin{equation}
-	S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r}, \omega \right) + \gamma \right)
+g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox}(\textbf{r}) g_\textit{vox}(\omega)
+\end{equation}
+
+\begin{equation}
+	S_\textit{k} = -R \left( \gamma + \frac{1}{N_\textit{k}} \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}}(\textbf{r},\omega) \right)
 \end{equation}
 
 
@@ -345,9 +360,9 @@ Therefore, a reference energy corresponding to the average energy of a water mol
 
 \begin{equation}
 \begin{aligned}
-	\Delta E_{ww}(\textbf{r}) \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}\left(\omega|\textbf{r}\right) \\
-	& \times \left[g_\textit{sw}\left(\textbf{r}^\prime , \omega^\prime \right) - g^o_\textit{ww} \left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime \right)\right] \\
-	& \times U_\textit{ww}\left(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime\right)d\omega d\textbf{r}^\prime d\omega^\prime \\
+	\Delta E_{ww}(\textbf{r}) \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}(\omega|\textbf{r}) \\
+	& \times \left[g_\textit{sw}(\textbf{r}^\prime , \omega^\prime) - g^o_\textit{ww} (\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime )\right] \\
+	& \times U_\textit{ww}(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime)d\omega d\textbf{r}^\prime d\omega^\prime \\
 	\Delta E_{ww,k} =& \frac{1}{N_k} \left\langle \sum_i^{\text{solvent},k} \; \sum_{j \neq i}^\text{solvent} U_{ij}\right\rangle - \left\langle E_{ww}^\text{bulk}\right\rangle
 \end{aligned}
 \end{equation}
@@ -871,6 +886,14 @@ To include the effect of the lid closing transition in the binding process, free
 	\item Simulation time: \SIrange{10}{20}{\nano\second} (\SI{100}{\nano\second})
 	\item Number of analyzed frames: \num{10000} (\num{100000})
 	\item Restraints: typically \SI{100}{\kcalPerMolASqr} on solute heavy atoms.
+\end{itemize}
+\end{checklist}
+
+\begin{checklist}{Choosing an energy method}
+\begin{itemize}
+	\item GPU, direct space: generally the fastest
+	\item CPU, PME: highly consistent with Amber MD, fast
+	\item CPU: slow, most general (can write out $E_{ij}$ matrices)
 \end{itemize}
 \end{checklist}
 
