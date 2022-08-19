@@ -1,0 +1,291 @@
+\begin{thebibliography}{30}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\urlprefix}{}
+\providecommand{\doiprefix}{https://doi.org/}
+
+\bibitem[{Sitkoff et~al.(1994)Sitkoff, Doree and Sharp, Kim A and Honig,
+  Barry}]{Sitkoff1994-pbsa}
+\textbf{\color{LiveCoMSMediumGrey} Sitkoff D}, Sharp KA, Honig B.
+\newblock Accurate calculation of hydration free energies using macroscopic
+  solvent models.
+\newblock J Phys Chem.  1994; 98(7):1978--1988.
+\newblock \href{https://doi.org/10.1021/j100058a043}{\doiprefix
+  \detokenize{10.1021/j100058a043}}.
+
+\bibitem[{Kollman et~al.(2000)Kollman, P A and Massova, I and Reyes, C and
+  Kuhn, B and Huo, S and Chong, L and Lee, M and Lee, T and Duan, Y and Wang, W
+  and Donini, O and Cieplak, P and Srinivasan, J and Case, D A and Cheatham,
+  3rd, T E}]{Kollman2000-mmpbsa}
+\textbf{\color{LiveCoMSMediumGrey} Kollman PA}, Massova I, Reyes C, Kuhn B, Huo
+  S, Chong L, Lee M, Lee T, Duan Y, Wang W, Donini O, Cieplak P, Srinivasan J,
+  Case DA, Cheatham TE 3rd.
+\newblock Calculating structures and free energies of complex molecules:
+  combining molecular mechanics and continuum models.
+\newblock Acc Chem Res.  2000; 33(12):889--897.
+\newblock \href{https://doi.org/10.1021/ar000033j}{\doiprefix
+  \detokenize{10.1021/ar000033j}}.
+
+\bibitem[{Genheden and Ryde(2015)Genheden, Samuel and Ryde,
+  Ulf}]{Genheden2015-mmpbsa-review}
+\textbf{\color{LiveCoMSMediumGrey} Genheden S}, Ryde U.
+\newblock The {MM/PBSA} and {MM/GBSA} methods to estimate ligand-binding
+  affinities.
+\newblock Expert Opin Drug Discov.  2015; 10(5):449--461.
+\newblock \href{https://doi.org/10.1517/17460441.2015.1032936}{\doiprefix
+  \detokenize{10.1517/17460441.2015.1032936}}.
+
+\bibitem[{Zwanzig(1954)Zwanzig, Robert W}]{Zwanzig1954-reweighting}
+\textbf{\color{LiveCoMSMediumGrey} Zwanzig RW}.
+\newblock High-temperature equation of state by a perturbation method. I.
+  nonpolar gases.
+\newblock J Chem Phys.  1954; 22(8):1420--1426.
+\newblock \href{https://doi.org/10.1063/1.1740409}{\doiprefix
+  \detokenize{10.1063/1.1740409}}.
+
+\bibitem[{Kirkwood(1935)Kirkwood, J. G.}]{Kirkwood1935-ti}
+\textbf{\color{LiveCoMSMediumGrey} Kirkwood JG}.
+\newblock Statistical mechanics of fluid mixtures.
+\newblock Journal of Chemical Physics.  1935; 3(5):300--313.
+\newblock \href{https://doi.org/10.1063/1.1749657}{\doiprefix
+  \detokenize{10.1063/1.1749657}}.
+
+\bibitem[{Peter et~al.(2004)Peter, Christine and Oostenbrink, Chris and van
+  Dorp, Arthur and van Gunsteren, Wilfred F}]{Peter2004-alchemical-entropy}
+\textbf{\color{LiveCoMSMediumGrey} Peter C}, Oostenbrink C, van Dorp A, van
+  Gunsteren WF.
+\newblock Estimating entropies from molecular dynamics simulations.
+\newblock J Chem Phys.  2004; 120(6):2652--2661.
+
+\bibitem[{Lazaridis(1998)Lazaridis, T.}]{Lazaridis1998}
+\textbf{\color{LiveCoMSMediumGrey} Lazaridis T}.
+\newblock Inhomogeneous fluid approach to solvation thermodynamics. 1. Theory.
+\newblock Journal of Physical Chemistry B.  1998; 102(18):3531--3541.
+\newblock \href{https://doi.org/DOI 10.1021/jp9723574}{\doiprefix
+  \detokenize{DOI 10.1021/jp9723574}}.
+
+\bibitem[{Hansen and McDonald(2013)Hansen, Jean-Pierre and McDonald, I
+  R}]{Hansen2013-simple-liquids}
+\textbf{\color{LiveCoMSMediumGrey} Hansen JP}, McDonald IR.
+\newblock Theory of simple liquids.
+\newblock 4 ed. San Diego, CA: Academic Press; 2013.
+
+\bibitem[{Chandler and Andersen(1972)Chandler, David and Andersen, Hans
+  C}]{Chandler1972-rism}
+\textbf{\color{LiveCoMSMediumGrey} Chandler D}, Andersen HC.
+\newblock Optimized cluster expansions for classical fluids. {II}. Theory of
+  molecular liquids.
+\newblock J Chem Phys.  1972; 57(5):1930--1937.
+\newblock \href{https://doi.org/10.1063/1.1678513}{\doiprefix
+  \detokenize{10.1063/1.1678513}}.
+
+\bibitem[{Kovalenko and Hirata(1998)Kovalenko, Andriy and Hirata,
+  Fumio}]{Kovalenko1998-3drism}
+\textbf{\color{LiveCoMSMediumGrey} Kovalenko A}, Hirata F.
+\newblock Three-dimensional density profiles of water in contact with a solute
+  of arbitrary shape: a {RISM} approach.
+\newblock Chemical Physics Letters.  1998; 290(1-3):237--244.
+\newblock \href{https://doi.org/10.1016/S0009-2614(98)00471-0}{\doiprefix
+  \detokenize{10.1016/S0009-2614(98)00471-0}}.
+
+\bibitem[{Nguyen et~al.(2012)Nguyen, C. N. and Young, T. K. and Gilson, M.
+  K.}]{Nguyen2012}
+\textbf{\color{LiveCoMSMediumGrey} Nguyen CN}, Young TK, Gilson MK.
+\newblock Grid inhomogeneous solvation theory: Hydration structure and
+  thermodynamics of the miniature receptor cucurbit[7]uril.
+\newblock Journal of Chemical Physics.  2012; 137(4):044101.
+\newblock \href{https://doi.org/10.1063/1.4733951}{\doiprefix
+  \detokenize{10.1063/1.4733951}}.
+
+\bibitem[{Ramsey et~al.(2016)Ramsey, S. and Nguyen, C. and Salomon-Ferrer, R.
+  and Walker, R. C. and Gilson, M. K. and Kurtzman, T.}]{Ramsey2016}
+\textbf{\color{LiveCoMSMediumGrey} Ramsey S}, Nguyen C, Salomon-Ferrer R,
+  Walker RC, Gilson MK, Kurtzman T.
+\newblock Solvation thermodynamic mapping of molecular surfaces in AmberTools:
+  GIST.
+\newblock Journal of Computational Chemistry.  2016; 37(21):2029--2037.
+\newblock \href{https://doi.org/10.1002/jcc.24417}{\doiprefix
+  \detokenize{10.1002/jcc.24417}}.
+
+\bibitem[{Young et~al.(2007)Young, Tom and Abel, Robert and Kim, Byungchan and
+  Berne, Bruce J. and Friesner, Richard A.}]{Young2007-watermap}
+\textbf{\color{LiveCoMSMediumGrey} Young T}, Abel R, Kim B, Berne BJ, Friesner
+  RA.
+\newblock Motifs for molecular recognition exploiting hydrophobic enclosure in
+  protein–ligand binding.
+\newblock Proceedings of the National Academy of Sciences.  2007;
+  104(3):808--813.
+\newblock \href{https://doi.org/10.1073/pnas.0610202104}{\doiprefix
+  \detokenize{10.1073/pnas.0610202104}}.
+
+\bibitem[{Abel et~al.(2008)Abel, Robert and Young, Tom and Farid, Ramy and
+  Berne, Bruce J and Friesner, Richard A}]{Abel2008-watermap}
+\textbf{\color{LiveCoMSMediumGrey} Abel R}, Young T, Farid R, Berne BJ,
+  Friesner RA.
+\newblock Role of the active-site solvent in the thermodynamics of factor Xa
+  ligand binding.
+\newblock J Am Chem Soc.  2008; 130(9):2817--2831.
+\newblock \href{https://doi.org/10.1021/ja0771033}{\doiprefix
+  \detokenize{10.1021/ja0771033}}.
+
+\bibitem[{Haider et~al.(2018)Haider, Kamran and Cruz, Anthony and Ramsey,
+  Steven and Gilson, Michael K and Kurtzman, Tom}]{Haider2018-sstmap}
+\textbf{\color{LiveCoMSMediumGrey} Haider K}, Cruz A, Ramsey S, Gilson MK,
+  Kurtzman T.
+\newblock Solvation structure and thermodynamic mapping ({SSTMap}): An
+  open-source, flexible package for the analysis of water in molecular dynamics
+  trajectories.
+\newblock J Chem Theory Comput.  2018; 14(1):418--425.
+\newblock \href{https://doi.org/10.1021/acs.jctc.7b00592}{\doiprefix
+  \detokenize{10.1021/acs.jctc.7b00592}}.
+
+\bibitem[{Li and Lazaridis(2012)Li, Zheng and Lazaridis, Themis}]{Li2012-stow}
+\textbf{\color{LiveCoMSMediumGrey} Li Z}, Lazaridis T.
+\newblock Computing the thermodynamic contributions of interfacial water.
+\newblock Methods Mol Biol.  2012; 819:393--404.
+\newblock \href{https://doi.org/10.1007/978-1-61779-465-0_24}{\doiprefix
+  \detokenize{10.1007/978-1-61779-465-0_24}}.
+
+\bibitem[{Nguyen et~al.(2016)Nguyen, Crystal N and Kurtzman, Tom and Gilson,
+  Michael K}]{Nguyen2016-gist-second-order}
+\textbf{\color{LiveCoMSMediumGrey} Nguyen CN}, Kurtzman T, Gilson MK.
+\newblock Spatial decomposition of translational water-water correlation
+  entropy in binding pockets.
+\newblock J Chem Theory Comput.  2016; 12(1):414--429.
+\newblock \href{https://doi.org/10.1021/acs.jctc.5b00939}{\doiprefix
+  \detokenize{10.1021/acs.jctc.5b00939}}.
+
+\bibitem[{Waibl et~al.(2022)Waibl, Franz and Kraml, Johannes and Hoerschinger,
+  Valentin J and Hofer, Florian and Kamenik, Anna S and Fern{\'a}ndez-Quintero,
+  Monica L and Liedl, Klaus R}]{Waibl2022-gist-solvents}
+\textbf{\color{LiveCoMSMediumGrey} Waibl F}, Kraml J, Hoerschinger VJ, Hofer F,
+  Kamenik AS, Fern{\'a}ndez-Quintero ML, Liedl KR.
+\newblock Grid inhomogeneous solvation theory for cross-solvation in rigid
+  solvents.
+\newblock J Chem Phys.  2022; 156(20):204101.
+\newblock \href{https://doi.org/10.1063/5.0087549}{\doiprefix
+  \detokenize{10.1063/5.0087549}}.
+
+\bibitem[{Ben-Naim(2013)Ben-Naim, Arieh}]{ben-naim-book}
+\textbf{\color{LiveCoMSMediumGrey} Ben-Naim A}.
+\newblock Solvation Thermodynamics.
+\newblock New York, NY: Springer; 2013.
+\newblock \href{https://doi.org/10.1007/978-1-4757-6550-2}{\doiprefix
+  \detokenize{10.1007/978-1-4757-6550-2}}.
+
+\bibitem[{Chen et~al.(2021)Chen, Lieyang and Cruz, Anthony and Roe, Daniel R.
+  and Simmonett, Andrew C. and Wickstrom, Lauren and Deng, Nanjie and Kurtzman,
+  Tom}]{Chen2021}
+\textbf{\color{LiveCoMSMediumGrey} Chen L}, Cruz A, Roe DR, Simmonett AC,
+  Wickstrom L, Deng N, Kurtzman T.
+\newblock Thermodynamic Decomposition of Solvation Free Energies with Particle
+  Mesh Ewald and Long-Range Lennard-Jones Interactions in Grid Inhomogeneous
+  Solvation Theory.
+\newblock Journal of Chemical Theory and Computation.  2021; 17(5):2714--2724.
+\newblock \href{https://doi.org/10.1021/acs.jctc.0c01185}{\doiprefix
+  \detokenize{10.1021/acs.jctc.0c01185}}.
+
+\bibitem[{Darden et~al.(1993)Darden, Tom and York, Darrin and Pedersen,
+  Lee}]{Darden1993-pme}
+\textbf{\color{LiveCoMSMediumGrey} Darden T}, York D, Pedersen L.
+\newblock Particle mesh Ewald: An {N$\cdot$log(N)} method for Ewald sums in
+  large systems.
+\newblock J Chem Phys.  1993; 98(12):10089--10092.
+\newblock \href{https://doi.org/10.1063/1.464397}{\doiprefix
+  \detokenize{10.1063/1.464397}}.
+
+\bibitem[{Case et~al.(2022)Case, D.A. and Aktulga, H.M. and Belfon, K. and
+  Ben-Shalom, I.Y. and Berryman, J.T. and Brozell, S.R. and Cerutti, D.S. and
+  Cheatham, T.E. III and Cisneros, G.A. and Cruzeiro, V.W.D. and Darden, T.A.
+  and Duke, R.E. and Giambasu, G. and Gilson, M.K. and Gohlke, H. and Goetz,
+  A.W. and Harris, R. and Izadi, S. and Izmailov, S.A. and Kasavajhala, K. and
+  Kaymak, M.C. and King, E. and Kovalenko, A. and Kurtzman, T. and Lee, T.S.
+  and LeGrand, S. and Li, P. and Lin, C. and Liu, J. and Luchko, T. and Luo, R.
+  and Machado, M. and Man, V. and Manathunga, M. and Merz, K.M. and Miao, Y.
+  and Mikhailovskii, O. and Monard, G. and Nguyen, H. and O'Hearn, K.A. and
+  Onufriev, A. and Pan, F. and Pantano, S. and Qi, R. and Rahnamoun, A. and
+  Roe, D.R. and Roitberg, A. and Sagui, C. and Schott-Verdugo, S. and Shajan,
+  A. and Shen, J. and Simmerling, C.L. and Skrynnikov, N.R. and Smith, J. and
+  Swails, J. and Walker, R.C. and Wang, J and Wang, J. and Wei, H. and Wolf,
+  R.M. and Wu, X. and Xiong, Y. and Xue, Y. and York, D.M. and Zhao, S. and
+  Kollman, P.A.}]{amber22}
+\textbf{\color{LiveCoMSMediumGrey} Case DA}, Aktulga HM, Belfon K, Ben-Shalom
+  IY, Berryman JT, Brozell SR, Cerutti DS, Cheatham TEI, Cisneros GA, Cruzeiro
+  VWD, Darden TA, Duke RE, Giambasu G, Gilson MK, Gohlke H, Goetz AW, Harris R,
+  Izadi S, Izmailov SA, Kasavajhala K, et~al., Amber 2022.
+\newblock University of California, San Francisco; 2022.
+
+\bibitem[{Kluyver et~al.(2016)Kluyver, Thomas and Ragan-Kelley, Benjamin and
+  P{\'e}rez, Benjamin and Granger, Brian and Bussonnier, Matthias and Frederic,
+  Jonathan and Kelley, Kyle and Hamrick, Jessica and Grout, Jason and Corlay,
+  Sylvain and Ivanov, Paul and Avila, Dami{\'a}n and Abdalla, Safia and
+  Willing, Carol and {Jupyter Development Team}}]{Kluyver2016-jupyter}
+\textbf{\color{LiveCoMSMediumGrey} Kluyver T}, Ragan-Kelley B, P{\'e}rez B,
+  Granger B, Bussonnier M, Frederic J, Kelley K, Hamrick J, Grout J, Corlay S,
+  Ivanov P, Avila D, Abdalla S, Willing C, {Jupyter Development Team}.
+\newblock Jupyter Notebooks---a publishing format for reproducible
+  computational workflows.
+\newblock In: Loizides F, Schmidt B, editors. \emph{Positioning and Power in
+  Academic Publishing: Players, Agents and Agendas} IOS Press BV; 2016. p.
+  87--90.
+\newblock \href{https://doi.org/10.3233/978-1-61499-649-1-87}{\doiprefix
+  \detokenize{10.3233/978-1-61499-649-1-87}}.
+
+\bibitem[{Granger and Perez(2021)Granger, Brian E and Perez,
+  Fernando}]{Granger2021-jupyter}
+\textbf{\color{LiveCoMSMediumGrey} Granger BE}, Perez F.
+\newblock Jupyter: Thinking and storytelling with code and data.
+\newblock Comput Sci Eng.  2021; 23(2):7--14.
+\newblock \href{https://doi.org/10.1109/MCSE.2021.3059263}{\doiprefix
+  \detokenize{10.1109/MCSE.2021.3059263}}.
+
+\bibitem[{Schrodinger(2015)Schrodinger, LLC}]{pymol}
+\textbf{\color{LiveCoMSMediumGrey} Schrodinger L}.
+\newblock The PyMOL Molecular Graphics System, Version 1.8; 2015.
+
+\bibitem[{Humphrey et~al.(1996)Humphrey, William and Dalke, Andrew and
+  Schulten, Klaus}]{vmd}
+\textbf{\color{LiveCoMSMediumGrey} Humphrey W}, Dalke A, Schulten K.
+\newblock {VMD} -- {V}isual {M}olecular {D}ynamics.
+\newblock Journal of Molecular Graphics.  1996; 14:33--38.
+
+\bibitem[{Kraml et~al.(2020)Kraml, Johannes and Hofer, Florian and Kamenik,
+  Anna S. and Waibl, Franz and Kahler, Ursula and Schauperl, Michael and Liedl,
+  Klaus R.}]{Kraml2020}
+\textbf{\color{LiveCoMSMediumGrey} Kraml J}, Hofer F, Kamenik AS, Waibl F,
+  Kahler U, Schauperl M, Liedl KR.
+\newblock Solvation Thermodynamics in Different Solvents: Water–Chloroform
+  Partition Coefficients from Grid Inhomogeneous Solvation Theory.
+\newblock Journal of Chemical Information and Modeling.  2020;
+  60(8):3843--3853.
+\newblock \href{https://doi.org/10.1021/acs.jcim.0c00289}{\doiprefix
+  \detokenize{10.1021/acs.jcim.0c00289}}.
+
+\bibitem[{Mpye et~al.(2020)Mpye, K. L. and Gildenhuys, S. and Mosebi,
+  S.}]{mpye2020-biotin-itc}
+\textbf{\color{LiveCoMSMediumGrey} Mpye KL}, Gildenhuys S, Mosebi S.
+\newblock The effects of temperature on streptavidin-biotin binding using
+  affinity isothermal titration calorimetry.
+\newblock Aims Biophysics.  2020; 7(4):236--247.
+\newblock \href{https://doi.org/10.3934/biophy.2020018}{\doiprefix
+  \detokenize{10.3934/biophy.2020018}}.
+
+\bibitem[{Hyre et~al.(2006)Hyre, D. E. and Le Trong, I. and Merritt, E. A. and
+  Eccleston, J. F. and Green, N. M. and Stenkamp, R. E. and Stayton, P.
+  S.}]{hyre2006-biotin-itc}
+\textbf{\color{LiveCoMSMediumGrey} Hyre DE}, Le~Trong I, Merritt EA, Eccleston
+  JF, Green NM, Stenkamp RE, Stayton PS.
+\newblock Cooperative hydrogen bond interactions in the streptavidin-biotin
+  system.
+\newblock Protein Science.  2006; 15(3):459--467.
+\newblock \href{https://doi.org/10.1110/ps.051970306}{\doiprefix
+  \detokenize{10.1110/ps.051970306}}.
+
+\bibitem[{Bansal et~al.(2018)Bansal, Nupur and Zheng, Zheng and Song, Lin Frank
+  and Pei, Jun and Merz, Jr, Kenneth M}]{Bansal2018-biotin}
+\textbf{\color{LiveCoMSMediumGrey} Bansal N}, Zheng Z, Song LF, Pei J, Merz KM
+  Jr.
+\newblock The role of the active site flap in streptavidin/biotin complex
+  formation.
+\newblock J Am Chem Soc.  2018; 140(16):5434--5446.
+
+\end{thebibliography}
