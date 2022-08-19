@@ -232,34 +232,38 @@ Therefore, an understanding of Jupyter notebooks is beneficial to reproduce the 
 \subsection{Software/system requirements}
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
 The main implementation of GIST is part of the MD analysis software \software{cpptraj} as part of AmberTools \cite{amber22}.
-A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub.
+A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations. 
 
 If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}.
 If using GROMACS, we propose to prepare the structures and topologies with AmberTools and converting them using \software{acpype.py}.
-In that way, a full Amber topology is available for GIST.
+In that way, a full Amber topology is available for GIST. 
+\todo{ (vah) is it necessary to mention GROMACS specifically? I would remove the previous two lines}
 Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation.
 
 Furthermore, a recent Python version (>3.6) should be available with the following packages.
 \begin{itemize}
-	\item \software{gisttools} (and its prerequisites)
-	\item \software{mdtraj}
+	\item \software{gisttools} (\url{https://github.com/liedllab/gisttools})
+	\item \software{mdtraj (\url{https://www.mdtraj.org/})}
 \end{itemize}
 
 We also show examples using the \software{gistpp} program, which can be obtained from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation).
 
-If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations. We also provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses.
+If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
+We also provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
+We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
 
-
+For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files.
+We recommend using a current version of \software{PyMol}\cite{pymol} or \software{VMD}\cite{vmd}.
 \section{Theory}
 GIST is an implementation of Inhomogeneous Solvation Theory (IST) \cite{Lazaridis1998} that discretizes  the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
-It was first devised by Nguyen et al. \cite{Nguyen2012} to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
+It was first devised by Nguyen et al. \cite{Nguyen2012} to overcome the limitation of IST which was commonly used for regions of high water occupancy. 
+Its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
 Here, we only provide a short overview of the theory behind GIST.
 For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020,Chen2021}
 
-
 \subsection{Solvation Entropy}
-The solvation entropy of a system is totality of the contribution of the  solute-water entropy and the water-water entropy. 
+The solvation entropy of a system is totality of the contribution of the solute-water entropy and the water-water entropy. 
 
 \begin{equation}
 	\Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
@@ -278,9 +282,9 @@ the solvation entropy to be an approximation of the integral around the solute a
 	\Delta S_\textit{solv}
 	\approx \Delta S_\textit{sw}
 	\newcommand{\gro}{g_{sw}(\textbf{r},\omega)}
-	\equiv -k_\textit{B} \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int \gro \ln\gro d\textbf{r}d\omega
+	\equiv -R \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int \gro \ln\gro d\textbf{r}d\omega
 \end{equation}
-\todo{We are inconsistent regarding R/kB}
+\todo{We are inconsistent regarding R/kB; vah: Fixed. is it - tho? Papers seem to disagre }
 
 The solvation entropy is further broken down in terms of the contribution from translational and orientational terms.
 \begin{equation}
@@ -295,12 +299,13 @@ splitting of the contributions of the translational and the orientational entrop
 evaluate each expression where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is the Euler's constant 
 that accounts for the bias in naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate. In the nearest neighbor
 estimate, a voxel is considered to be a neighboring voxel when it shares any vertices of the voxel of interest. 
+\todo{ vah: Is gamma divided by Nk or not? The formula in Franz' recent paper indicates otherwise.}
 \begin{equation}
 	g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox} \left( \textbf{r})g_\textit{vox}\omega \right)
 \end{equation}
 
 \begin{equation}
-	S_{k}^\textit{trans} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r} \right) + \gamma \right)
+	S_{k}^\textit{trans} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}} \left( \textbf{r} \right) + \gamma \right)
 \end{equation}
 
 
@@ -312,7 +317,7 @@ The second method directly calculates the solvation entropy by evaluating the si
 using the nearest-neighbor approach. Unlike the first method, the nearest neighbor estimate for the sixth-order entropy considers all the water 
 found within the same and neighboring voxels.  
 \begin{equation}
-	S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} ln g_{NN, \textit{i}} \left( \textbf{r}, \omega \right) + \gamma \right)
+	S_\textit{k} \approx \frac{-R}{N_\textit{k}} \left( \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}} \left( \textbf{r}, \omega \right) + \gamma \right)
 \end{equation}
 
 
@@ -409,7 +414,7 @@ Additionally, there is a correction term $E_\text{corr}$, which corrects for the
 The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
 
 \begin{equation}
-	E_\textit{lj} = E_\textit{lj\_short} +  E_\textit{corr}
+	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{corr}
 \end{equation}
 
 \section{Tutorial}
@@ -453,7 +458,7 @@ strip ^2 parmout streptavidin/solvated.parm7
 trajout streptavidin/pre-equil.ncrst
 \end{lstlisting}
 (Adapt for biotin as necessary.)
-
+\todo{vah: Maybe include a section on how to prepare a protein structure before equilibration. Protonation, force field and a large enough iso solvation box seem important to me. I will probably also at least mention what simulation settings we are running later on.}
 %We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
 
 Use the \software{equilibration.py} script (or your own) to perform short NVT and NpT equilibration runs on the starting structure.
@@ -647,7 +652,7 @@ Both the solvent-solvent energy and the entropy are not perfectly flat, indicati
 The slow energy convergence indicates that a non-optimal reference value was used, but is also complicated by the fact that a charged solute is used.
 In this case, both the entropy and $E_{sw}$ can be considered converged around \SI{10}{\angstrom}.
 While this is not true for $E_{ww}$, we will see below that the energy difference upon binding converges more readily than its individual contributions.
-%\todo{The reader is left hanging here - what should be done about the convergence issue? Is that bad or can it be ignored? -vah} - ok? -fwa
+\todo{vah: Is that shown somewhere yet?}
 
 \begin{figure}
 	\centering
