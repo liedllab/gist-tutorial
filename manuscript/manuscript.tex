@@ -452,6 +452,9 @@ The Lennard-Jones contribution is computed in the direct space, using a distance
 	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{corr}
 \end{equation}
 
+\section{Running GIST}
+\todo{We could put the examples for how to run GIST, how to visualize a dx file, how to create more dx files, etc., here and move them out. The actual tutorial could be only the streptavidin/biotin thing, and could be shortened a lot if we move the example inputs here.}
+
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
 \begin{enumerate}
@@ -570,14 +573,16 @@ python FindCentroid.py -i structure.pdb
 \end{lstlisting}
 
 \paragraph{Run GIST using cpptraj}
-\todo{GIST is incorporated in cpptraj which requires the topology and the trajectory of the MD simulation to be analayzed. The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic comands are:}
+GIST is incorporated in cpptraj which requires the topology and the trajectory of the MD simulation to be analayzed. The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic comands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
 
-\todo{parm topology.prmtop}
-\todo{trajin trajectory.nc 1 10000}
-\todo{gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 gridspacn 0.50 out gist.dat}
-\todo{go}
+\begin{lstlisting}
+parm topology.prmtop
+trajin trajectory.nc
+gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 gridspacn 0.50 out gist.dat
+go
+\end{lstlisting}
 
-\todo{The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file and what frames to be analyzed. In the above example, GIST will be run from frame 1 to 10000. The third line tells cpptraj to run a GIST calculation using the region defined and print the output of the calculation in a file called gist.dat. The last instructs cpptraj to run the calculation. The syntax for running cpptraj given this input file is:}
+The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file and what frames to be analyzed. The third line tells cpptraj to run a GIST calculation using the region defined and print the output of the calculation in a file called gist.dat. The last instructs cpptraj to run the calculation. The syntax for running cpptraj given this input file is:
 
 \begin{lstlisting}
 cpptraj -i gist.in
@@ -607,22 +612,37 @@ Cppraj outputs the quantities calculated in a data explorer "DX" file format whi
 Aside from the thermodynamic quantities, GIST also calculates the number densitiies of hydrogen and oxygen in each voxel. Here is a full list of quantities calculated by GIST \todo{This is incomplete!}:
 
 \begin{itemize}
-	\item{[gO] Number density of oxygen centers found in the voxel, in units of the bulk density.}
-	\item{[gH] Number density of hydrogen centers found in the voxel in units of the reference bulk density.}
+	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. For water, gO and gH are produced.}
+	%\item{[gH] Number density of hydrogen centers found in the voxel in units of the reference bulk density.}
 	\item{[Esw] Mean solute-water interaction energy density.}
 	\item{[Eww] Mean water-water interaction energy density.}
+	\item{[PME] (only if PME was used) water PME energy density.}
 	\item{[dTStrans] First order translational entropy density.}
 	\item{[dTSorient] First order orientational entropy density .}
 	\item{[neighbor] Mean number of waters neighboring the water molecules found in this voxel multiplied by the voxel number density.}
 	\item{[dipole] Magnitude of mean dipole moment (polarization).}
-	\item{[order] Average Tetrahedral Order Parameter.}
+	\item{[order] (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter.}
 	\item{[dipolex] x-component of the mean water dipole moment density}
 	\item{[dipoley] y-component of the mean water dipole moment density}
 	\item{[dipolez] z-component of the mean water dipole moment density}
-	\item{[Eij] Water-water interaction matrix.}
+	\item{[Eij] (if \inlinecode{doeij} was specified) Water-water interaction matrix.}
 \end{itemize}
 
-\todo{There are default dx files that will be written as an output, such as the dx files for energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above is written in the output file (output.dat) and can be used to generate DX files for other quantities.}
+Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above is written in the output file (output.dat) and can be used to generate DX files for other quantities.
+
+A minimal PyMOL input to visualize a dx file is shown here.
+For reference, an input structure is loaded from a file named \inlinecode{solute.pdb} (assuming that this file exists).
+The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
+
+% The current font makes the O look like a tofu / placeholder
+\begin{lstlisting}
+load solute.pdb
+as surface
+load gist-gO.dx, gO
+isosurface gO_high, gO, 2.
+\end{lstlisting}
+
+\todo{Should be put a picture here?}
 
 \subsection{Running the GIST analysis for Streptavidin-Biotin Complex}
 For easier post-processing, we will use grids that contain the whole molecule.
@@ -636,7 +656,7 @@ autoimage !(:WAT) origin
 strip :WAT
 trajout solute-centered.pdb
 \end{lstlisting}
-Then, find the extent (minimum and maximum) of the x-, y-, and z-coordinates for each system.
+Then, find the extent (minimum and maximum) of the x-, \mbox{y-,} and z-coordinates for each system.
 This can be done e.g., using the \software{mdtraj} package in Python.
 \begin{lstlisting}[style=python]
 import mdtraj as md
@@ -799,16 +819,6 @@ gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 \end{lstlisting}
 
 Visualize the free energy, the total energy, and the entropy, at several iso-levels.
-A minimal PyMOL input might look like this:
-
-% The current font makes the O look like a tofu / placeholder
-\begin{lstlisting}
-load solute-centered.pdb
-show sticks, resname BTN
-as surface, not resname BTN
-load gist-gO.dx, gO
-isosurface gO_high, gO, 2.
-\end{lstlisting}
 
 Adapt the above PyMOL script to visualize the average energy per solvent at a positive and a negative isolevel, as well as regions of negative entropy per solvent.
 The expected representation of the streptavidin binding pocket is shown in Figure~\ref{fig_binding_pocket_pymol}.
