@@ -454,6 +454,12 @@ The Lennard-Jones contribution is computed in the direct space, using a distance
 
 \section{Running GIST}
 %\subsection{Running the GIST analysis}
+To run a gist analyis, the following is required:
+\begin{itemize}
+	\item A running installation of \software{cpptraj}.
+	\item A topology of the molecule of interest in a solvent box.
+	\item An MD trajectory of that system.
+\end{itemize}
 GIST analysis can be divided in three steps: defining a region of interest, running GIST using \software{cpptraj}, and post-processing and analysis.
 \cite{Ramsey2016}
 
@@ -550,14 +556,22 @@ isosurface gO_high, gO, 2.
 \todo{Should be put a picture here?}
 
 \section{Tutorial}
-Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
+Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
+In the process, the reader will learn how to set up and run a GIST calculation.
+During the tutorial, we will
 \begin{enumerate}
 	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
 	\item visualize local contributions to $\dgsolv$ in the streptavidin binding pocket as well as around biotin.
 \end{enumerate}
-\todo{include: learn how to setup ad run a gist calculation}
 
 \subsection{Streptavidin/Biotin}
+The streptavidin-biotin complex is one of the strongest known non-covalent interactions involving a small molecule.
+Therefore, the combination of streptavidin and biotin is used routinely in biotechnology, and the interaction between them has been investigated in detail \todo{CITE}\cite{}.
+
+In nature, streptavidin occurs as a tetramer, and binds biotin with a binding constant of \todo{???}.
+Here, we will investigate the binding of biotin to a streptavidin monomer for simplicity.
+This interaction has been reported to have a binding constant of \todo{???}.
+
 \subsection{Tutorial data}
 We will use the 1STP crystal structure to start our calculations.
 For the sake of simplicity, you can download prepared and solvated Amber topologies and structures based on 1STP by running
