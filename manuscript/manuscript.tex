@@ -453,7 +453,101 @@ The Lennard-Jones contribution is computed in the direct space, using a distance
 \end{equation}
 
 \section{Running GIST}
-\todo{We could put the examples for how to run GIST, how to visualize a dx file, how to create more dx files, etc., here and move them out. The actual tutorial could be only the streptavidin/biotin thing, and could be shortened a lot if we move the example inputs here.}
+%\subsection{Running the GIST analysis}
+GIST analysis can be divided in three steps: defining a region of interest, running GIST using \software{cpptraj}, and post-processing and analysis.
+\cite{Ramsey2016}
+
+\paragraph{Identify and define the region of interest}
+In order to run a GIST analysis, the region where the solvent properties will be calculated must be first defined. This region is represented by a rectangular prism centered at (x, y, z) with $N_x \times N_y \times N_z$ voxels, where each voxel is cubic with a sidelength of \inlinecode{gridspacn}.
+While integrals over GIST quantities are independent of the voxel size, individual voxel values converge slower at high resolutions.\pdfcomment{The calculation actually can actually get faster at higher resolution, because the same grid is used in the nearest-neighbor search.}
+A default value of 0.5 A is used that provides reasonable discretization for many use-cases.
+
+In \software{ccptraj}, the rectangular prism is defined by parameters of the \inlinecode{gist} command.
+The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of the grid is defined by \inlinecode{griddim}, and the spacing is defined by \inlinecode{gridspacn}.
+
+\begin{lstlisting}
+gist gridcntr <x> <y> <z> \
+griddim <Nx> <Ny> <Nz> gridspacn <val>
+\end{lstlisting}
+
+
+The region can be defined using a ligand in a specific binding pocket of the protein, a specific residue of the protein, or the whole protein itself. A helper script FindCentroid.py \todo{(upload FindCentroid.py!)} can be used to determine the centroid of the region of interest as well as the dimensions of the rectangular prism that will fully enclose the region. A pdb file is needed as an input and the rectangular prism will be centered based on the centroid of the given structure.
+
+\begin{lstlisting}
+python FindCentroid.py -i structure.pdb
+\end{lstlisting}
+
+\paragraph{Run GIST using cpptraj}
+GIST is incorporated in cpptraj which requires the topology and the trajectory of the MD simulation to be analayzed. The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic comands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
+
+\begin{lstlisting}
+parm topology.prmtop
+trajin trajectory.nc
+gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 gridspacn 0.50 out gist.dat
+go
+\end{lstlisting}
+
+The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file and what frames to be analyzed. The third line tells cpptraj to run a GIST calculation using the region defined and print the output of the calculation in a file called gist.dat. The last instructs cpptraj to run the calculation. The syntax for running cpptraj given this input file is:
+
+\begin{lstlisting}
+cpptraj -i gist.in
+\end{lstlisting}
+
+\pdfcomment{Franz: I removed the list because it is very long and not complete. We can add it to the lists at the end, but then it should be complete.}
+%\todo{Aside from the commands defining the region of interest, there are other options available to specify the GIST analysis. Here is the full list that can be added to the third line of the input file:} 
+%\begin{itemize}
+%	\item{[doorder] Calculate the water order parameter [reference] for each voxel.}
+%	\item{[doeij] Calculate the triangular matrix representing the water-water interactions between pairs of voxels (see below).}
+%	\item{[skipE] Skip all energy calculations (cannot be specified with ’doeij’).}
+%	\item{[skipS Skip all the entropy calculations.]}
+%	\item{[refdens rdval>] Reference density of bulk water, used in computing $g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/Å3.}
+%	\item{[temp <tval>] Temperature of the input trajectory.}
+%	\item{[noimage] Disable distance imaging in energy calculation.}
+%	\item{[gridcntr <xval> <yval> <zval>] Coordinates (Å) of the center of the grid (default 0.0, 0.0, 0.0).}
+%	\item{[griddim <xval> <yval> <zval>] Grid dimensions along each coordinate axis (default 40, 40, 40).}
+%	\item{[gridspacn <spaceval>] Grid spacing (linear dimension of each voxel) in Angstroms. Values greater than 0.75 Å are not recommended (default 0.5 Å).}
+%	\item{[prefix <filename prefix>] Output file name prefix (default “gist”).}
+%	\item{[ext <grid extension>] Output grid file name extension (default “.dx”).}
+%	\item{[out <output>] Name of the main GIST output file. If not specified set to ’<prefix>-output.dat’.}
+%	\item{[info <info>] Name of main GIST info file. If not specified info is written to standard output.}
+%\end{itemize}
+
+\paragraph{Postprocessing and Analyzing GIST results}
+Cppraj outputs the quantities calculated in a data explorer "DX" file format which can be easily visualized in Pymol or VMD.
+Aside from the thermodynamic quantities, GIST also calculates the number densitiies of hydrogen and oxygen in each voxel. Here is a full list of quantities calculated by GIST \todo{This is incomplete!}:
+
+\begin{itemize}
+	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. For water, gO and gH are produced.}
+	%\item{[gH] Number density of hydrogen centers found in the voxel in units of the reference bulk density.}
+	\item{[Esw] Mean solute-water interaction energy density.}
+	\item{[Eww] Mean water-water interaction energy density.}
+	\item{[PME] (only if PME was used) water PME energy density.}
+	\item{[dTStrans] First order translational entropy density.}
+	\item{[dTSorient] First order orientational entropy density .}
+	\item{[neighbor] Mean number of waters neighboring the water molecules found in this voxel multiplied by the voxel number density.}
+	\item{[dipole] Magnitude of mean dipole moment (polarization).}
+	\item{[order] (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter.}
+	\item{[dipolex] x-component of the mean water dipole moment density}
+	\item{[dipoley] y-component of the mean water dipole moment density}
+	\item{[dipolez] z-component of the mean water dipole moment density}
+	\item{[Eij] (if \inlinecode{doeij} was specified) Water-water interaction matrix.}
+\end{itemize}
+
+Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above is written in the output file (output.dat) and can be used to generate DX files for other quantities.
+
+A minimal PyMOL input to visualize a dx file is shown here.
+For reference, an input structure is loaded from a file named \inlinecode{solute.pdb} (assuming that this file exists).
+The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
+
+% The current font makes the O look like a tofu / placeholder
+\begin{lstlisting}
+load solute.pdb
+as surface
+load gist-gO.dx, gO
+isosurface gO_high, gO, 2.
+\end{lstlisting}
+
+\todo{Should be put a picture here?}
 
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex. The goal is to
@@ -548,101 +642,6 @@ pmemd.cuda \
 	-ref EQUIL-DONE.rst
 \end{lstlisting}
 
-\subsection{Running the GIST analysis}
-GIST analysis can be divided in three steps: defining a region of interest, running GIST using \software{cpptraj}, and post-processing and analysis.
-\cite{Ramsey2016}
-
-\paragraph{Identify and define the region of interest}
-In order to run a GIST analysis, the region where the solvent properties will be calculated must be first defined. This region is represented by a rectangular prism centered at (x, y, z) with $N_x \times N_y \times N_z$ voxels, where each voxel is cubic with a sidelength of \inlinecode{gridspacn}.
-While integrals over GIST quantities are independent of the voxel size, individual voxel values converge slower at high resolutions.\pdfcomment{The calculation actually can actually get faster at higher resolution, because the same grid is used in the nearest-neighbor search.}
-A default value of 0.5 A is used that provides reasonable discretization for many use-cases.
-
-In \software{ccptraj}, the rectangular prism is defined by parameters of the \inlinecode{gist} command.
-The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of the grid is defined by \inlinecode{griddim}, and the spacing is defined by \inlinecode{gridspacn}.
-
-\begin{lstlisting}
-gist gridcntr <x> <y> <z> \
-     griddim <Nx> <Ny> <Nz> gridspacn <val>
-\end{lstlisting}
-
-
-The region can be defined using a ligand in a specific binding pocket of the protein, a specific residue of the protein, or the whole protein itself. A helper script FindCentroid.py \todo{(upload FindCentroid.py!)} can be used to determine the centroid of the region of interest as well as the dimensions of the rectangular prism that will fully enclose the region. A pdb file is needed as an input and the rectangular prism will be centered based on the centroid of the given structure.
-
-\begin{lstlisting}
-python FindCentroid.py -i structure.pdb
-\end{lstlisting}
-
-\paragraph{Run GIST using cpptraj}
-GIST is incorporated in cpptraj which requires the topology and the trajectory of the MD simulation to be analayzed. The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic comands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
-
-\begin{lstlisting}
-parm topology.prmtop
-trajin trajectory.nc
-gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 gridspacn 0.50 out gist.dat
-go
-\end{lstlisting}
-
-The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file and what frames to be analyzed. The third line tells cpptraj to run a GIST calculation using the region defined and print the output of the calculation in a file called gist.dat. The last instructs cpptraj to run the calculation. The syntax for running cpptraj given this input file is:
-
-\begin{lstlisting}
-cpptraj -i gist.in
-\end{lstlisting}
-	
-\pdfcomment{Franz: I removed the list because it is very long and not complete. We can add it to the lists at the end, but then it should be complete.}
-%\todo{Aside from the commands defining the region of interest, there are other options available to specify the GIST analysis. Here is the full list that can be added to the third line of the input file:} 
-%\begin{itemize}
-%	\item{[doorder] Calculate the water order parameter [reference] for each voxel.}
-%	\item{[doeij] Calculate the triangular matrix representing the water-water interactions between pairs of voxels (see below).}
-%	\item{[skipE] Skip all energy calculations (cannot be specified with ’doeij’).}
-%	\item{[skipS Skip all the entropy calculations.]}
-%	\item{[refdens rdval>] Reference density of bulk water, used in computing $g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/Å3.}
-%	\item{[temp <tval>] Temperature of the input trajectory.}
-%	\item{[noimage] Disable distance imaging in energy calculation.}
-%	\item{[gridcntr <xval> <yval> <zval>] Coordinates (Å) of the center of the grid (default 0.0, 0.0, 0.0).}
-%	\item{[griddim <xval> <yval> <zval>] Grid dimensions along each coordinate axis (default 40, 40, 40).}
-%	\item{[gridspacn <spaceval>] Grid spacing (linear dimension of each voxel) in Angstroms. Values greater than 0.75 Å are not recommended (default 0.5 Å).}
-%	\item{[prefix <filename prefix>] Output file name prefix (default “gist”).}
-%	\item{[ext <grid extension>] Output grid file name extension (default “.dx”).}
-%	\item{[out <output>] Name of the main GIST output file. If not specified set to ’<prefix>-output.dat’.}
-%	\item{[info <info>] Name of main GIST info file. If not specified info is written to standard output.}
-%\end{itemize}
-
-\paragraph{Postprocessing and Analyzing GIST results}
-Cppraj outputs the quantities calculated in a data explorer "DX" file format which can be easily visualized in Pymol or VMD.
-Aside from the thermodynamic quantities, GIST also calculates the number densitiies of hydrogen and oxygen in each voxel. Here is a full list of quantities calculated by GIST \todo{This is incomplete!}:
-
-\begin{itemize}
-	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. For water, gO and gH are produced.}
-	%\item{[gH] Number density of hydrogen centers found in the voxel in units of the reference bulk density.}
-	\item{[Esw] Mean solute-water interaction energy density.}
-	\item{[Eww] Mean water-water interaction energy density.}
-	\item{[PME] (only if PME was used) water PME energy density.}
-	\item{[dTStrans] First order translational entropy density.}
-	\item{[dTSorient] First order orientational entropy density .}
-	\item{[neighbor] Mean number of waters neighboring the water molecules found in this voxel multiplied by the voxel number density.}
-	\item{[dipole] Magnitude of mean dipole moment (polarization).}
-	\item{[order] (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter.}
-	\item{[dipolex] x-component of the mean water dipole moment density}
-	\item{[dipoley] y-component of the mean water dipole moment density}
-	\item{[dipolez] z-component of the mean water dipole moment density}
-	\item{[Eij] (if \inlinecode{doeij} was specified) Water-water interaction matrix.}
-\end{itemize}
-
-Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above is written in the output file (output.dat) and can be used to generate DX files for other quantities.
-
-A minimal PyMOL input to visualize a dx file is shown here.
-For reference, an input structure is loaded from a file named \inlinecode{solute.pdb} (assuming that this file exists).
-The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
-
-% The current font makes the O look like a tofu / placeholder
-\begin{lstlisting}
-load solute.pdb
-as surface
-load gist-gO.dx, gO
-isosurface gO_high, gO, 2.
-\end{lstlisting}
-
-\todo{Should be put a picture here?}
 
 \subsection{Running the GIST analysis for Streptavidin-Biotin Complex}
 For easier post-processing, we will use grids that contain the whole molecule.
