@@ -113,12 +113,12 @@
 \maketitle
 
 \begin{abstract}
-Grid inhomogeneous solvation theory (GIST) is a method to compute the free energy of hydration of a compound on a 3-dimensional grid.
+Grid inhomogeneous solvation theory (GIST) is a method to compute the free energy of solvation of a compound on a 3-dimensional grid based on molecular dynamics (MD) simulations.
 The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses on both proteins and small molecules. However, this versatility also comes with a higher entry barrier for new users.
 
 In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis at the example of the streptavidin-biotin complex.
 Furthermore, we discuss the theory of GIST with a focus on practical aspects, and show several pitfalls and technical difficulties that may occur during a GIST study.
-We assume familiarity with molecular dynamics (MD) simulations as well as the AmberTools package.
+We assume familiarity with molecular dynamics simulations as well as the AmberTools package.
 
 %This particular document provides a skeleton illustrating key sections for a Tutorial document.
 %Please see the sample \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates} for additional information on and examples of using the LiveCoMS LaTeX class.
@@ -135,7 +135,7 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 
 
 \section{Introduction}
-\todo{ (vah) Sources and better description of all these methods, more literature research, better flow }
+\todo{ (vah) Sources and better description of all these methods, more literature research, QSAR based methods? better flow }
 
 \todo{IMO, our article looks too dry. We should have something nice (e.g., an illustration of the GIST method) on the 1st or 2nd page -fwa.}
 
@@ -143,7 +143,7 @@ We assume familiarity with molecular dynamics (MD) simulations as well as the Am
 Solvation thermodynamics govern any process involving solutes in a solvent.
 %Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
 Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
-The free energy of solvation thereby strongly influences real-world problems of interest such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
+The free energy of solvation thereby strongly influences real-world problems such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
 
 The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
 Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
@@ -169,7 +169,7 @@ Examples of those methods include grid inhomogeneous solvation theory (GIST) \ci
 The main limitation of those methods is that they rely on an infinite expansion of the entropy in terms of the density distribution, which is truncated after the first or, sometimes, the second \cite{Nguyen2016-gist-second-order,Waibl2022-gist-solvents} term.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems.
 
-In this tutorial, GIST is applied to calculate solution thermodynamics properties of interest. 
+In this tutorial, we aim to give the reader an introduction into GIST and its application to calculate solution thermodynamics properties of interest. 
 
 GIST is based on IST, solving the integral equations on a grid. 
 This approach is more general than other IST-based methods because it accounts for all solvent regions rather than focusing on high-occopancy solvation sites.
@@ -183,9 +183,9 @@ It has been shown that GIST can produce comparable accuracy to TI by approximati
 
 Recent work has improved the calculation speed tremendously, allowing for the treatment of large biological systems such as proteases or antibodies.
 Furthermore, an implementation based on the particle mesh Ewald (PME) \cite{Darden1993-pme} method was presented, which improves the consistency between GIST and popular molecular dynamics engines. 
-Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution.
+Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution.\todo{Sources!}
 
-While previous tutorials gave insightful pointers as to how to setup and run GIST calculations, the post-processing of such calculations was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address the recent improvements to the method.
+While previous tutorials gave insightful pointers how to setup and run GIST calculations, their post-processing was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address recent improvements to the method as well as provide a basic template for the analysis and interpretation of GIST calculations.
 
 %Here you would explain what problem you are tackling and briefly motivate your work.
 %
@@ -237,7 +237,7 @@ Therefore, an understanding of Jupyter notebooks is beneficial to reproduce the 
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
 The main implementation of GIST is part of the MD analysis software \software{cpptraj} as part of AmberTools \cite{amber22}.
 
-A recent version of \software{cpptraj} should be used, such as the one in AmberTools22 or an installation from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
+A recent version of \software{cpptraj} should be used, such as the one provided in AmberTools22 or a recent installation from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations. 
 
 
@@ -246,12 +246,12 @@ If no Amber installation is available, the MD can be performed other simulation 
 If using GROMACS, we propose to prepare the structures and topologies with AmberTools and converting them using \software{acpype.py}.
 
 \todo {If the simulation was ran using GROMACS, mdtraj can be used to convert GROMACS topology and trajectory in to an Amber file format.}
-\todo {vah: I would remove this mention of GROMACs and replace it with a more generall comment. Or we could test if this actually works...}
+\todo {vah: I would remove this mention of GROMACs and replace it with a more general comment. Or we could test if this actually works ( I doubt it does for ff19SB/OPC).}
 In that way, a full Amber topology is available for GIST.
 
-Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation.
+Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation due to the loss of precision for the atom positions.
 
-Furthermore, a recent Python version (>3.6) should be available with the following packages.
+Furthermore, a recent Python version (>3.6) should be available with the following packages installed:
 \begin{itemize}
 	\item \software{gisttools} (\url{https://github.com/liedllab/gisttools})
 	\item \software{mdtraj (\url{https://www.mdtraj.org/})}
@@ -260,7 +260,7 @@ Furthermore, a recent Python version (>3.6) should be available with the followi
 We also show examples using the \software{gistpp} program, which can be obtained from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation).
 
 If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
-We also provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
+We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
 We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
 
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files.
@@ -270,7 +270,7 @@ We recommend using a current version of \software{PyMol}\cite{pymol} or \softwar
 GIST is an implementation of inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998} that discretizes the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
 It was first devised by Nguyen et al. \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described by Ramsey et al. \cite{Ramsey2016}. % to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
 Here, we only provide a short overview of the theory behind GIST.
-For more detailed information, we recommend one of the more recent publications on developments in GIST. \cite{Kraml2020,Chen2021}
+For more detailed information, we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021}.
 
 \subsection{Solvation Entropy}
 
@@ -322,7 +322,7 @@ The solvation entropy is further broken down in terms of the contribution from t
 \end{equation}
 
 \subsection{Entropy Calculations in Cpptraj}
-In \software{cpptraj} the calculation of  solvation entropy is handled into two methods.
+In \software{cpptraj} the calculation of  solvation entropy is handled by two methods.
 
 
 The first method assumes that the distribution of the orientation $\omega$ is constant within a voxel $k$.
@@ -341,7 +341,7 @@ and
 	S_{k}^\textit{orient} = -R \left( \gamma + \frac{1}{N_k} \sum _{i=1}^{N_k} \ln g_{NN, i}(\omega) \right)
 	,
 \end{equation}
-where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is Euler's constant that accounts for the bias in naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate.
+where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is Euler's constant accounting for the bias of the naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate.
 
 The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation) 
 using the nearest-neighbor approach. 
@@ -357,7 +357,7 @@ g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox}(\textbf{
 
 
 \subsection{Solvation Energy}
-The solvation energy is readily calculated by summing up the contributions of the water-water interaction and the water-solute interaction.
+The solvation energy is readily calculated by summing up the contributions of the water-water interaction and the water-solute interaction from the force field.
 \begin{equation}
 	\Delta E_\textit{solv} = \Delta E_\textit{sw} + \Delta E_\textit{ww}
 \end{equation}
@@ -404,13 +404,13 @@ Therefore, a reference energy corresponding to the average energy of a water mol
 %\end{equation}
 
 When computing the total $E_{ww}$ of the system, double-counting of interactions must be avoided.
-The total solvent-solvent energy of the system is as follows.
+The total solvent-solvent energy of the system is as follows:
 
 \begin{equation}
 \Delta E_{ww} = \int \frac{\Delta E_{ww}(\textbf{r})}{2} d\textbf{r}
 \end{equation}
 
-When water is replaced from a small region $R$ of interest, such as a single water molecule, almost all interactions are with water molecules outside of this region.
+However, when water is replaced from a small region $R$ of interest, such as a single water molecule, almost all interactions are with water molecules outside of this region.
 Therefore, there is no double counting, and the full solvent-solvent energy should be used.
 
 \begin{equation}
@@ -425,7 +425,7 @@ We note that replacement of a small or medium solvent region would lead to reorg
 However, this depends on the local environment and on \emph{what} the molecule would be replaced by.
 Therefore, the effect of reorganization can not be directly included in the GIST method, but must be judged for each case individually.
 This is not a problem when computing the total free energy of solvation $\dgsolv$, since no additional boundary is created.
-\todo{Do we need this paragraph?}
+\todo{This is a bit unclear to me, could we elaborate on this a bit more? What are we asking of the reader here, how would one consider this effect? -vah}
 
 
 
@@ -451,6 +451,7 @@ The Lennard-Jones contribution is computed in the direct space, using a distance
 \begin{equation}
 	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{corr}
 \end{equation}
+\todo{Is $E_{corr}$ the same in eq 13 and 14? How is it calculated? -vah}
 
 \section{Running GIST}
 %\subsection{Running the GIST analysis}
@@ -489,7 +490,8 @@ GIST is incorporated in cpptraj which requires the topology and the trajectory o
 \begin{lstlisting}
 parm topology.prmtop
 trajin trajectory.nc
-gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 gridspacn 0.50 out gist.dat
+gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 \
+	gridspacn 0.50 out gist.dat
 go
 \end{lstlisting}
 
@@ -519,7 +521,7 @@ cpptraj -i gist.in
 %\end{itemize}
 
 \paragraph{Postprocessing and Analyzing GIST results}
-Cppraj outputs the quantities calculated in a data explorer "DX" file format which can be easily visualized in Pymol or VMD.
+Cppraj outputs the quantities calculated in a data explorer "OpenDX" (.dx) file format which can be easily visualized in Pymol or VMD.
 Aside from the thermodynamic quantities, GIST also calculates the number densitiies of hydrogen and oxygen in each voxel. Here is a full list of quantities calculated by GIST \todo{This is incomplete!}:
 
 \begin{itemize}
@@ -539,9 +541,9 @@ Aside from the thermodynamic quantities, GIST also calculates the number densiti
 	\item{[Eij] (if \inlinecode{doeij} was specified) Water-water interaction matrix.}
 \end{itemize}
 
-Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above is written in the output file (output.dat) and can be used to generate DX files for other quantities.
+Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above are written to the output file (output.dat) and can be used to generate DX files for other quantities.
 
-A minimal PyMOL input to visualize a dx file is shown here.
+A minimal PyMOL input to visualize a .dx file is shown here.
 For reference, an input structure is loaded from a file named \inlinecode{solute.pdb} (assuming that this file exists).
 The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
 
@@ -553,7 +555,7 @@ load gist-gO.dx, gO
 isosurface gO_high, gO, 2.
 \end{lstlisting}
 
-\todo{Should be put a picture here?}
+\todo{Should be put a picture here? | Yeah, I am in favour -vah}
 
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
@@ -612,7 +614,7 @@ Use the \software{equilibration.py} script (or your own) to perform short NVT an
 \todo {NPT}
 Note that the barostat might interfere with restrained equilibration of the complex, since different molecules are moved relative to each other when the volume changes.
 But since our equilibration script also contains unrestrained pressure equilibration, we should not run into any trouble.
-
+\todo{Should we mention more sophisticated choices of structure here, eg clustering? Just taking the "equilibrated" structure is kinda random. -vah}
 Then split the equilibrated structure into biotin and streptavidin parts using \software{cpptraj\_remove\_mol.sh}.
 After that, you can use \software{equilibration.py -R} to run short restrained equilibrations (where only the water is allowed to move) on the individual systems.
 
@@ -681,16 +683,16 @@ max = pdb.xyz[0].max(0) * 10.
 print(*list(zip("xyz", min, max)), sep="\n")
 \end{lstlisting}
 Then, decide on grid dimensions for every system.
-For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{7}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+7)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
-\todo{this does not work with the default gisttools values for the automatic detection of the energy reference. Better use a larger value. }
+For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{15}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+15)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
+\todo{this does not work with the default gisttools values for the automatic detection of the energy reference. Better use a larger value. | changed from 7 to 15 -vah }
 We note that this centered grid is usually larger than it needs to be in some directions.
 If you want to save some extra memory and calculation time, feel free to align the grid more precisely to the minimum and maximum coordinates, or use a smaller grid that only covers the binding pocket.
 You can also rotate the molecule by its principal axes to fit the cuboid grid more exactly.
 However, this needs to be done \emph{before} the MD run, since rotating the trajectory damages the periodic box information.
 
 Now, you can finally run the actual GIST analysis. Center the molecule exactly in the same way as above, to make sure that its position matches the grid parameters that you decided on.
-We recommend using either the PME or GPU implementation of GIST, depending on whether you have a fast GPU.
-A further advantage of the PME implementation is that it matches the energy calculation of the MD engine more closely.
+We recommend using either the PME or GPU implementation of GIST, depending on whether you have a fast GPU. To use the GPU version of GIST, cpptraj needs to be compiled with the "-cuda" flag set.
+While the GPU version is generally faster, an advantage of the PME implementation is that it matches the energy calculation of the MD engine more closely.
 
 \begin{lstlisting}
 parm solvated.parm7
@@ -712,7 +714,7 @@ The Amber manual provides reference energies for several solvents.
 However, the exact reference value is different when using PME-GIST, and also depends on the box size.
 For exact analyses such as computing the total $\dgsolv$ of a compound, it is important to compute an exact reference energy.
 
-The most accurate method to compute a reference energy is to run a separate GIST calculations with the same energy method (PME/GPU) and a similar box size, and then compute the average solvent-solvent energy per molecule.
+The most accurate method to compute a reference energy is to run a separate GIST calculations of the solvent without solute using the same energy method (PME/GPU) and a similar box size, and then compute the average solvent-solvent energy per molecule.
 
 \begin{equation}
 \label{eq_ewwref}
@@ -964,8 +966,9 @@ It has been shown in literature \cite{Chen2021,Waibl2022-gist-solvents} that the
 Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 %\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah. Ok? -fwa}
+\todo{this table is super confusing to me. What's "total"? Doesn't seem to be E-TS. Diff is also not the sum of other total entries. Shouldn't it be TS instead of S?-vah}
 \begin{table}[h]
-	\caption{Free energy contributions for the monomers and the dimer.}\label{tab_dg_monomers_dimer}
+	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$.}\label{tab_dg_monomers_dimer}
 	\small
 	\begin{tabular}{lrrrrr}
 		\toprule
