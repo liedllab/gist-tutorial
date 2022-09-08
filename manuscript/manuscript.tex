@@ -403,29 +403,24 @@ Therefore, a reference energy corresponding to the average energy of a water mol
 %	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
 %\end{equation}
 
-When computing the total $E_{ww}$ of the system, double-counting of interactions must be avoided.
-The total solvent-solvent energy of the system is as follows.
+When calculating the total $E_{ww}$ of the system, double-counting of interactions must be avoided. For a given region $\bold{R}$, the contribution
+from the interaction of  water molecules outside $\bold{R}$ with the water molecules inside $\bold{R}$ is accounter for in $E_{ww}$. This means that
+the sum of $E_{ww}$ of two different regions, $\bold{R_1}$  and $\bold{R_2}$, taken from the same simulation box will not be equal 
+to the union of $E_{ww}$ of the two regions due to double-counting. 
+
+Double-counting is accounted in two different ways. The first method uses the water-displacement method. This method is applicable when determining the energetic cost of kicking out a water molecule. For example, when a ligand binds to the protein, water molecules will be displaced from the binding pocket to
+the bulk. 
 
 \begin{equation}
-\Delta E_{ww} = \int \frac{\Delta E_{ww}(\textbf{r})}{2} d\textbf{r}
+	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
 \end{equation}
 
-When water is replaced from a small region $R$ of interest, such as a single water molecule, almost all interactions are with water molecules outside of this region.
-Therefore, there is no double counting, and the full solvent-solvent energy should be used.
+The second method uses normalized water properties to account the difference in water properties of two different regions. 
+The normalized water property is defined as the water property per water molecule. 
 
 \begin{equation}
-\Delta E_{ww,R} = \int_R E_{ww}(\textbf{r}) d\textbf{r}
+	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
 \end{equation}
-
-When the region of interest $R$ comprises more than one molecule, interactions within this region are double-counted while interactions to the outside are not.
-To take this into account, the solvent-solvent energy between each pair of voxels $E_{ww,kl}$ is needed.
-While this is supported by the standard GIST implementation, it is rarely done due to the large size of the $E_{ww,kl}$ matrix.
-
-We note that replacement of a small or medium solvent region would lead to reorganization of the surrounding solvent.
-However, this depends on the local environment and on \emph{what} the molecule would be replaced by.
-Therefore, the effect of reorganization can not be directly included in the GIST method, but must be judged for each case individually.
-This is not a problem when computing the total free energy of solvation $\dgsolv$, since no additional boundary is created.
-\todo{Do we need this paragraph?}
 
 
 
