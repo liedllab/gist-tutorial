@@ -409,20 +409,11 @@ from the interaction of  water molecules outside $\bold{R}$ with the water molec
 the sum of $E_{ww}$ of two different regions, $\bold{R_1}$  and $\bold{R_2}$, taken from the same simulation box will not be equal 
 to the union of $E_{ww}$ of the two regions due to double-counting. 
 
-Double-counting is accounted in two different ways. The first method uses the water-displacement method. This method is applicable when determining the energetic cost of kicking out a water molecule. For example, when a ligand binds to the protein, water molecules will be displaced from the binding pocket to
-the bulk. 
-
-\begin{equation}
-	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
-\end{equation}
+\todo The double counting is accounted for by divinding the Eww by 2. It's done in the code
+\todo postprocessing user can multiply it by 2
 
 The second method uses normalized water properties to account the difference in water properties of two different regions. 
 The normalized water property is defined as the water property per water molecule. 
-
-\begin{equation}
-	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
-\end{equation}
-
 
 
 \subsection{PME implementation}
