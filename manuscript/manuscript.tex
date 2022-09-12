@@ -90,7 +90,12 @@
 	literate={Å}{{\AA}}1
 }
 \lstdefinestyle{code}{}
+\lstdefinestyle{cpptraj}{title={\centering Cpptraj}}
+\lstdefinestyle{bash}{title={\centering Commandline}}
+\lstdefinestyle{amber-in}{title={\centering Amber input}}
+\lstdefinestyle{pymol}{title={\centering Pymol}}
 \lstdefinestyle{python}{
+	title={\centering Python},
 	language=Python,
 	stringstyle=\color[rgb]{1.0, 0, 0},
 	commentstyle=\color[rgb]{0, 0, 0.6}
@@ -471,7 +476,7 @@ A default value of 0.5 A is used that provides reasonable discretization for man
 In \software{ccptraj}, the rectangular prism is defined by parameters of the \inlinecode{gist} command.
 The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of the grid is defined by \inlinecode{griddim}, and the spacing is defined by \inlinecode{gridspacn}.
 
-\begin{lstlisting}
+\begin{lstlisting}[style=cpptraj]
 gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
@@ -479,14 +484,14 @@ griddim <Nx> <Ny> <Nz> gridspacn <val>
 
 The region can be defined using a ligand in a specific binding pocket of the protein, a specific residue of the protein, or the whole protein itself. A helper script FindCentroid.py \todo{(upload FindCentroid.py!)} can be used to determine the centroid of the region of interest as well as the dimensions of the rectangular prism that will fully enclose the region. A pdb file is needed as an input and the rectangular prism will be centered based on the centroid of the given structure.
 
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 python FindCentroid.py -i structure.pdb
 \end{lstlisting}
 
 \paragraph{Run GIST using cpptraj}
 GIST is incorporated in cpptraj which requires the topology and the trajectory of the MD simulation to be analayzed. The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic comands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
 
-\begin{lstlisting}
+\begin{lstlisting}[style=cpptraj]
 parm topology.prmtop
 trajin trajectory.nc
 gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 gridspacn 0.50 out gist.dat
@@ -495,7 +500,7 @@ go
 
 The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file and what frames to be analyzed. The third line tells cpptraj to run a GIST calculation using the region defined and print the output of the calculation in a file called gist.dat. The last instructs cpptraj to run the calculation. The syntax for running cpptraj given this input file is:
 
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 cpptraj -i gist.in
 \end{lstlisting}
 
@@ -546,7 +551,7 @@ For reference, an input structure is loaded from a file named \inlinecode{solute
 The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
 
 % The current font makes the O look like a tofu / placeholder
-\begin{lstlisting}
+\begin{lstlisting}[style=pymol]
 load solute.pdb
 as surface
 load gist-gO.dx, gO
@@ -575,13 +580,13 @@ This interaction has been reported to have a binding constant of \todo{???}.
 \subsection{Tutorial data}
 We will use the 1STP crystal structure to start our calculations.
 For the sake of simplicity, you can download prepared and solvated Amber topologies and structures based on 1STP by running
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 git clone git@github.com:liedllab/gist-tutorial.git
 \end{lstlisting}
 This will download the tutorial files (including both the manuscript and the examples in the \software{code} folder).
 \subsection{System Preparation and Equilibration}
 If you want to skip this section, run 
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 make equilibration-targets
 \end{lstlisting}
 in the code folder. This assumes that you have Python and Amber set up properly and that \software{pmemd.cuda} is in the PATH.
@@ -598,7 +603,7 @@ One can choose to sample the complex and dissociated states individually, or to 
 Here, we choose not to include any sampling of the conformational states. 
 It is therefore important that the conformations of the monomers in the complex and dissociated states match exactly. 
 Use \software{cpptraj} to produce biotin and streptavidin structures based on the complex by stripping the respective other molecule like this:
-\begin{lstlisting}
+\begin{lstlisting}[style=cpptraj]
 parm complex/solvated.parm7
 trajin complex/equil/EQUIL-DONE.rst
 strip ^2 parmout streptavidin/solvated.parm7
@@ -625,7 +630,7 @@ We run \SI{100}{\nano\second} of simulation and store the conformations every \S
 A simulation length of at least \SIrange{10}{20}{\nano\second} is recommended, to obtain statistically independent snapshots of the water.
 
 An example Amber input file for GIST might look like this:
-\begin{lstlisting}
+\begin{lstlisting}[style=amber-in]
 restrained 100 ns NpT
 &cntrl
   ntx=5, irest=1,
@@ -644,7 +649,7 @@ restrained 100 ns NpT
 Note that these are very standard MD settings except for the line that defines the restraints.
 
 Run the MD using \software{pmemd.cuda}:
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 pmemd.cuda \
 	-O \
 	-i 100ns-npt-restraint.in \
@@ -662,7 +667,7 @@ For easier post-processing, we will use grids that contain the whole molecule.
 This could in theory be avoided for streptavidin and the complex, since only the surrounding of the biotin molecule (i.e., the binding pocket) is required for the analysis.
 We also recommend that you center the molecule in space.
 For each system (biotin, streptavidin, complex), produce a centered pdb file using \software{cpptraj}:
-\begin{lstlisting}
+\begin{lstlisting}[style=cpptraj]
 parm solvated.parm7
 trajin md-01.nc 1 1 1
 autoimage !(:WAT) origin
@@ -692,7 +697,7 @@ Now, you can finally run the actual GIST analysis. Center the molecule exactly i
 We recommend using either the PME or GPU implementation of GIST, depending on whether you have a fast GPU.
 A further advantage of the PME implementation is that it matches the energy calculation of the MD engine more closely.
 
-\begin{lstlisting}
+\begin{lstlisting}[style=cpptraj]
 parm solvated.parm7
 trajin md-01.nc
 autoimage !(:WAT) origin
@@ -759,7 +764,7 @@ In \software{gistpp}, this can be done as follows:
 \todo{This might become invalid with future GIST versions, depending on whether we adopt the COM as molecular center.} 
 \todo{Better use the population.}
 
-\begin{lstlisting}
+\begin{lstlisting}[style=bash]
 rho0=0.03287465
 neg_eww_ref=9.533
 gistpp -op multconst -i gist-gO.dx -opt const $rho0 \
@@ -944,7 +949,7 @@ You will find that the energy is strongly unfavorable to binding, because we do 
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this energy difference.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST\@.
 An example \software{cpptraj} input might look like:
-\begin{lstlisting}
+\begin{lstlisting}[style=cpptraj]
 parm solvated.parm7
 trajin md-01.nc 1 last 100
 energy complex ^1,2 # etype pme
@@ -1001,6 +1006,27 @@ To include the effect of the lid closing transition in the binding process, free
 \section{Recent developments}
 \subsection{GIST with non-water solvents}
 \subsection{GIST with salt-water mixtures}
+In \cite{Waibl2021-gist-salt}, an extension of GIST was presented that can use salt-water mixtures as a solvent.
+This allows treating salting-out effects, although it was shown that the salting-out coefficient is over-predicted by GIST unless higher-order entropies are incorporated.
+Generally, GIST should be able to treat arbitrary solvent mixtures as long as each molecule is sufficiently rigid.
+
+The \software{cpptraj} implementation of GIST allows the user to specify which components of the system to treat as a solute, using the \inlinecode{solute} keyword.
+Everything else will be treated as solvent.
+If the solvent contains more than one molecular species, a list of solvent molecule names (i.e., ``\inlinecode{solventmols WAT,NA,CL}'') must be specified.
+For each molecule in this list, densities (e.g., \inlinecode{g\_mol\_NA}) and energies (e.g., \inlinecode{Eww\_mol\_NA}) will be computed and written to .dx files.
+Note that, e.g., \inlinecode{Esw\_mol\_NA} contains the interactions of every ``\inlinecode{NA}'' molecule with the solute, and \inlinecode{Esw\_mol\_NA} contains the interactions among ``\inlinecode{NA}'' molecules as well as their interactions with all other solvents, divided by 2 to account for double counting.
+Furthermore, the first molecule in this list will be treated as the main solvent, for which first-order entropy values will be computed.
+
+For instance, a GIST calculation in salt water, including the first-order water entropy, can be run as follows:
+
+\begin{lstlisting}[style=cpptraj]
+gist gridcntr <x> <y> <z> \
+griddim <Nx> <Ny> <Nz> gridspacn <val> \
+solute !(:WAT,NA,CL) solventmols WAT,NA,CL
+\end{lstlisting}
+
+The current implementation of the entropy calculation in \software{cpptraj} requires at least 3 atoms in the main solvent.
+To compute the first-order entropy of the ions, as well as an approximate second order entropy, Python code is available on \url{https://github.com/liedllab/second-disorder}.
 
 \section{Checklists}
 %Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
