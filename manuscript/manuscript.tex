@@ -520,8 +520,8 @@ cpptraj -i gist.in
 %\end{itemize}
 
 \paragraph{Postprocessing and Analyzing GIST results}
-Cppraj outputs the quantities calculated in a data explorer "OpenDX" (.dx) file format which can be easily visualized in Pymol or VMD.
-Aside from the thermodynamic quantities, GIST also calculates the number densitiies of hydrogen and oxygen in each voxel. Here is a full list of quantities calculated by GIST \todo{This is incomplete!}:
+Cpptraj outputs the quantities calculated as a "open data explorer" (.dx) file format which can be easily visualized in Pymol or VMD.
+Aside from the thermodynamic quantities, GIST also calculates the number densities of hydrogen and oxygen in each voxel. Here is a full list of quantities calculated by GIST \todo{This is incomplete!}:
 
 \begin{itemize}
 	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. For water, gO and gH are produced.}
@@ -1003,6 +1003,32 @@ To include the effect of the lid closing transition in the binding process, free
 \section{Recent developments}
 \subsection{GIST with non-water solvents}
 \subsection{GIST with salt-water mixtures}
+\section{Cheatsheet}
+%This will be a cheatsheet containing all options for cpptrajs GIST implementation
+\subsection{Installation}
+GIST calculations in cpptraj can be sped up through various levels of parallelization. When cpptraj was compiled with the '-cuda' configure flag set, the GPU accelerated version of GIST is used automatically. 
+
+\subsection{The CPPTRAJ action}
+\subsection{Output}
+GIST calculations put out a variety of data sorted by voxel into a file specified by the "out" keyword. Some of the output data is also automatically written to "open data explorer" (.dx) files for convenient visualisation in software such as VMD or PyMOL. The following columns can be found in the output file:
+\begin{tabular}{l l p{.3\textwidth}}
+\toprule
+gX & X & For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. \\
+Esw & X &  Mean solute-water interaction energy density. \\
+Eww & X & Mean water-water interaction energy density. \\
+PME & [pme] & Water PME energy density. \\
+U\_PME & [pme] & Water PME energy density. \\
+dTStrans & X & First order translational entropy density. \\
+dTSorient & X & First order orientational entropy density . \\
+neighbor & X & Mean number of waters neighboring the water molecules found in this voxel multiplied by the voxel number density. \\
+dipole & X & Magnitude of mean dipole moment (polarization). \\
+order & X & (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter. \\
+dipolex & X & x-component of the mean water dipole moment density \\
+dipoley & X & y-component of the mean water dipole moment density \\
+dipolez & X & z-component of the mean water dipole moment density \\
+Eij & X & (if \inlinecode{doeij} was specified) Water-water interaction matrix. \\
+\bottomrule
+\end{tabular}
 
 \section{Checklists}
 %Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
