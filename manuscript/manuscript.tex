@@ -183,7 +183,9 @@ It has been shown that GIST can produce comparable accuracy to TI by approximati
 
 Recent work has improved the calculation speed tremendously, allowing for the treatment of large biological systems such as proteases or antibodies.
 Furthermore, an implementation based on the particle mesh Ewald (PME) \cite{Darden1993-pme} method was presented, which improves the consistency between GIST and popular molecular dynamics engines. 
-Yet further changes allow the inclusion of other rigid solvents than water or allow for the treatment of solvent mixtures and ions in solution.\todo{Sources!}
+Yet further changes allow the inclusion of other rigid solvents than water or 
+allow for the treatment of solvent mixtures and ions in solution. 
+\todo{Sources!}
 
 While previous tutorials gave insightful pointers how to setup and run GIST calculations, their post-processing was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address recent improvements to the method as well as provide a basic template for the analysis and interpretation of GIST calculations.
 
@@ -218,7 +220,6 @@ After completing this tutorial, we expect the reader to be able to run their own
 %This will often happen in a specific section or subsection in the article itself.
 
 \section{Prerequisites}
-\todo{ (vah)  Improve flow and logical progression of prerquisites.}
 
 %Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
 
@@ -433,7 +434,7 @@ This is not a problem when computing the total free energy of solvation $\dgsolv
 In the original version of GIST, the energies are calculated based on the the minimum image convention.
 In PME-GIST, the electrostatics are calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the treatment in the Amber MD engine \cite{Chen2021}.
 The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are computed separately.
-\todo{E$_{LJ}$ seems more intuitive to me, need to check what the GIST literature is using -vah. They use $E_{lj}$, but LJ in the text -fwa.}
+
 \begin{equation}
 	E_\text{total} = E_\text{elec} + E_\text{lj}
 \end{equation}
@@ -469,15 +470,21 @@ While integrals over GIST quantities are independent of the voxel size, individu
 A default value of 0.5 A is used that provides reasonable discretization for many use-cases.
 
 In \software{ccptraj}, the rectangular prism is defined by parameters of the \inlinecode{gist} command.
-The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of the grid is defined by \inlinecode{griddim}, and the spacing is defined by \inlinecode{gridspacn}.
+The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of 
+the grid is defined by \inlinecode{griddim} (in voxel counts), and the spacing 
+is defined by \inlinecode{gridspacn} (in $\AA$).
 
 \begin{lstlisting}
 gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 
-
-The region can be defined using a ligand in a specific binding pocket of the protein, a specific residue of the protein, or the whole protein itself. A helper script FindCentroid.py \todo{(upload FindCentroid.py!)} can be used to determine the centroid of the region of interest as well as the dimensions of the rectangular prism that will fully enclose the region. A pdb file is needed as an input and the rectangular prism will be centered based on the centroid of the given structure.
+The region can be defined using a ligand in a specific binding pocket of the 
+protein, a specific residue of the protein, or the whole protein itself. A 
+helper script FindCentroid.py can be used to determine the centroid of the 
+region of interest as well as the dimensions of the rectangular prism that will 
+fully enclose the region. A pdb file is needed as an input and the rectangular 
+prism will be centered based on the centroid of the given structure.
 
 \begin{lstlisting}
 python FindCentroid.py -i structure.pdb
@@ -500,24 +507,6 @@ The first line specifies the amber topology file that was used to run MD. The se
 cpptraj -i gist.in
 \end{lstlisting}
 
-\pdfcomment{Franz: I removed the list because it is very long and not complete. We can add it to the lists at the end, but then it should be complete.}
-%\todo{Aside from the commands defining the region of interest, there are other options available to specify the GIST analysis. Here is the full list that can be added to the third line of the input file:} 
-%\begin{itemize}
-%	\item{[doorder] Calculate the water order parameter [reference] for each voxel.}
-%	\item{[doeij] Calculate the triangular matrix representing the water-water interactions between pairs of voxels (see below).}
-%	\item{[skipE] Skip all energy calculations (cannot be specified with ’doeij’).}
-%	\item{[skipS Skip all the entropy calculations.]}
-%	\item{[refdens rdval>] Reference density of bulk water, used in computing $g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/Å3.}
-%	\item{[temp <tval>] Temperature of the input trajectory.}
-%	\item{[noimage] Disable distance imaging in energy calculation.}
-%	\item{[gridcntr <xval> <yval> <zval>] Coordinates (Å) of the center of the grid (default 0.0, 0.0, 0.0).}
-%	\item{[griddim <xval> <yval> <zval>] Grid dimensions along each coordinate axis (default 40, 40, 40).}
-%	\item{[gridspacn <spaceval>] Grid spacing (linear dimension of each voxel) in Angstroms. Values greater than 0.75 Å are not recommended (default 0.5 Å).}
-%	\item{[prefix <filename prefix>] Output file name prefix (default “gist”).}
-%	\item{[ext <grid extension>] Output grid file name extension (default “.dx”).}
-%	\item{[out <output>] Name of the main GIST output file. If not specified set to ’<prefix>-output.dat’.}
-%	\item{[info <info>] Name of main GIST info file. If not specified info is written to standard output.}
-%\end{itemize}
 
 \paragraph{Postprocessing and Analyzing GIST results}
 Cpptraj outputs the quantities calculated as a "open data explorer" (.dx) file format which can be easily visualized in Pymol or VMD.
@@ -587,6 +576,23 @@ make equilibration-targets
 \end{lstlisting}
 in the code folder. This assumes that you have Python and Amber set up properly and that \software{pmemd.cuda} is in the PATH.
 
+
+The choice of the initial structure to be analyzed is crucial to the results 
+you can expect from the GIST calculation. Crystal structures may not be 
+representative of the dominant solution structure for a given analysis target. 
+In our example we use the final structure after a short equilibration run. A 
+more sophisticated approach would be identifying a dominant structure out of 
+the ensemble of sampled structures.  Depending on what properties you are 
+interested in, running a MD simulation of your structure beforehand and 
+choosing a dominant structure or even multiple structures through clustering 
+might therefore be beneficial.
+When starting with a crystal structure, special care has to be taken during the 
+preperation of the structure. Make sure to protonate your structure and take 
+care to choose a proper protonation state for the varying chemical moeties in 
+your structure. You will need to solvate your structure in a solvent box, which 
+should be chosen large enough so that the solvent around the region of interest 
+is not influenced through periodic images.   
+
 When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are two options for dealing with configurational diversity in the structures.
 \todo{Maybe Valentin knows a citation for that?}
 One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the sampled conformations.
@@ -606,16 +612,18 @@ strip ^2 parmout streptavidin/solvated.parm7
 trajout streptavidin/pre-equil.ncrst
 \end{lstlisting}
 (Adapt for biotin as necessary.)
-\todo{vah: Maybe include a section on how to prepare a protein structure before equilibration. Protonation, force field and a large enough iso solvation box seem important to me. I will probably also at least mention what simulation settings we are running later on.}
 %We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
 
 Use the \software{equilibration.py} script (or your own) to perform short NVT and NpT equilibration runs on the starting structure.
 \todo {NPT}
 Note that the barostat might interfere with restrained equilibration of the complex, since different molecules are moved relative to each other when the volume changes.
-But since our equilibration script also contains unrestrained pressure equilibration, we should not run into any trouble.
-\todo{Should we mention more sophisticated choices of structure here, eg clustering? Just taking the "equilibrated" structure is kinda random. -vah}
+But since our equilibration script also contains unrestrained pressure 
+equilibration, we should not run into any trouble.
+
 Then split the equilibrated structure into biotin and streptavidin parts using \software{cpptraj\_remove\_mol.sh}.
-After that, you can use \software{equilibration.py -R} to run short restrained equilibrations (where only the water is allowed to move) on the individual systems.
+After that, you can use \software{equilibration.py -R} to run short restrained 
+equilibrations (where only the water is allowed to move) on the individual 
+systems.
 
 \subsection{Running MD for GIST}
 
@@ -683,7 +691,10 @@ print(*list(zip("xyz", min, max)), sep="\n")
 \end{lstlisting}
 Then, decide on grid dimensions for every system.
 For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{15}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+15)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
-\todo{this does not work with the default gisttools values for the automatic detection of the energy reference. Better use a larger value. | changed from 7 to 15 -vah }
+\todo{ This is handled differently by FindCentroid.py: d = max - min; voxelnr = 
+d*5 for x,y,z each; we should handle it similiar or at least mention 
+FindCentroid.py here. 
+What does gisttools do if the grid is too small? -vah }
 We note that this centered grid is usually larger than it needs to be in some directions.
 If you want to save some extra memory and calculation time, feel free to align the grid more precisely to the minimum and maximum coordinates, or use a smaller grid that only covers the binding pocket.
 You can also rotate the molecule by its principal axes to fit the cuboid grid more exactly.
@@ -732,18 +743,18 @@ Although it has a simple convergence check built-in, it is always recommended to
 \begin{lstlisting}[style=python]
 import gisttools as gt
 import matplotlib.pyplot as plt
-gist = gt.gist.load_gist_file(
+gist_obj = gt.gist.load_gist_file(
     "gist.dat", struct="solute-centered.pdb")
-bins, eww = gist.rdf(
+bins, eww = gist_obj.rdf(
     "Eww_unref_norm", bins=100, rmax=20., normalize="norm")
 plt.plot(bins, eww)
-eww_auto = gist.detect_reference_value().values[0]
+eww_auto = gist_obj.detect_reference_value().values[0]
 plt.axhline(eww_auto, color='k')
 plt.gca().set(
     xlabel='distance [A]', ylabel='E_ww per mol')
 plt.show()
 \end{lstlisting}
-\todo{While not massively important, I don't like that we call the gist object here "gist", as that's the same name as gisttools subpackage gist. "gt.gist.bla" and "gist.bla" therefore look quite similiar, but do very different things. -vah}
+
 The expected output of this code is shown in Figure~\ref{fig_ewwref}.
 
 \begin{figure}
@@ -874,7 +885,6 @@ strept = load_gist_file('streptavidin/gist/gist.dat', \
     struct='streptavidin/gist/solute-centered.pdb')
 print(strept.n_frames, strept.rho0)
 \end{lstlisting}
-\todo{Maybe add more complete print calls? E.g. print('Biotin: Frames=\{biotin.n\_frames\}, Rho=\{biotin.rho0\} -vah)}
 Assign reference energies and check them for plausibility.
 \begin{lstlisting}[style=python]
 biotin.eww_ref = biotin.detect_reference_value()
@@ -1006,13 +1016,56 @@ To include the effect of the lid closing transition in the binding process, free
 \section{Cheatsheet}
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
 \subsection{Installation}
-GIST calculations in cpptraj can be sped up through various levels of parallelization. When cpptraj was compiled with the '-cuda' configure flag set, the GPU accelerated version of GIST is used automatically. 
+GIST calculations in cpptraj can be sped up through various levels of 
+parallelization. When cpptraj was compiled with the '-cuda' configure flag set, 
+the GPU accelerated version of GIST is used automatically. 
 
-\subsection{The CPPTRAJ action}
-\subsection{Output}
-GIST calculations put out a variety of data sorted by voxel into a file specified by the "out" keyword. Some of the output data is also automatically written to "open data explorer" (.dx) files for convenient visualisation in software such as VMD or PyMOL. The following columns can be found in the output file:
-\begin{tabular}{l l p{.3\textwidth}}
+
+\begin{Checklists*}
+	
+\begin{checklist}{The CPPTRAJ action}
+
+\textbf{Options}\\
+Various flags and options can be provided when running a GIST calculation in 
+cpptraj. A list of possible and required options is provided here:
+
+\begin{tabular}{l p{.7\textwidth}}
 \toprule
+doorder & Calculate the water order parameter [reference] for each voxel\\
+doeij & Calculate the triangular matrix representing the water-water 
+interactions between pairs of voxels.\\
+skipE & Skip all energy calculations (cannot be specified with ’doeij’)\\
+skipS & Skip all the entropy calculations.\\
+refdens <rdval> & Reference density of bulk water, used in computing 
+$g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/Å3. \\
+temp <tval> & Temperature of the input trajectory. \\
+noimage &  Disable distance imaging in energy calculation. \\
+gridcntr <xval> <yval> <zval> & Coordinates (Å) of the center of the grid 
+(default 0.0, 0.0, 0.0). \\
+griddim <xval> <yval> <zval> & Grid dimensions along each coordinate axis 
+(default 40, 40, 40).\\
+gridspacn <spaceval> & Grid spacing (linear dimension of each voxel) in 
+Angstroms. Values greater than 0.75 Å are not recommended (default 0.5 Å).\\
+prefix <filename prefix> & Output file name prefix (default “gist”).\\
+ext <grid extension> & Output grid file name extension (default “.dx”). \\
+out <output> & Name of the main GIST output file. If not specified set to 
+’<prefix>-output.dat’.\\
+info <info> & Name of main GIST info file. If not specified info is 
+written to standard output. \\
+\bottomrule
+\end{tabular}
+
+
+\textbf{Output}\\
+GIST calculations put out a variety of data sorted by voxel into a file 
+specified by the "out" keyword. Some of the output data is also automatically 
+written to "open data explorer" (.dx) files for convenient visualisation in 
+software such as VMD or PyMOL. The following columns can be found in the output 
+file:
+\begin{tabular}{l l p{.8\textwidth}}
+\toprule
+Name & Keyword & Description\\
+\midrule
 gX & X & For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. \\
 Esw & X &  Mean solute-water interaction energy density. \\
 Eww & X & Mean water-water interaction energy density. \\
@@ -1029,7 +1082,8 @@ dipolez & X & z-component of the mean water dipole moment density \\
 Eij & X & (if \inlinecode{doeij} was specified) Water-water interaction matrix. \\
 \bottomrule
 \end{tabular}
-
+\end{checklist}
+\end{Checklists*}
 \section{Checklists}
 %Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
 %Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
