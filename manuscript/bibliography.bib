@@ -786,4 +786,274 @@ Avila, Dami{\'a}n and Abdalla, Safia and Willing, Carol and {Jupyter Development
   doi  = "10.1063/1.464397",
 }
 
+@ARTICLE{Borhani2019-qspr,
+  title     = "Hybrid {QSPR} models for the prediction of the free energy of
+               solvation of organic solute/solvent pairs",
+  author    = "Borhani, Tohid N and Garc{\'\i}a-Mu{\~n}oz, Salvador and Vanesa
+               Luciani, Carla and Galindo, Amparo and Adjiman, Claire S",
+  abstract  = "Due to the importance of the Gibbs free energy of solvation in
+               understanding many physicochemical phenomena, including
+               lipophilicity, phase equilibria and liquid-phase reaction
+               equilibrium and kinetics, there is a need for predictive models
+               that can be applied across large sets of solvents and solutes.
+               In this paper, we propose two quantitative structure property
+               relationships (QSPRs) to predict the Gibbs free energy of
+               solvation, developed using partial least squares (PLS) and
+               multivariate linear regression (MLR) methods for 295 solutes in
+               210 solvents with total number of data points of 1777. Unlike
+               other QSPR models, the proposed models are not restricted to a
+               specific solvent or solute. Furthermore, while most QSPR models
+               include either experimental or quantum mechanical descriptors,
+               the proposed models combine both, using experimental descriptors
+               to represent the solvent and quantum mechanical descriptors to
+               represent the solute. Up to twelve experimental descriptors and
+               nine quantum mechanical descriptors are considered in the
+               proposed models. Extensive internal and external validation is
+               undertaken to assess model accuracy in predicting the Gibbs free
+               energy of solvation for a large number of solute/solvent pairs.
+               The best MLR model, which includes three solute descriptors and
+               two solvent properties, yields a coefficient of determination
+               (R2) of 0.88 and a root mean squared error (RMSE) of 0.59 kcal
+               mol-1 for the training set. The best PLS model includes six
+               latent variables, and has an R2 value of 0.91 and a RMSE of 0.52
+               kcal mol-1. The proposed models are compared to selected results
+               based on continuum solvation quantum chemistry calculations.
+               They enable the fast prediction of the Gibbs free energy of
+               solvation of a wide range of solutes in different solvents.",
+  journal   = "Phys. Chem. Chem. Phys.",
+  publisher = "Royal Society of Chemistry (RSC)",
+  volume    =  21,
+  number    =  25,
+  pages     = "13706--13720",
+  month     =  jun,
+  year      =  2019,
+  copyright = "http://creativecommons.org/licenses/by/3.0/",
+  language  = "en",
+  doi = "10.1039/C8CP07562J",
+}
+
+@ARTICLE{Mennucci2010-pcm,
+  title     = "Continuum solvation models: What else can we learn from them?",
+  author    = "Mennucci, Benedetta",
+  abstract  = "Molecular modeling is nowadays a well-established analytical
+               tool exactly as spectroscopies or other experimental
+               methodologies, and we expect that its impact on many research
+               fields in chemistry, biology, material science, and even
+               medicine will enormously increase in the near future. The real
+               spread and success of this expectation will be strictly linked
+               to different factors, among which a fundamental one will be the
+               capacity of simulations of (supra)molecular systems to include
+               environment effects. It is in fact well-known that molecular
+               responses and processes are strongly affected or, in some cases,
+               completely determined by the surrounding environment (either a
+               solvent, a protein, a membrane, a polymer, or a composite
+               matrix). This Perspective highlights recent achievements and
+               suggests possible future developments of one of the most popular
+               approaches to include environmental effects in molecular
+               calculations, the continuun solvation model.",
+  journal   = "J. Phys. Chem. Lett.",
+  publisher = "American Chemical Society (ACS)",
+  volume    =  1,
+  number    =  10,
+  pages     = "1666--1674",
+  month     =  may,
+  year      =  2010,
+  language  = "en",
+  doi = "10.1021/jz100506s",
+}
+
+@ARTICLE{Miertus1981-pcm,
+  title     = "Electrostatic interaction of a solute with a continuum. A direct
+               utilizaion of {AB} initio molecular potentials for the prevision
+               of solvent effects",
+  author    = "Miertu{\v s}, S and Scrocco, E and Tomasi, J",
+  abstract  = "A method is presented which utilizes the calculation of the
+               molecular electrostatic potential or the electric field at a
+               discrete number of preselected points to evaluate the
+               environmental effects of a solvent on the properties of a
+               molecular system. No limitations are imposed on the composition
+               and dimension of the solute, on the goodness of the
+               corresponding wavefunction, or on the shape of the cavity in the
+               dielectric. Several levels of approximation, which evidence the
+               effect of self-polarization of the system of surface charges,
+               the influence of the tails of the solute charge distribution
+               going beyond the limits of the cavity, and the effect of the
+               polarization of the solute, are examined and discussed.",
+  journal   = "Chem. Phys.",
+  publisher = "Elsevier BV",
+  volume    =  55,
+  number    =  1,
+  pages     = "117--129",
+  month     =  feb,
+  year      =  1981,
+  language  = "en",
+  doi = "10.1016/0301-0104(81)85090-2",
+}
+
+@ARTICLE{Klamt1993-cosmo,
+  title     = "{COSMO}: a new approach to dielectric screening in solvents with
+               explicit expressions for the screening energy and its gradient",
+  author    = "Klamt, A and Sch{\"u}{\"u}rmann, G",
+  journal   = "J. Chem. Soc., Perkin Trans. 2",
+  publisher = "Royal Society of Chemistry (RSC)",
+  number    =  5,
+  pages     = "799--805",
+  year      =  1993,
+  doi = "10.1039/P29930000799",
+}
+
+@article{Swails2014-cphmd,
+   author = {Swails, JM and York, DM and Roitberg, AE},
+   title = {Constant pH Replica Exchange Molecular Dynamics in Explicit Solvent Using Discrete Protonation States: Implementation, Testing, and Validation},
+   journal = {Journal of Chemical Theory and Computation},
+   volume = {10},
+   number = {3},
+   pages = {1341-1352},
+   note = {},
+   abstract = {By utilizing Graphics Processing Units, we show that constant pH molecular dynamics simulations (CpHMD) run in Generalized Born (GB) implicit solvent for long time scales can yield poor plc predictions as a result of sampling unrealistic conformations. To address this shortcoming, we present a method for performing constant pH molecular dynamics simulations (CpHMD) in explicit solvent using a discrete protonation state model. The method involves standard molecular dynamics (MD) being propagated in explicit solvent followed by protonation state changes being attempted in GB implicit solvent at fixed intervals. Replica exchange along the pH-dimension (pH-REMD) helps to obtain acceptable titration behavior with the proposed method. We analyzed the effects of various parameters and settings on the CpH_MD and pH-REMD in explicit solvent, including the size of the simulation unit cell and the length of the relaxation dynamics following protonation state changes. We tested the method with the amino acid model compounds, a small pentapeptide with two titratable sites, and hen egg white lysozyme (HEWL). The proposed method yields superior predicted pK(a) values for HEWL over hundreds of nanoseconds of simulation relative to corresponding predicted values from simulations run in implicit solvent.},
+   keywords = {EGG-WHITE LYSOZYME
+PARTICLE MESH EWALD
+PK(A) VALUES
+HEN
+SIMULATION
+SYNCHRONIZATION
+PREDICTION
+TITRATION
+AMBER
+Chemistry, Physical
+Physics, Atomic, Molecular & Chemical
+Chemistry
+Physics},
+   ISSN = {},
+   % ISSN = {1549-9618},
+   DOI = {10.1021/ct401042b},
+   year = {2014},
+   type = {Journal Article}
+}
+
+@article{Liu2016-md-solubility,
+   author = {Liu, S. and Cao, S. and Hoang, K. and Young, K. L. and Paluch, A. S. and Mobley, D. L.},
+   title = {Using MD Simulations To Calculate How Solvents Modulate Solubility},
+   journal = {Journal of Chemical Theory and Computation},
+   volume = {12},
+   number = {4},
+   pages = {1930-1941},
+   note = {},
+   abstract = {Here, our interest is in predicting solubility in general, and we focus particularly on predicting how the solubility of particular solutes is modulated by the solvent environment. Solubility in general is extremely important, both for theoretical reasons it provides an important probe of the balance between solute solute and solute solvent interactions and for more practical reasons, such as how to control the solubility of a given solute via modulation of its environment, as in process chemistry and separations. Here, we study how the change of solvent affects the solubility of a given compound. That is, we calculate relative solubilities. We use MD simulations to calculate relative solubility and compare our calculated values with experiment as well as with results from several other methods, SMD and UNIFAC, the latter of which is commonly used in chemical engineering design. We find that straightforward solubility calculations based on molecular simulations using a general small-molecule force field outperform SMD and UNIFAC both in terms of accuracy and coverage of the relevant chemical space.},
+   keywords = {solvation free-energies
+hydration free-energies
+small-molecule hydration
+unifac group-contribution
+vapor-liquid-equilibria
+amber force-field
+blind prediction
+efficient generation
+aqueous solubility
+organic-compounds},
+   ISSN = {},
+   % ISSN = {1549-9618},
+   DOI = {10.1021/acs.jctc.5b00934},
+   year = {2016},
+   type = {Journal Article}
+}
+
+@article{Mobley2009-dgsolv,
+   author = {Mobley, David L. and Bayly, Christopher I. and Cooper, Matthew D. and Shirts, Michael R. and Dill, Ken A.},
+   title = {Small Molecule Hydration Free Energies in Explicit Solvent: An Extensive Test of Fixed-Charge Atomistic Simulations},
+   journal = {Journal of Chemical Theory and Computation},
+   volume = {5},
+   number = {2},
+   pages = {350-358},
+   ISSN = {},
+   % ISSN = {1549-9618},
+   DOI = {10.1021/ct800409d},
+   url = {https://dx.doi.org/10.1021/ct800409d},
+   year = {2009},
+}
+
+@article{Mobley2014-freesolv,
+   author = {Mobley, D. L. and Guthrie, J. P.},
+   title = {FreeSolv: a database of experimental and calculated hydration free energies, with input files},
+   journal = {Journal of Computer-Aided Molecular Design},
+   volume = {28},
+   number = {7},
+   pages = {711-720},
+   note = {},
+   abstract = {This work provides a curated database of experimental and calculated hydration free energies for small neutral molecules in water, along with molecular structures, input files, references, and annotations. We call this the Free Solvation Database, or FreeSolv. Experimental values were taken from prior literature and will continue to be curated, with updated experimental references and data added as they become available. Calculated values are based on alchemical free energy calculations using molecular dynamics simulations. These used the GAFF small molecule force field in TIP3P water with AM1-BCC charges. Values were calculated with the GROMACS simulation package, with full details given in references cited within the database itself. This database builds in part on a previous, 504-molecule database containing similar information. However, additional curation of both experimental data and calculated values has been done here, and the total number of molecules is now up to 643. Additional information is now included in the database, such as SMILES strings, PubChem compound IDs, accurate reference DOIs, and others. One version of the database is provided in the Supporting Information of this article, but as ongoing updates are envisioned, the database is now versioned and hosted online. In addition to providing the database, this work describes its construction process. The database is available free-of-charge via http://www.escholarship.org/uc/item/6sd403pz.},
+   keywords = {hydration free energy
+transfer free energy
+alchemical
+molecular dynamics
+free energy calculations
+solvation free-energies
+efficient generation
+small molecules
+am1-bcc model
+charge models
+force-fields
+explicit
+solvent
+prediction
+quality},
+   ISSN = {},
+   % ISSN = {0920-654x},
+   DOI = {10.1007/s10822-014-9747-x},
+   year = {2014},
+}
+
+% The entry below contains non-ASCII chars that could not be converted
+% to a LaTeX equivalent.
+@ARTICLE{Fredenslund1975-unifac,
+  title     = "Group-contribution estimation of activity coefficients in
+               nonideal liquid mixtures",
+  author    = "Fredenslund, Aage and Jones, Russell L and Prausnitz, John M",
+  abstract  = "A group-contribution method is presented for the prediction of
+               activity coefficients in nonelectrolyte liquid mixtures. The
+               method combines the solution-of-functional-groups concept with a
+               model for activity coefficients based on an extension of the
+               quasi chemical theory of liquid mixtures (UNIQUAC). The
+               resulting UNIFAC model (UNIQUAC Functional-group Activity
+               Coefficients) contains two adjustable parameters per pair of
+               functional groups. By using group-interaction parameters
+               obtained from data reduction, activity coefficients in a large
+               number of binary and multicomponent mixtures may be predicted,
+               often with good accuracy. This is demonstrated for mixtures
+               containing water, hydrocarbons, alcohols, chlorides, nitriles,
+               ketones, amines, and other organic fluids in the temperature
+               range 275 to 400 K.",
+  journal   = "AIChE J.",
+  publisher = "Wiley",
+  volume    =  21,
+  number    =  6,
+  pages     = "1086--1099",
+  month     =  nov,
+  year      =  1975,
+  doi = "10.1002/aic.690210607",
+}
+
+@article{Pratt2016-hydrophobicity,
+   author = {Pratt, L. R. and Chaudhari, M. I. and Rempe, S. B.},
+   title = {Statistical Analyses of Hydrophobic Interactions: A Mini-Review},
+   journal = {Journal of Physical Chemistry B},
+   volume = {120},
+   number = {27},
+   pages = {6455-6460},
+   note = {},
+   abstract = {This review focuses on the striking recent progress in solving for hydrophobic interactions between small inert molecules. We discuss several new understandings. First, the inverse temperature phenomenology of hydrophobic interactions, i.e., strengthening of hydrophobic bonds with increasing temperature, is decisively exhibited by hydrophobic interactions between atomic-scale hard sphere solutes in water. Second, inclusion of attractive interactions associated with atomic-size hydrophobic reference cases leads to substantial, nontrivial corrections to reference results for purely repulsive solutes. Hydrophobic bonds are weakened by adding solute dispersion forces to treatment of reference cases. The classic statistical mechanical theory for those corrections is not accurate in this application, but molecular quasi-chemical theory shows promise. Finally, because of the masking roles of excluded volume and attractive interactions, comparisons that do not discriminate the different possibilities face an interpretive danger.},
+   keywords = {scaled particle theory
+pressure-dependence
+attractive forces
+molecular theory
+aqueous-solution
+hydrogen gas
+loop-closure
+hydration
+solvation
+solutes},
+   ISSN = {},
+   % ISSN = {1520-6106},
+   DOI = {10.1021/acs.jpcb.6b04082},
+   year = {2016},
+   type = {Journal Article}
+}
 
