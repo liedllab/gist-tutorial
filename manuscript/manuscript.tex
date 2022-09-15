@@ -150,14 +150,23 @@ Solvation thermodynamics govern any process involving solutes in a solvent.
 Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
 The free energy of solvation thereby strongly influences real-world problems such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
 
-The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
-Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
+%The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
+%Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
 %More recently, QM/MM approaches and potentials based on deep learning \cite{Smith2017-ani} are trying to bridge the gap to computationally less demanding methods while keeping the accuracy of DFT methods.
 
-Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
-This allows for the treatment of large biological systems such as proteins in aqueous solution.
-Implicit solvent methods such as MM/PBSA or MM/GBSA \cite{Sitkoff1994-pbsa,Kollman2000-mmpbsa} can quickly provide results for a large number of structures, but yield inaccurate results when compared to more rigorous explicit solvent methods \cite{Genheden2015-mmpbsa-review}.
-On the other hand, the free energy of solvation can be calculated in a statistically rigorous way using explicit solvent simulations combined with alchemical methods such as free energy perturbation (FEP) \cite{Zwanzig1954-reweighting} or thermodynamic integration(TI) \cite{Kirkwood1935-ti}.
+A wide range of methods have been devised to compute the free energy of hydration.
+Data-driven methods such as QSPR or UNIFAC can deliver good results \cite{Borhani2019-qspr,Fredenslund1975-unifac}, but might be limited to molecules that are similar to those in the training set.
+Polarizable continuum models (PCMs) \cite{Miertus1981-pcm,Klamt1993-cosmo} such as treat the solvent phase as a homogeneous phase that reacts to the electrostatic potential of the solute \cite{Mennucci2010-pcm}.
+%Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
+%This allows for the treatment of large biological systems such as proteins in aqueous solution.
+Methods such as MM/PBSA or MM/GBSA \cite{Sitkoff1994-pbsa,Kollman2000-mmpbsa} combine an implicit solvent treatment of electrostatics with structural sampling of the solute.
+They can quickly provide results for a large number of structures, but yield inaccurate results when compared to more rigorous explicit solvent methods \cite{Genheden2015-mmpbsa-review}.
+
+On the other hand, explicit solvation methods model the solvent using individual molecules.
+They are generally more accurate than implicit methods, but require a statistical sampling of the solvent conformations \cite{Liu2016-md-solubility,Swails2014-cphmd}.
+Molecular dynamics (MD) simulations provide an accurate way of modeling solvent packing in confined areas \cite{}\todo{ask Tom for a citation!} and general hydrophobic effects \cite{Pratt2016-hydrophobicity}.
+
+The free energy of solvation can be calculated in a statistically rigorous way using alchemical methods \cite{Liu2016-md-solubility,Mobley2009-dgsolv,Mobley2014-freesolv} such as free energy perturbation (FEP) \cite{Zwanzig1954-reweighting} or thermodynamic integration (TI) \cite{Kirkwood1935-ti}.
 However, they are unable to provide a spatial interpretation of the results.
 Furthermore, splitting the resulting free energy into contributions for the enthalpy and entropy is challenging \cite{Peter2004-alchemical-entropy}.
 %Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
@@ -477,7 +486,7 @@ A default value of 0.5 A is used that provides reasonable discretization for man
 In \software{ccptraj}, the rectangular prism is defined by parameters of the \inlinecode{gist} command.
 The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of 
 the grid is defined by \inlinecode{griddim} (in voxel counts), and the spacing 
-is defined by \inlinecode{gridspacn} (in $\AA$).
+is defined by \inlinecode{gridspacn} (in Å).
 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr <x> <y> <z> \
@@ -982,9 +991,9 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 %\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah. Ok? -fwa}
 \todo{this table is super confusing to me. What's "total"? Doesn't seem to be E-TS. Diff is also not the sum of other total entries. Shouldn't it be TS instead of S?-vah}
 \begin{table}[h]
-	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$.}\label{tab_dg_monomers_dimer}
+	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``total'' is calculated as $E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$.}\label{tab_dg_monomers_dimer}
 	\small
-	\begin{tabular}{lrrrrr}
+	\begin{tabular}{@{}lrrrrr@{}}
 		\toprule
 		System       & E(internal) & $\Delta E^\textit{GIST}$ & $\Delta S^\textit{GIST}$ & $\Delta S^\textit{scaled}$ & total \\
 		\midrule
@@ -1056,7 +1065,7 @@ the GPU accelerated version of GIST is used automatically.
 Various flags and options can be provided when running a GIST calculation in 
 cpptraj. A list of possible and required options is provided here:
 
-\begin{tabular}{l p{.7\textwidth}}
+\begin{tabular}{@{}l p{.7\textwidth}@{}}
 \toprule
 doorder & Calculate the water order parameter [reference] for each voxel\\
 doeij & Calculate the triangular matrix representing the water-water 
@@ -1089,7 +1098,7 @@ specified by the "out" keyword. Some of the output data is also automatically
 written to "open data explorer" (.dx) files for convenient visualisation in 
 software such as VMD or PyMOL. The following columns can be found in the output 
 file:
-\begin{tabular}{l l p{.8\textwidth}}
+\begin{tabular}{@{}l l p{.8\textwidth}@{}}
 \toprule
 Name & Keyword & Description\\
 \midrule
