@@ -1025,7 +1025,29 @@ To include the effect of the lid closing transition in the binding process, free
 %You will likely want to reference your GitHub repository as a central point to access all of this information, and then the GitHub repository may link out to other content as needed.
 
 \section{Recent developments}
+In recent years, several updates to the original GIST implementation have been published.
+The basic functionality of the program, however, has not been changed.
+In this chapter, we will shortly present each of those updates.
+\subsection{GPU implementation}
+In Reference~\cite{Kraml2020}, a GPU implementation of the energy calculation was implemented, which typically increases the speed by 1--2 orders of magnitude.
+
+If \software{cpptraj} is compiled with GPU support, the energy calculation uses the GPU automatically, without any additional input.
+However, PME-GIST is not supported on the GPU.
+
+\subsection{PME implementation}
+In Reference~\cite{Chen2021}, a PME implementation of the GIST energy was presented.
+For typical systems, this implementation is slightly slower than GPU-GIST, but much faster than the original CPU code.
+Furthermore, PME-GIST offers the best agreement between GIST energies and those observed in an MD simulation.
+
+To run a PME-GIST calculation, the \inlinecode{pme} flag to the \inlinecode{gist} action in \software{cpptraj} can be used.
+The output will contain two additional columns: \inlinecode{PME\_dens} and \inlinecode{PME\_norm}.
+They contain the potential of solute and solvent evaluated at the solvent positions and divided by two.
+Furthermore, the \inlinecode{Eww} and \inlinecode{Esw} columns are also computed using PME, and are reported as usual.
+For typical use cases, it is recommended to use \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
+
 \subsection{GIST with non-water solvents}
+In References~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
+
 \subsection{GIST with salt-water mixtures}
 In \cite{Waibl2021-gist-salt}, an extension of GIST was presented that can use salt-water mixtures as a solvent.
 This allows treating salting-out effects, although it was shown that the salting-out coefficient is over-predicted by GIST unless higher-order entropies are incorporated.
