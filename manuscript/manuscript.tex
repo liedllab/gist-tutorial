@@ -1048,7 +1048,26 @@ For typical use cases, it is recommended to use \inlinecode{Eww} and \inlinecode
 \subsection{GIST with non-water solvents}
 In References~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
 
+To run a GIST calculation in a solvent other than water, use the \inlinecode{solute} flag together with a \software{cpptraj} selection mask.
+Everything that is not in the \inlinecode{solute} mask is treated as solvent.
+If there are multiple solvent species, use the \inlinecode{solventmols} option as described in Section~\ref{sec-salt-water}.
+The code will automatically choose three atoms which are used to define the solvent orientation, and print this selection to the output.
+
+Sometimes, \software{cpptraj} does not automatically choose the optimal atoms.
+In methanol, for instance, one can either incorporate the C--H bonds or the O--H bond in the selection.
+The latter is probably more relevant since it can incorporate hydrogen bonding effects.
+Assuming that the alcohol hydrogen is called H1, this could be specified as follows:
+
+\begin{lstlisting}[style=cpptraj]
+gist gridcntr <x> <y> <z> \
+griddim <Nx> <Ny> <Nz> gridspacn <val> \
+solute ^1 rigidatoms O1 H1 C1
+\end{lstlisting}
+
+Note that the central atom of the \inlinecode{rigidatoms} selection goes first.
+
 \subsection{GIST with salt-water mixtures}
+\label{sec-salt-water}
 In \cite{Waibl2021-gist-salt}, an extension of GIST was presented that can use salt-water mixtures as a solvent.
 This allows treating salting-out effects, although it was shown that the salting-out coefficient is over-predicted by GIST unless higher-order entropies are incorporated.
 Generally, GIST should be able to treat arbitrary solvent mixtures as long as each molecule is sufficiently rigid.
