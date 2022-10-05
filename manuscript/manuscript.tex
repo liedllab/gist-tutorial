@@ -545,20 +545,6 @@ Aside from the thermodynamic quantities, GIST also calculates the number densiti
 
 Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above are written to the output file (output.dat) and can be used to generate DX files for other quantities.
 
-A minimal PyMOL input to visualize a ..dx file is shown here.
-For reference, an input structure is loaded from a file named \inlinecode{solute.pdb} (assuming that this file exists).
-The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
-
-% The current font makes the O look like a tofu / placeholder
-\begin{lstlisting}[style=pymol]
-load solute.pdb
-as surface
-load gist-gO.dx, gO
-isosurface gO_high, gO, 2.
-\end{lstlisting}
-
-\todo{Should be put a picture here? | Yeah, I am in favour -vah}
-
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
 In the process, the reader will learn how to set up and run a GIST calculation.
@@ -1089,6 +1075,72 @@ solute !(:WAT,NA,CL) solventmols WAT,NA,CL
 
 The current implementation of the entropy calculation in \software{cpptraj} requires at least 3 atoms in the main solvent.
 To compute the first-order entropy of the ions, as well as an approximate second order entropy, Python code is available on \url{https://github.com/liedllab/second-disorder}.
+
+\section{Visualization}
+
+\subsection{Loading a DX file in Pymol }
+A minimal PyMOL input to visualize a dx file is shown here.
+For reference, an input structure is loaded from a file named \inlinecode{streptavidin.pdb}.
+The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
+
+% The current font makes the O look like a tofu / placeholder
+\begin{lstlisting}[style=pymol]
+	load streptavidin.pdb
+	as surface
+	color gray70, streptavidin
+	load gist-gO.dx, gO
+	isomesh gO_high, gO, 2
+	color slate, gO_high
+\end{lstlisting}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\linewidth]{figures/streptavidin_gO_high_surf.png}
+	\caption{Oxygen density around strepativin at twice the reference bulk density}\label{streptavidin_gO}
+\end{figure}
+
+\subsection{Solvent Accessible Surface Area (SASA)}
+
+The solvent accessible surface area (SASA) represents  the voxels that are close to the protein surface and occupied by oxygen water.
+It represents the surface where water can go, and potentially surfaces that a ligand atom can occupy.
+
+
+The surface is generated from the oxygen density (gO.dx) file using \software{gistpp}. 
+A voxel is deemed to be  part of the surface if it is occupied by water (gO > 0.3) and has at least one neighboring empty voxel (gO < 0.1).
+
+\begin{lstlisting}[style=bash]
+	gistpp -op sasa -i gO.dx -o sasa.dx
+\end{lstlisting}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\linewidth]{streptavidin_sasa_close.png}
+	\caption{SASA for streptavidin focused on the binding pocket}\label{streptavidin_sasa}
+\end{figure}
+
+In the above figure, the SASA was generated from a simulation of the protein in the absence of the ligand.
+When the ligand is placed in the binding pocked, all atoms are within the SASA. 
+
+\subsection{Region around the binding pocket}
+Specific regions in a protein can be defined to calculate the thermodynamic quantities for that region.
+This is significant specially when calculating the properties of water that will be expelled when a ligand binds to the protein.
+
+For example, voxels that are part of the binding pocket can be defined using a ligand molecule and a distance criteria. In \software{gistpp}, voxels that are within the distance criteria from any ligand heavy atom is considered as part of the region. The resulting file is a binary file and can be visualized using \software{pymol}.
+
+\begin{lstlisting}[style=bash]
+	gistpp -op defbp -i gO.dx -i2 ligand.pdb 
+	
+	-opt const 3.5 -o gO_3.5.dx
+\end{lstlisting}
+
+
+In this example, the region defined in the binding pocket includes all voxels that are within 3.5 A of the heavy atoms of biotin. 
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\linewidth]{streptavidin_bp.png}
+	\caption{Volume of strepatividin defined around 3.5 A of biotin. }\label{streptavidin_sasa}
+\end{figure}
 
 \section{Cheatsheet}
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
