@@ -26,6 +26,7 @@
 \graphicspath{{figures/}}
 
 \usepackage{listings}
+\usepackage{tabularx}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% IMPORTANT USER CONFIGURATION
@@ -215,9 +216,9 @@ While previous tutorials gave insightful pointers how to setup and run GIST calc
 
 This tutorial provides an example of a GIST workflow that can be easily adapted towards different systems. 
 In addition to a short introduction of the method and the theory behind it, we present an overview of the various different flavors of GIST methods.
-
-Furthermore, a GIST study of the streptavidin-biotin complex is presented, which reflects on many common aspects of GIST studies.
-Using this test system, we present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
+We ease the user into the basic usage of GIST by presenting a calculation for a small molecule.
+Building on the basics, a more advanced GIST study of the streptavidin-biotin complex is presented, which reflects on many common aspects of GIST studies.
+Using these test systems, we present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
 We show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket and around the ligand.
 
 Additionally, we compute the binding contribution of the free energy of solvation, which requires accurate post-processing of the GIST outputs to avoid unfavorable summation of bias in the GIST calculation.
@@ -241,7 +242,7 @@ After completing this tutorial, we expect the reader to be able to run their own
 This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD) simulations.
 The user should be able to run MD simulations and work with their output data.
 Previous experience of GIST is not necessary.
-However, we only provide a short explanation of the theory behind GIST and point the reader towards the primary sources for more detailed information.
+However, we only provide a short explanation of the theory behind GIST in section \ref{sec:theory} at the end of this tutorial. For more detailed information, we point the reader towards the primary sources for more detailed information.
 
 The presented analyses are run in Python.
 While no programming experience should be necessary to follow the tutorial, a basic understanding of Python is advantageous to adjust the code towards different requirements and use-cases. 
@@ -250,11 +251,9 @@ Therefore, an understanding of Jupyter notebooks is beneficial to reproduce the 
 
 \subsection{Software/system requirements}
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
-The main implementation of GIST is part of the MD analysis software \software{cpptraj} as part of AmberTools \cite{amber22}.
+The main implementation of GIST is part of the MD analysis software \software{cpptraj} released with AmberTools \cite{amber22}.
 
 A recent version of \software{cpptraj} should be used, such as the one provided in AmberTools22 or a recent installation from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
-The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations. 
-
 
 The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations.
 If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}.
@@ -280,196 +279,12 @@ We recommend JupyterLab to work with the notebook. Jupyter is available at \url{
 
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files.
 We recommend using a current version of \software{PyMol}\cite{pymol} or \software{VMD}\cite{vmd}.
-\section{Theory}
-
-GIST is an implementation of inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998} that discretizes the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
-It was first devised by Nguyen et al. \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described by Ramsey et al. \cite{Ramsey2016}. % to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
-Here, we only provide a short overview of the theory behind GIST.
-For more detailed information, we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021}.
-
-\subsection{Solvation Entropy}
-
-%The solvation entropy of a system is totality of the contribution of the  solute-water entropy and the water-water entropy. -- this is inconsistent with IST theory (fwa)
 
 
-%\begin{equation}
-%	\Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
-%\end{equation}
-%Here the solvation entropy is approximated from the contribution of solute-water interaction. 
-%\textbf{STILLNEEDS REVISON + ADD CITATIONS} The quantity $k_\textit{b}$represents the Boltzman constant, 
-%$\rho^\textit{o}$ is the bulk number density, $g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
-%pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
-%$\omega$ represents the Euler angles, and $\frac{1}{8\pi^2}$ is the volume of the orientational space, which acts as a normalization constant.
-%In bulk and in regions where the orientational 
-%entropy is uniform, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order solvation entropy of 
-%bulk to be zero. Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
-%the solvation entropy to be an approximation of the integral around the solute atom. 
-
-IST expresses the free energy of solvation in terms of the solvent density in a coordinate system defined by the solute.
-The solute is kept fixed in space, following the standard solvation process established by Ben-Naim \cite{ben-naim-book}.
-
-For the entropy, this leads to an infinite expansion of correlations of increasing order.
-In a slightly simplified view, the first order is the solvent density $g_\textit{sw}\left(\textbf{r},\omega \right)$ at each position $\textbf{r}$ and orientation $\omega$.
-The first-order entropy omits all solvent-solvent (and higher) correlations, while the solute-solvent correlation is taken into account because the coordinates are relative to the solute.
-Thus, it is called the solute-water entropy $S_{sw}$.
-%The second order is the pair density, i.e., the probability of finding two solvent molecules in positions $\textbf{r}$ and $\textbf{r}^\prime$.
-
-The solvent density is expressed relative to the bulk density $\rho^\textit{o}$. %$g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
-%pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
-%$\omega$ represents the Euler angles, and 
-The entropy integral is also normalized by $8\pi^2$, which is the volume of the orientational space.
-In bulk or at a high distance to the solute, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order entropy of 
-bulk to be zero. 
-Therefore, no reference entropy needs to be computed unless there is a numeric bias, e.g., when the MD frames are not statistically independent due to insufficient spacing.
-%Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
-%the solvation entropy to be an approximation of the integral around the solute atom. 
-\begin{equation}
-	\Delta S_\textit{solv}
-	\approx \Delta S_\textit{sw}
-	\newcommand{\gro}{g_{sw}(\textbf{r},\omega)}
-	\equiv -R \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int \gro \ln\gro d\textbf{r}d\omega
-\end{equation}
-\todo{We are inconsistent regarding R/kB; vah: Fixed. is it - tho? Papers seem to disagre }
-
-The solvation entropy is further broken down in terms of the contribution from translational and orientational terms.
-\begin{equation}
-	\Delta S_\textit{solv} = \Delta S_\textit{trans} + \Delta S_\textit{orient}
-\end{equation}
-
-\subsection{Entropy Calculations in Cpptraj}
-In \software{cpptraj} the calculation of  solvation entropy is handled by two methods.
-
-
-The first method assumes that the distribution of the orientation $\omega$ is constant within a voxel $k$.
-This allows for the splitting of the contributions of the translational and the orientational entropy. 
-A first nearest neighbor (NN) approach is used to evaluate the density.
-%The translational density $g_{NN}(\textbf{r})$ is expressed in reference to a homogeneous bulk solvent at the reference density, while the orientational density $g_{NN}(\omega)$ is expressed to a random placement of the number of solvents found in this voxel.
-Both the translational ($g_{NN}(\textbf{r})$) and orientational ($g_{NN}(\omega)$) density are computed relative to a bulk solvent at the reference density $\rho^0$.
-
-The average entropy contributions per solvent molecule in voxel $k$ are calculated as
-
-\begin{equation}
-	S_{k}^\textit{trans} = -R \left( \gamma + \frac{1}{N_\textit{k}} \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}}(\textbf{r}) \right)
-\end{equation}
-and
-\begin{equation}
-	S_{k}^\textit{orient} = -R \left( \gamma + \frac{1}{N_k} \sum _{i=1}^{N_k} \ln g_{NN, i}(\omega) \right)
-	,
-\end{equation}
-where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is Euler's constant accounting for the bias of the naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate.
-
-The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation) 
-using the nearest-neighbor approach. 
-% Unlike the first method, the nearest neighbor estimate for the sixth-order entropy considers all the water found within the same and neighboring voxels. -- misleading because this is also done for S_trans (fwa)
-
-\begin{equation}
-g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox}(\textbf{r}) g_\textit{vox}(\omega)
-\end{equation}
-
-\begin{equation}
-	S_\textit{k} = -R \left( \gamma + \frac{1}{N_\textit{k}} \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}}(\textbf{r},\omega) \right)
-\end{equation}
-
-
-\subsection{Solvation Energy}
-The solvation energy is readily calculated by summing up the contributions of the water-water interaction and the water-solute interaction from the force field.
-\begin{equation}
-	\Delta E_\textit{solv} = \Delta E_\textit{sw} + \Delta E_\textit{ww}
-\end{equation}
-
-The solute-solvent energy $E_{sw}$ can be expressed in terms of the solvent density and the potential $U_{sw}(\textbf{r},\omega)$ induced by the solute.
-In practice, it is evaluated as the expectation value $\langle\cdot\rangle$ of the pairwise force field energy $U_{ij}$ between all solvent molecules in voxel $k$ and all solute atoms.
-
-\begin{equation}
-\begin{aligned}
-\label{eq-esw}
-	\Delta E_{sw}(\textbf{r}) \equiv& \frac{1}{8\pi^2} \int g_\textit{sw}\left(\omega|\textbf{r}\right) U_\textit{sw}\left(\textbf{r}, \omega\right) d\omega \\
-	\Delta E_{sw,k}=& \left\langle \sum_i^{\textit{solvent},k} \; \sum_j^\textit{solute} U_{ij}\right\rangle
-\end{aligned}
-\end{equation}
-
-To localize $E_{sw}$ on the three-dimensional grid, every energy term is assigned to the voxel $k$ holding the solvent, and the expectation value in Equation~\ref{eq-esw} is computed per voxel.
-Similar to the entropy integrals, the solute-water solvation energy integral also decays with increasing distance from the solute. Hence, the solvation energy can be approximated by local spatial integrals. 
-
-The solvent-solvent energy $E_{ww}$ is computed in a similar manner.
-Again, it can be expressed in terms of density functions, but is practically computed as a sum over solvent-solvent interactions where one solvent is in voxel $k$.
-In contrast to $E_{sw}$, $E_{ww}$ does not tend to zero in bulk.
-Therefore, a reference energy corresponding to the average energy of a water molecule in bulk needs to be subtracted.
-
-%However, there is a complication arising from this approximation. Water molecules outside the region of interest will also be accounted for in the pairwise water term. For example, given two different regions $R_a$ and $R_b$, will not sum up to the total energy of the two regions due to double counting.
-
-\begin{equation}
-\begin{aligned}
-	\Delta E_{ww}(\textbf{r}) \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}(\omega|\textbf{r}) \\
-	& \times \left[g_\textit{sw}(\textbf{r}^\prime , \omega^\prime) - g^o_\textit{ww} (\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime )\right] \\
-	& \times U_\textit{ww}(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime)d\omega d\textbf{r}^\prime d\omega^\prime \\
-	\Delta E_{ww,k} =& \frac{1}{N_k} \left\langle \sum_i^{\text{solvent},k} \; \sum_{j \neq i}^\text{solvent} U_{ij}\right\rangle - \left\langle E_{ww}^\text{bulk}\right\rangle
-\end{aligned}
-\end{equation}
-
-%AFAIK, this was never done, since the pair interaction matrix Eij would have to be written out.
-%There are two ways in which this double counting was accounted for in the original paper. First, using the water-displacement method. This method is applicable when a determining the energetic cost of kicking out a water molecule. 
-%\begin{equation}
-%	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
-%\end{equation}
-
-%The second method uses normalized-water properties to account the difference in water properties of two different regions. The normalized water property is defined as the water property per water molecule. 
-%\begin{equation}
-%	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
-%\end{equation}
-
-
-When computing the total $E_{ww}$ of the system, double-counting of interactions must be avoided.
-The total solvent-solvent energy of the system is as follows:
-
-\begin{equation}
-	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
-\end{equation}
-
-However, when water is replaced from a small region $R$ of interest, such as a single water molecule, almost all interactions are with water molecules outside of this region.
-Therefore, there is no double counting, and the full solvent-solvent energy should be used.
-
-\begin{equation}
-	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
-\end{equation}
-
-When the region of interest $R$ comprises more than one molecule, interactions within this region are double-counted while interactions to the outside are not.
-To take this into account, the solvent-solvent energy between each pair of voxels $E_{ww,kl}$ is needed.
-While this is supported by the standard GIST implementation, it is rarely done due to the large size of the $E_{ww,kl}$ matrix.
-
-We note that replacement of a small or medium solvent region would lead to reorganization of the surrounding solvent.
-However, this depends on the local environment and on \emph{what} the molecule would be replaced by.
-Therefore, the effect of reorganization can not be directly included in the GIST method, but must be judged for each case individually.
-This is not a problem when computing the total free energy of solvation $\dgsolv$, since no additional boundary is created.
-\todo{This is a bit unclear to me, could we elaborate on this a bit more? What are we asking of the reader here, how would one consider this effect? -vah}
-
-\subsection{PME implementation}
-
-In the original version of GIST, the energies are calculated based on the the minimum image convention.
-In PME-GIST, the electrostatics are calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the treatment in the Amber MD engine \cite{Chen2021}.
-The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are computed separately.
-
-\begin{equation}
-	E_\text{total} = E_\text{elec} + E_\text{lj}
-\end{equation}
-
-In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space using a distance cutoff, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
-Additionally, there is a correction term $E_\text{corr}$, which corrects for the self-interaction of each solvent molecule in the reciprocal term.
-
-\begin{equation}
-	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
-\end{equation}
-%\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. } - ok? -fwa
-The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
-
-\begin{equation}
-	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{corr}
-\end{equation}
-\todo{Is $E_{corr}$ the same in eq 13 and 14? How is it calculated? -vah}
 
 \section{Running GIST}
 %\subsection{Running the GIST analysis}
-To run a gist analyis, the following is required:
+To run a GIST analyis, the following is required:
 \begin{itemize}
 	\item A running installation of \software{cpptraj}.
 	\item A topology of the molecule of interest in a solvent box.
@@ -521,38 +336,57 @@ The first line specifies the amber topology file that was used to run MD. The se
 cpptraj -i gist.in
 \end{lstlisting}
 
+Cpptrajs' gist action has a large number of options to modify the GIST calculation or its' output. A full list is provided at the end of this tutorial or through cpptrajs manual. The major options are summarized in the following table:
 
+\begin{table}[h]
+	\caption{The major options available in cpptrajs' GIST implementation.}\label{tab:GIST_options}
+	\small
+	\begin{tabularx}{\columnwidth}{@{}llXl@{}}
+		\toprule
+		Command       & Options & Explanation & Default  \\
+		\midrule
+		gridcntr    & <y> <y> <z> & Coordinates of the grid center in \AA & 0 0 0  \\
+		griddim     & <nx> <ny> <nz> & Number of voxels along each axis defining the grid size & 40 40 40\\
+		gridspacn & <dval> &Grid spacing / voxel dimensions in  \AA & 0.5    \\
+		refdens         & <rdval> & Reference density of the bulk water in molecules/\AA$^3$ . & 0.0334    \\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+
+Setting the reference density according to the water model used in your simulation is important to get correct results. The reference density can be calculated from a GIST calculation for a pure water simulation or estimated from bulk-like water sufficiently far away from a solvent. \todo{How much information on the choice of reference density should we include?}
+ 
 \paragraph{Postprocessing and Analyzing GIST results}
 Cpptraj outputs the quantities calculated as a "open data explorer" (.dx) file format which can be easily visualized in Pymol or VMD.
-Aside from the thermodynamic quantities, GIST also calculates the number densities of hydrogen and oxygen in each voxel. Here is a full list of quantities calculated by GIST \todo{This is incomplete!}:
+Aside from the thermodynamic quantities, GIST also calculates the number densities of hydrogen and oxygen in each voxel. Here is a list of the most important quantities calculated by GIST:
 
 \begin{itemize}
 	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. For water, gO and gH are produced.}
-	%\item{[gH] Number density of hydrogen centers found in the voxel in units of the reference bulk density.}
 	\item{[Esw] Mean solute-water interaction energy density.}
 	\item{[Eww] Mean water-water interaction energy density.}
 	\item{[PME] (only if PME was used) water PME energy density.}
 	\item{[dTStrans] First order translational entropy density.}
 	\item{[dTSorient] First order orientational entropy density .}
+	\item{[dTSsix] First order entropy density for the six-dimensional combined orientation and translation space.}
 	\item{[neighbor] Mean number of waters neighboring the water molecules found in this voxel multiplied by the voxel number density.}
 	\item{[dipole] Magnitude of mean dipole moment (polarization).}
-	\item{[order] (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter.}
 	\item{[dipolex] x-component of the mean water dipole moment density}
 	\item{[dipoley] y-component of the mean water dipole moment density}
 	\item{[dipolez] z-component of the mean water dipole moment density}
-	\item{[Eij] (if \inlinecode{doeij} was specified) Water-water interaction matrix.}
 \end{itemize}
 
-Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All quantities mentioned above are written to the output file (output.dat) and can be used to generate DX files for other quantities.
+Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All calculated quantities are written to the output file (output.dat) and can be used to generate DX files for other quantities. A full list of all calculated properties found in the output in addition to the ones mentioned above is provided at the end of the tutorial.
 
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
-In the process, the reader will learn how to set up and run a GIST calculation.
 During the tutorial, we will
 \begin{enumerate}
-	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
+	\item set up and run GIST calculations for a small molecule as well as a protein binding pocket.
+	\item compute the free energy of solvation for a small molecule using GIST.
 	\item visualize local contributions to $\dgsolv$ in the streptavidin binding pocket as well as around biotin.
+	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
+	\item explore advantages and disadvantages of the GIST method when used to calculate  $\dgsolv$
 \end{enumerate}
+The tutorial is divided into a beginners part and an advanced part. In the beginners part, we will take a look at how to run GIST calculations for small molecules and interpret the output for a small molecule. In the advanced part, we will apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of binding for a small molecule into this pocket using an end-state approach. In addition, while the beginners part focuses only on GIST calculation run, we will discuss all steps along the way in detail in the advanced section.
 
 \subsection{Streptavidin/Biotin}
 The streptavidin-biotin complex is one of the strongest known non-covalent interactions involving a small molecule.
@@ -563,19 +397,22 @@ Here, we will investigate the binding of biotin to a streptavidin monomer for si
 This interaction has been reported to have a binding constant of \todo{???}.
 
 \subsection{Tutorial data}
-We will use the 1STP crystal structure to start our calculations.
+We will use the 1STP crystal structure to start our calculations. For the beginners section, we will use the biotin ligand as extracted from the crystal structure. For the second part, we will use the whole crystal structure.
 For the sake of simplicity, you can download prepared and solvated Amber topologies and structures based on 1STP by running
 \begin{lstlisting}[style=bash]
 git clone git@github.com:liedllab/gist-tutorial.git
 \end{lstlisting}
 This will download the tutorial files (including both the manuscript and the examples in the \software{code} folder).
-\subsection{System Preparation and Equilibration}
+\
+\subsection{Running GIST for Biotin}
+
+\subsection{Applying GIST for the Streptavidin-Biotin complex}
+\subsubsection{System Preparation and Equilibration}
 If you want to skip this section, run 
 \begin{lstlisting}[style=bash]
 make equilibration-targets
 \end{lstlisting}
 in the code folder. This assumes that you have Python and Amber set up properly and that \software{pmemd.cuda} is in the PATH.
-
 
 The choice of the initial structure to be analyzed is crucial to the results 
 you can expect from the GIST calculation. Crystal structures may not be 
@@ -625,7 +462,7 @@ After that, you can use \software{equilibration.py -R} to run short restrained
 equilibrations (where only the water is allowed to move) on the individual 
 systems.
 
-\subsection{Running MD for GIST}
+\subsubsection{Running MD for GIST}
 
 Now, you can run restrained MD simulations based on the equilibrated structures for subsequent GIST analyses.
 \todo {explain why the protein needs to be restrained for an MD simulation that will be analyzed using GIST}
@@ -1095,11 +932,199 @@ For example, voxels that are part of the binding pocket can be defined using a l
 
 In this example, the region defined in the binding pocket includes all voxels that are within 3.5 A of the heavy atoms of biotin. 
 
-\begin{figure}
-	\centering
-	\includegraphics[width=1.0\linewidth]{streptavidin_bp.png}
-	\caption{Volume of strepatividin defined around 3.5 A of biotin. }\label{streptavidin_sasa}
-\end{figure}
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=1.0\linewidth]{streptavidin_bp.png}
+%	\caption{Volume of strepatividin defined around 3.5 A of biotin. }\label{streptavidin_sasa}
+%\end{figure}
+
+\section{Theory}
+\label{sec:theory}
+GIST is an implementation of inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998} that discretizes the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
+It was first devised by Nguyen et al. \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described by Ramsey et al. \cite{Ramsey2016}. % to overcome the limitation of IST which was commonly used for regions of high water occupancy and its implementation in \software{cpptraj} was thoroughly described in \cite{Ramsey2016}.
+Here, we only provide a short overview of the theory behind GIST.
+For more detailed information, we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021}.
+
+\subsection{Solvation Entropy}
+
+%The solvation entropy of a system is totality of the contribution of the  solute-water entropy and the water-water entropy. -- this is inconsistent with IST theory (fwa)
+
+
+%\begin{equation}
+%	\Delta S_\textit{solv} = \Delta S_\textit{sw} + \Delta S_\textit{ww}
+%\end{equation}
+%Here the solvation entropy is approximated from the contribution of solute-water interaction. 
+%\textbf{STILLNEEDS REVISON + ADD CITATIONS} The quantity $k_\textit{b}$represents the Boltzman constant, 
+%$\rho^\textit{o}$ is the bulk number density, $g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
+%pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
+%$\omega$ represents the Euler angles, and $\frac{1}{8\pi^2}$ is the volume of the orientational space, which acts as a normalization constant.
+%In bulk and in regions where the orientational 
+%entropy is uniform, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order solvation entropy of 
+%bulk to be zero. Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
+%the solvation entropy to be an approximation of the integral around the solute atom. 
+
+IST expresses the free energy of solvation in terms of the solvent density in a coordinate system defined by the solute.
+The solute is kept fixed in space, following the standard solvation process established by Ben-Naim \cite{ben-naim-book}.
+
+For the entropy, this leads to an infinite expansion of correlations of increasing order.
+In a slightly simplified view, the first order is the solvent density $g_\textit{sw}\left(\textbf{r},\omega \right)$ at each position $\textbf{r}$ and orientation $\omega$.
+The first-order entropy omits all solvent-solvent (and higher) correlations, while the solute-solvent correlation is taken into account because the coordinates are relative to the solute.
+Thus, it is called the solute-water entropy $S_{sw}$.
+%The second order is the pair density, i.e., the probability of finding two solvent molecules in positions $\textbf{r}$ and $\textbf{r}^\prime$.
+
+The solvent density is expressed relative to the bulk density $\rho^\textit{o}$. %$g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
+%pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water molecule,  
+%$\omega$ represents the Euler angles, and 
+The entropy integral is also normalized by $8\pi^2$, which is the volume of the orientational space.
+In bulk or at a high distance to the solute, the quantity $g_\textit{sw}\left(\textbf{r},\omega \right)$ is unity which leads to the first-order entropy of 
+bulk to be zero. 
+Therefore, no reference entropy needs to be computed unless there is a numeric bias, e.g., when the MD frames are not statistically independent due to insufficient spacing.
+%Also, this quantity reaches unity as the distance from the solute molecule increases which leads for the calculation of 
+%the solvation entropy to be an approximation of the integral around the solute atom. 
+\begin{equation}
+	\Delta S_\textit{solv}
+	\approx \Delta S_\textit{sw}
+	\newcommand{\gro}{g_{sw}(\textbf{r},\omega)}
+	\equiv -R \frac{\rho^\textit{0}}{8\pi^\textit{2}} \int \gro \ln\gro d\textbf{r}d\omega
+\end{equation}
+\todo{We are inconsistent regarding R/kB; vah: Fixed. is it - tho? Papers seem to disagre }
+
+The solvation entropy is further broken down in terms of the contribution from translational and orientational terms.
+\begin{equation}
+	\Delta S_\textit{solv} = \Delta S_\textit{trans} + \Delta S_\textit{orient}
+\end{equation}
+
+\subsection{Entropy Calculations in Cpptraj}
+In \software{cpptraj} the calculation of  solvation entropy is handled by two methods.
+
+
+The first method assumes that the distribution of the orientation $\omega$ is constant within a voxel $k$.
+This allows for the splitting of the contributions of the translational and the orientational entropy. 
+A first nearest neighbor (NN) approach is used to evaluate the density.
+%The translational density $g_{NN}(\textbf{r})$ is expressed in reference to a homogeneous bulk solvent at the reference density, while the orientational density $g_{NN}(\omega)$ is expressed to a random placement of the number of solvents found in this voxel.
+Both the translational ($g_{NN}(\textbf{r})$) and orientational ($g_{NN}(\omega)$) density are computed relative to a bulk solvent at the reference density $\rho^0$.
+
+The average entropy contributions per solvent molecule in voxel $k$ are calculated as
+
+\begin{equation}
+	S_{k}^\textit{trans} = -R \left( \gamma + \frac{1}{N_\textit{k}} \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}}(\textbf{r}) \right)
+\end{equation}
+and
+\begin{equation}
+	S_{k}^\textit{orient} = -R \left( \gamma + \frac{1}{N_k} \sum _{i=1}^{N_k} \ln g_{NN, i}(\omega) \right)
+	,
+\end{equation}
+where $N_\textit{k}$ is the number of water molecules found in voxel k, $\gamma$ is Euler's constant accounting for the bias of the naive entropy estimator, and $g_\textit{NN}$ is the nearest neighbor estimate.
+
+The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation) 
+using the nearest-neighbor approach. 
+% Unlike the first method, the nearest neighbor estimate for the sixth-order entropy considers all the water found within the same and neighboring voxels. -- misleading because this is also done for S_trans (fwa)
+
+\begin{equation}
+	g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox}(\textbf{r}) g_\textit{vox}(\omega)
+\end{equation}
+
+\begin{equation}
+	S_\textit{k} = -R \left( \gamma + \frac{1}{N_\textit{k}} \sum _{i=1}^{N_k} \ln g_{NN, \textit{i}}(\textbf{r},\omega) \right)
+\end{equation}
+
+
+\subsection{Solvation Energy}
+The solvation energy is readily calculated by summing up the contributions of the water-water interaction and the water-solute interaction from the force field.
+\begin{equation}
+	\Delta E_\textit{solv} = \Delta E_\textit{sw} + \Delta E_\textit{ww}
+\end{equation}
+
+The solute-solvent energy $E_{sw}$ can be expressed in terms of the solvent density and the potential $U_{sw}(\textbf{r},\omega)$ induced by the solute.
+In practice, it is evaluated as the expectation value $\langle\cdot\rangle$ of the pairwise force field energy $U_{ij}$ between all solvent molecules in voxel $k$ and all solute atoms.
+
+\begin{equation}
+	\begin{aligned}
+		\label{eq-esw}
+		\Delta E_{sw}(\textbf{r}) \equiv& \frac{1}{8\pi^2} \int g_\textit{sw}\left(\omega|\textbf{r}\right) U_\textit{sw}\left(\textbf{r}, \omega\right) d\omega \\
+		\Delta E_{sw,k}=& \left\langle \sum_i^{\textit{solvent},k} \; \sum_j^\textit{solute} U_{ij}\right\rangle
+	\end{aligned}
+\end{equation}
+
+To localize $E_{sw}$ on the three-dimensional grid, every energy term is assigned to the voxel $k$ holding the solvent, and the expectation value in Equation~\ref{eq-esw} is computed per voxel.
+Similar to the entropy integrals, the solute-water solvation energy integral also decays with increasing distance from the solute. Hence, the solvation energy can be approximated by local spatial integrals. 
+
+The solvent-solvent energy $E_{ww}$ is computed in a similar manner.
+Again, it can be expressed in terms of density functions, but is practically computed as a sum over solvent-solvent interactions where one solvent is in voxel $k$.
+In contrast to $E_{sw}$, $E_{ww}$ does not tend to zero in bulk.
+Therefore, a reference energy corresponding to the average energy of a water molecule in bulk needs to be subtracted.
+
+%However, there is a complication arising from this approximation. Water molecules outside the region of interest will also be accounted for in the pairwise water term. For example, given two different regions $R_a$ and $R_b$, will not sum up to the total energy of the two regions due to double counting.
+
+\begin{equation}
+	\begin{aligned}
+		\Delta E_{ww}(\textbf{r}) \equiv & \left(\frac{1}{8\pi^2} \right)^2 \rho^o \int g_\textit{sw}(\omega|\textbf{r}) \\
+		& \times \left[g_\textit{sw}(\textbf{r}^\prime , \omega^\prime) - g^o_\textit{ww} (\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime )\right] \\
+		& \times U_\textit{ww}(\textbf{r}, \omega, \textbf{r}^\prime, \omega^\prime)d\omega d\textbf{r}^\prime d\omega^\prime \\
+		\Delta E_{ww,k} =& \frac{1}{N_k} \left\langle \sum_i^{\text{solvent},k} \; \sum_{j \neq i}^\text{solvent} U_{ij}\right\rangle - \left\langle E_{ww}^\text{bulk}\right\rangle
+	\end{aligned}
+\end{equation}
+
+%AFAIK, this was never done, since the pair interaction matrix Eij would have to be written out.
+%There are two ways in which this double counting was accounted for in the original paper. First, using the water-displacement method. This method is applicable when a determining the energetic cost of kicking out a water molecule. 
+%\begin{equation}
+%	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
+%\end{equation}
+
+%The second method uses normalized-water properties to account the difference in water properties of two different regions. The normalized water property is defined as the water property per water molecule. 
+%\begin{equation}
+%	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
+%\end{equation}
+
+
+When computing the total $E_{ww}$ of the system, double-counting of interactions must be avoided.
+The total solvent-solvent energy of the system is as follows:
+
+\begin{equation}
+	\Delta E^R_\textit{ww} = n^\textit{R} E^\textit{bulk}_\textit{ww} - E^\textit{R,corr}_\textit{ww}
+\end{equation}
+
+However, when water is replaced from a small region $R$ of interest, such as a single water molecule, almost all interactions are with water molecules outside of this region.
+Therefore, there is no double counting, and the full solvent-solvent energy should be used.
+
+\begin{equation}
+	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
+\end{equation}
+
+When the region of interest $R$ comprises more than one molecule, interactions within this region are double-counted while interactions to the outside are not.
+To take this into account, the solvent-solvent energy between each pair of voxels $E_{ww,kl}$ is needed.
+While this is supported by the standard GIST implementation, it is rarely done due to the large size of the $E_{ww,kl}$ matrix.
+
+We note that replacement of a small or medium solvent region would lead to reorganization of the surrounding solvent.
+However, this depends on the local environment and on \emph{what} the molecule would be replaced by.
+Therefore, the effect of reorganization can not be directly included in the GIST method, but must be judged for each case individually.
+This is not a problem when computing the total free energy of solvation $\dgsolv$, since no additional boundary is created.
+\todo{This is a bit unclear to me, could we elaborate on this a bit more? What are we asking of the reader here, how would one consider this effect? -vah}
+
+\subsection{PME implementation}
+
+In the original version of GIST, the energies are calculated based on the the minimum image convention.
+In PME-GIST, the electrostatics are calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the treatment in the Amber MD engine \cite{Chen2021}.
+The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are computed separately.
+
+\begin{equation}
+	E_\text{total} = E_\text{elec} + E_\text{lj}
+\end{equation}
+
+In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space using a distance cutoff, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
+Additionally, there is a correction term $E_\text{corr}$, which corrects for the self-interaction of each solvent molecule in the reciprocal term.
+
+\begin{equation}
+	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
+\end{equation}
+%\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. } - ok? -fwa
+The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
+
+\begin{equation}
+	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{corr}
+\end{equation}
+\todo{Is $E_{corr}$ the same in eq 13 and 14? How is it calculated? -vah}
+
 
 \section{Cheatsheet}
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
