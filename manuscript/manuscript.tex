@@ -1101,20 +1101,19 @@ The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference 
 
 \subsection{Solvent Accessible Surface Area (SASA)}
 
-The solvent accessible surface area (SASA) represents  the voxels that are close to the protein surface and occupied by oxygen water.
-It represents the surface where water can go, and potentially surfaces that a ligand atom can occupy.
+The solvent accessible surface (SASA) represents the interface between regions that are occupied by the solute, and those which can be accessed by the solvent.
+GIST provides a very natural way of creating a SASA using an isosurface of the oxygen density gO.
+It can be visualized in PyMOL as follows:
 
-
-The surface is generated from the oxygen density (gO.dx) file using \software{gistpp}. 
-A voxel is deemed to be  part of the surface if it is occupied by water (gO > 0.3) and has at least one neighboring empty voxel (gO < 0.1).
-
-\begin{lstlisting}[style=bash]
-	gistpp -op sasa -i gO.dx -o sasa.dx
+\begin{lstlisting}[style=pymol]
+load ../gist.pdb
+load ../gist-gO.dx
+isomesh sas, gist-gO, 0.1
 \end{lstlisting}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1.0\linewidth]{streptavidin_sasa_close.png}
+	\includegraphics[width=1.0\linewidth]{figures/sasa-simple.png}
 	\caption{SASA for streptavidin focused on the binding pocket}\label{streptavidin_sasa}
 \end{figure}
 
@@ -1134,12 +1133,12 @@ For example, voxels that are part of the binding pocket can be defined using a l
 \end{lstlisting}
 
 
-In this example, the region defined in the binding pocket includes all voxels that are within 3.5 A of the heavy atoms of biotin. 
+In this example, the region defined in the binding pocket includes all voxels that are within \SI{3.5}{\angstrom} of the heavy atoms of biotin. 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1.0\linewidth]{streptavidin_bp.png}
-	\caption{Volume of strepatividin defined around 3.5 A of biotin. }\label{streptavidin_sasa}
+	\includegraphics[width=1.0\linewidth]{streptavidin_bp_close.png}
+	\caption{Volume of streptavidin defined around \SI{3.5}{\angstrom} of biotin. }\label{streptavidin_volume}
 \end{figure}
 
 \section{Cheatsheet}
