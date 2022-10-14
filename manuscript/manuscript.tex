@@ -294,33 +294,28 @@ GIST analysis can be divided in three steps: defining a region of interest, runn
 \cite{Ramsey2016}
 
 \paragraph{Identify and define the region of interest}
-In order to run a GIST analysis, the region where the solvent properties will be calculated must be first defined. This region is represented by a rectangular prism centered at (x, y, z) with $N_x \times N_y \times N_z$ voxels, where each voxel is cubic with a sidelength of \inlinecode{gridspacn}.
+In order to run a GIST analysis, the region where the solvent properties will be calculated must be first defined. This region is represented by a rectangular grid centered at (x, y, z) with $N_x \times N_y \times N_z$ voxels, where each voxel is cubic with a sidelength of \inlinecode{gridspacn}.
 While integrals over GIST quantities are independent of the voxel size, individual voxel values converge slower at high resolutions.\pdfcomment{The calculation actually can actually get faster at higher resolution, because the same grid is used in the nearest-neighbor search.}
-A default value of 0.5 A is used that provides reasonable discretization for many use-cases.
+The default value of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
 
-In \software{ccptraj}, the rectangular prism is defined by parameters of the \inlinecode{gist} command.
-The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of 
-the grid is defined by \inlinecode{griddim} (in voxel counts), and the spacing 
-is defined by \inlinecode{gridspacn} (in Å).
+The grid is defined by parameters of the \inlinecode{gist} command in \software{cpptraj}.
+The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing in \AA by \inlinecode{gridspacn}.
 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 
-The region can be defined using a ligand in a specific binding pocket of the 
-protein, a specific residue of the protein, or the whole protein itself. A 
-helper script FindCentroid.py can be used to determine the centroid of the 
-region of interest as well as the dimensions of the rectangular prism that will 
-fully enclose the region. A pdb file is needed as an input and the rectangular 
-prism will be centered based on the centroid of the given structure.
+Often, the region of interest will be defined by the surrounding of a molecule, which might either be a ligand in the binding pocket or also the whole protein. 
+A helper script called \inlinecode{FindCentroid.py} for this purpose is supplied with this tutorial, and can be used as follows:
 
 \begin{lstlisting}[style=bash]
 python FindCentroid.py -i structure.pdb
 \end{lstlisting}
 
 \paragraph{Run GIST using cpptraj}
-GIST is incorporated in cpptraj which requires the topology and the trajectory of the MD simulation to be analayzed. The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic comands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
+GIST is implemented in \software{cpptraj} which requires the topology and the trajectory of the MD simulation to be analyzed.
+The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic commands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
 
 \begin{lstlisting}[style=cpptraj]
 parm topology.prmtop
@@ -330,13 +325,17 @@ gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 \
 go
 \end{lstlisting}
 
-The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file and what frames to be analyzed. The third line tells cpptraj to run a GIST calculation using the region defined and print the output of the calculation in a file called gist.dat. The last instructs cpptraj to run the calculation. The syntax for running cpptraj given this input file is:
+The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file.
+Note that the solute should not move significantly for a GIST calculation.
+This is typically achieved by using restraints on the solute coordinates.
+The third line tells \software{cpptraj} to run a GIST calculation using the region defined and print the output of the calculation in a file called \inlinecode{gist.dat}. The last instructs cpptraj to run the calculation.
+The syntax for running \software{cpptraj} given this input file is:
 
 \begin{lstlisting}[style=bash]
 cpptraj -i gist.in
 \end{lstlisting}
 
-Cpptrajs' gist action has a large number of options to modify the GIST calculation or its' output. A full list is provided at the end of this tutorial or through cpptrajs manual. The major options are summarized in the following table:
+The \inlinecode{gist} action has a large number of options to modify the GIST calculation or its' output. A full list is provided at the end of this tutorial or through cpptrajs manual. The major options are summarized in the following table:
 
 \begin{table}[h]
 	\caption{The major options available in cpptrajs' GIST implementation.}\label{tab:GIST_options}
@@ -353,7 +352,9 @@ Cpptrajs' gist action has a large number of options to modify the GIST calculati
 	\end{tabularx}
 \end{table}
 
-Setting the reference density according to the water model used in your simulation is important to get correct results. The reference density can be calculated from a GIST calculation for a pure water simulation or estimated from bulk-like water sufficiently far away from a solvent. \todo{How much information on the choice of reference density should we include?}
+Setting the reference density according to the water model used in your simulation is important to get correct results.
+Densities of typical water models can be found in the \software{cpptraj} manual.
+For other models, the density should be computed from a pure water simulation.
  
 \paragraph{Postprocessing and Analyzing GIST results}
 Cpptraj outputs the quantities calculated as a "open data explorer" (.dx) file format which can be easily visualized in Pymol or VMD.
