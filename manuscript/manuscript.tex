@@ -105,6 +105,7 @@
 
 \DeclareSIUnit{\calorie}{cal}
 \DeclareSIUnit{\kcalPerMolASqr}{\kilo\calorie\per\mole\per\angstrom\squared}
+\DeclareSIUnit{\Molar}{M}
 
 % TODO: delete for final build
 \usepackage{pdfcomment}
@@ -256,13 +257,9 @@ The main implementation of GIST is part of the MD analysis software \software{cp
 A recent version of \software{cpptraj} should be used, such as the one provided in AmberTools22 or a recent installation from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 
 The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations.
-If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}.
-If using GROMACS, we propose to prepare the structures and topologies with AmberTools and converting them using \software{acpype.py}.
-
-\todo {If the simulation was ran using GROMACS, mdtraj can be used to convert GROMACS topology and trajectory in to an Amber file format.}
-\todo {vah: I would remove this mention of GROMACs and replace it with a more general comment. Or we could test if this actually works ( I doubt it does for ff19SB/OPC).}
-In that way, a full Amber topology is available for GIST.
-
+If no Amber installation is available, the MD can be performed other simulation engines, as long as the topology and trajectory can be produced in a format supported by \software{cpptraj}.
+If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
+%We should actually test that!
 Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation due to the loss of precision for the atom positions.
 
 Furthermore, a recent Python version (>3.6) should be available with the following packages installed:
@@ -275,7 +272,7 @@ We also show examples using the \software{gistpp} program, which can be obtained
 
 If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
 We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
-We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
+%We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
 
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files.
 We recommend using a current version of \software{PyMol}\cite{pymol} or \software{VMD}\cite{vmd}.
@@ -390,11 +387,12 @@ The tutorial is divided into a beginners part and an advanced part. In the begin
 
 \subsection{Streptavidin/Biotin}
 The streptavidin-biotin complex is one of the strongest known non-covalent interactions involving a small molecule.
-Therefore, the combination of streptavidin and biotin is used routinely in biotechnology, and the interaction between them has been investigated in detail \todo{CITE}\cite{}.
+Therefore, the combination of streptavidin and biotin is used routinely in biotechnology \cite{Dundas2013-streptavidin-review}, and the interaction between them has been investigated in detail \cite{McConnell2021-biotin}.
 
-In nature, streptavidin occurs as a tetramer, and binds biotin with a binding constant of \todo{???}.
-Here, we will investigate the binding of biotin to a streptavidin monomer for simplicity.
-This interaction has been reported to have a binding constant of \todo{???}.
+\newcommand{\appr}{{\mathord{\sim}}}
+In nature, streptavidin occurs as a tetramer, and binds biotin with a binding constant of \SI{\sim e-14}{\per\Molar} \cite{Dundas2013-streptavidin-review}.
+The binding to the closed conformation of the tetramer has been estimated to have a free energy of \SI{26.6}{\kilo\calorie\per\mol} \cite{Bansal2018-biotin}.
+Here, we will investigate the binding of biotin to a closed streptavidin monomer for simplicity.
 
 \subsection{Tutorial data}
 We will use the 1STP crystal structure to start our calculations. For the beginners section, we will use the biotin ligand as extracted from the crystal structure. For the second part, we will use the whole crystal structure.
