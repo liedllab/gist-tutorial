@@ -148,8 +148,8 @@ We assume familiarity with molecular dynamics simulations as well as the AmberTo
 
 Solvation thermodynamics govern any process involving solutes in a solvent.
 %Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
-Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
-The free energy of solvation thereby strongly influences real-world problems such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
+The free energy of solvation is defined as the work needed to insert a solute into a solvent. Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
+It thereby strongly influences real-world problems such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
 
 %The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
 %Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
@@ -405,6 +405,15 @@ git clone git@github.com:liedllab/gist-tutorial.git
 This will download the tutorial files (including both the manuscript and the examples in the \software{code} folder).
 \
 \subsection{Running GIST for Biotin}
+In this example, we will be running a simple GIST calculation for a small molecule to get familiar with the usage of the GIST command in \software{cpptraj}.
+\subsubsection{System preparation}
+First, extract biotin from the crystal structure and generate a PDB file containing only biotin. Prepare your structure by adding hydrogens, making sure to choose the correct protonation state. Parametrize biotin with the forcefield of your choice. Solvate the parametrized biotin, making sur to choose a water box of large enough size so that the water on the box edges behaves bulk-like (a wall distance of at least 15\AA is recommended). A good starting point (though a bit dated) for the parametrization and solvation of small molecules is AMBER's tutorial 4b (\url{http://ambermd.org/tutorials/basic/tutorial4b/}). 
+\subsubsection{Equilibration}
+Equilibrate your solvated biotin to the conditions of your choice. Even when running a NVT simulation as the production run for the GIST analysis, it is advisible to include an NPT equilibration step to adjust the box size before hand. Allow enough equilibration time in the ensemble of your choice to allow the water to relax around your biotin structure.
+
+\subsubsection{MD simulation}
+\todo{Move simulation part from complex to here}
+
 
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 \subsubsection{System Preparation and Equilibration}
