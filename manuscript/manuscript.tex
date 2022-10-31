@@ -105,6 +105,7 @@
 
 \DeclareSIUnit{\calorie}{cal}
 \DeclareSIUnit{\kcalPerMolASqr}{\kilo\calorie\per\mole\per\angstrom\squared}
+\DeclareSIUnit{\Molar}{M}
 
 % TODO: delete for final build
 \usepackage{pdfcomment}
@@ -148,8 +149,8 @@ We assume familiarity with molecular dynamics simulations as well as the AmberTo
 
 Solvation thermodynamics govern any process involving solutes in a solvent.
 %Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
-Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
-The free energy of solvation thereby strongly influences real-world problems such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
+The free energy of solvation is defined as the work needed to insert a solute into a solvent. Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
+It thereby strongly influences real-world problems such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
 
 %The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
 %Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
@@ -256,13 +257,9 @@ The main implementation of GIST is part of the MD analysis software \software{cp
 A recent version of \software{cpptraj} should be used, such as the one provided in AmberTools22 or a recent installation from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 
 The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations.
-If no Amber installation is available, the MD can be performed other simulation engines compatible with \software{cpptraj}.
-If using GROMACS, we propose to prepare the structures and topologies with AmberTools and converting them using \software{acpype.py}.
-
-\todo {If the simulation was ran using GROMACS, mdtraj can be used to convert GROMACS topology and trajectory in to an Amber file format.}
-\todo {vah: I would remove this mention of GROMACs and replace it with a more general comment. Or we could test if this actually works ( I doubt it does for ff19SB/OPC).}
-In that way, a full Amber topology is available for GIST.
-
+If no Amber installation is available, the MD can be performed other simulation engines, as long as the topology and trajectory can be produced in a format supported by \software{cpptraj}.
+If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
+%We should actually test that!
 Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation due to the loss of precision for the atom positions.
 
 Furthermore, a recent Python version (>3.6) should be available with the following packages installed:
@@ -275,7 +272,7 @@ We also show examples using the \software{gistpp} program, which can be obtained
 
 If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
 We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
-We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
+%We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
 
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files.
 We recommend using a current version of \software{PyMol}\cite{pymol} or \software{VMD}\cite{vmd}.
@@ -294,33 +291,28 @@ GIST analysis can be divided in three steps: defining a region of interest, runn
 \cite{Ramsey2016}
 
 \paragraph{Identify and define the region of interest}
-In order to run a GIST analysis, the region where the solvent properties will be calculated must be first defined. This region is represented by a rectangular prism centered at (x, y, z) with $N_x \times N_y \times N_z$ voxels, where each voxel is cubic with a sidelength of \inlinecode{gridspacn}.
+In order to run a GIST analysis, the region where the solvent properties will be calculated must be first defined. This region is represented by a rectangular grid centered at (x, y, z) with $N_x \times N_y \times N_z$ voxels, where each voxel is cubic with a sidelength of \inlinecode{gridspacn}.
 While integrals over GIST quantities are independent of the voxel size, individual voxel values converge slower at high resolutions.\pdfcomment{The calculation actually can actually get faster at higher resolution, because the same grid is used in the nearest-neighbor search.}
-A default value of 0.5 A is used that provides reasonable discretization for many use-cases.
+The default value of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
 
-In \software{ccptraj}, the rectangular prism is defined by parameters of the \inlinecode{gist} command.
-The center of the grid is defined by \inlinecode{gridcntr}, the dimensions of 
-the grid is defined by \inlinecode{griddim} (in voxel counts), and the spacing 
-is defined by \inlinecode{gridspacn} (in Å).
+The grid is defined by parameters of the \inlinecode{gist} command in \software{cpptraj}.
+The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing in \AA by \inlinecode{gridspacn}.
 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 
-The region can be defined using a ligand in a specific binding pocket of the 
-protein, a specific residue of the protein, or the whole protein itself. A 
-helper script FindCentroid.py can be used to determine the centroid of the 
-region of interest as well as the dimensions of the rectangular prism that will 
-fully enclose the region. A pdb file is needed as an input and the rectangular 
-prism will be centered based on the centroid of the given structure.
+Often, the region of interest will be defined by the surrounding of a molecule, which might either be a ligand in the binding pocket or also the whole protein. 
+A helper script called \inlinecode{FindCentroid.py} for this purpose is supplied with this tutorial, and can be used as follows:
 
 \begin{lstlisting}[style=bash]
 python FindCentroid.py -i structure.pdb
 \end{lstlisting}
 
 \paragraph{Run GIST using cpptraj}
-GIST is incorporated in cpptraj which requires the topology and the trajectory of the MD simulation to be analayzed. The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic comands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
+GIST is implemented in \software{cpptraj} which requires the topology and the trajectory of the MD simulation to be analyzed.
+The commands needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic commands, assuming a given grid center and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, are:
 
 \begin{lstlisting}[style=cpptraj]
 parm topology.prmtop
@@ -330,13 +322,17 @@ gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 \
 go
 \end{lstlisting}
 
-The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file and what frames to be analyzed. The third line tells cpptraj to run a GIST calculation using the region defined and print the output of the calculation in a file called gist.dat. The last instructs cpptraj to run the calculation. The syntax for running cpptraj given this input file is:
+The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file.
+Note that the solute should not move significantly for a GIST calculation.
+This is typically achieved by using restraints on the solute coordinates.
+The third line tells \software{cpptraj} to run a GIST calculation using the region defined and print the output of the calculation in a file called \inlinecode{gist.dat}. The last instructs cpptraj to run the calculation.
+The syntax for running \software{cpptraj} given this input file is:
 
 \begin{lstlisting}[style=bash]
 cpptraj -i gist.in
 \end{lstlisting}
 
-Cpptrajs' gist action has a large number of options to modify the GIST calculation or its' output. A full list is provided at the end of this tutorial or through cpptrajs manual. The major options are summarized in the following table:
+The \inlinecode{gist} action has a large number of options to modify the GIST calculation or its' output. A full list is provided at the end of this tutorial or through cpptrajs manual. The major options are summarized in the following table:
 
 \begin{table}[h]
 	\caption{The major options available in cpptrajs' GIST implementation.}\label{tab:GIST_options}
@@ -353,7 +349,9 @@ Cpptrajs' gist action has a large number of options to modify the GIST calculati
 	\end{tabularx}
 \end{table}
 
-Setting the reference density according to the water model used in your simulation is important to get correct results. The reference density can be calculated from a GIST calculation for a pure water simulation or estimated from bulk-like water sufficiently far away from a solvent. \todo{How much information on the choice of reference density should we include?}
+Setting the reference density according to the water model used in your simulation is important to get correct results.
+Densities of typical water models can be found in the \software{cpptraj} manual.
+For other models, the density should be computed from a pure water simulation.
  
 \paragraph{Postprocessing and Analyzing GIST results}
 Cpptraj outputs the quantities calculated as a "open data explorer" (.dx) file format which can be easily visualized in Pymol or VMD.
@@ -389,11 +387,12 @@ The tutorial is divided into a beginners part and an advanced part. In the begin
 
 \subsection{Streptavidin/Biotin}
 The streptavidin-biotin complex is one of the strongest known non-covalent interactions involving a small molecule.
-Therefore, the combination of streptavidin and biotin is used routinely in biotechnology, and the interaction between them has been investigated in detail \todo{CITE}\cite{}.
+Therefore, the combination of streptavidin and biotin is used routinely in biotechnology \cite{Dundas2013-streptavidin-review}, and the interaction between them has been investigated in detail \cite{McConnell2021-biotin}.
 
-In nature, streptavidin occurs as a tetramer, and binds biotin with a binding constant of \todo{???}.
-Here, we will investigate the binding of biotin to a streptavidin monomer for simplicity.
-This interaction has been reported to have a binding constant of \todo{???}.
+\newcommand{\appr}{{\mathord{\sim}}}
+In nature, streptavidin occurs as a tetramer, and binds biotin with a binding constant of \SI{\sim e-14}{\per\Molar} \cite{Dundas2013-streptavidin-review}.
+The binding to the closed conformation of the tetramer has been estimated to have a free energy of \SI{26.6}{\kilo\calorie\per\mol} \cite{Bansal2018-biotin}.
+Here, we will investigate the binding of biotin to a closed streptavidin monomer for simplicity.
 
 \subsection{Tutorial data}
 We will use the 1STP crystal structure to start our calculations. For the beginners section, we will use the biotin ligand as extracted from the crystal structure. For the second part, we will use the whole crystal structure.
@@ -404,6 +403,15 @@ git clone git@github.com:liedllab/gist-tutorial.git
 This will download the tutorial files (including both the manuscript and the examples in the \software{code} folder).
 \
 \subsection{Running GIST for Biotin}
+In this example, we will be running a simple GIST calculation for a small molecule to get familiar with the usage of the GIST command in \software{cpptraj}.
+\subsubsection{System preparation}
+First, extract biotin from the crystal structure and generate a PDB file containing only biotin. Prepare your structure by adding hydrogens, making sure to choose the correct protonation state. Parametrize biotin with the forcefield of your choice. Solvate the parametrized biotin, making sur to choose a water box of large enough size so that the water on the box edges behaves bulk-like (a wall distance of at least 15\AA is recommended). A good starting point (though a bit dated) for the parametrization and solvation of small molecules is AMBER's tutorial 4b (\url{http://ambermd.org/tutorials/basic/tutorial4b/}). 
+\subsubsection{Equilibration}
+Equilibrate your solvated biotin to the conditions of your choice. Even when running a NVT simulation as the production run for the GIST analysis, it is advisible to include an NPT equilibration step to adjust the box size before hand. Allow enough equilibration time in the ensemble of your choice to allow the water to relax around your biotin structure.
+
+\subsubsection{MD simulation}
+\todo{Move simulation part from complex to here}
+
 
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 \subsubsection{System Preparation and Equilibration}
@@ -934,11 +942,7 @@ In this example, the region defined in the binding pocket includes all voxels th
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\linewidth]{streptavidin_bp_close.png}
-<<<<<<< HEAD
-	\caption{Volume of strepatividin defined around 3.5 A of biotin. }\label{streptavidin_sasa}
-=======
 	\caption{Volume of strepatividin defined around 3.5 A of biotin. }\label{streptavidin_bp_close}
->>>>>>> a25ffd93b8a5e63570d270603c16c6da5aa39c1d
 \end{figure}
 
 \section{Theory}
@@ -1139,7 +1143,7 @@ the GPU accelerated version of GIST is used automatically.
 
 \begin{Checklists*}
 	
-\begin{checklist}{The CPPTRAJ action}
+\begin{checklist}{The CPPTRAJ GIST action}
 
 \textbf{Options}\\
 Various flags and options can be provided when running a GIST calculation in 
