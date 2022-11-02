@@ -1157,19 +1157,18 @@ The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are 
 \end{equation}
 
 In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space using a distance cutoff, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
-Additionally, there is a correction term $E_\text{corr}$, which corrects for the self-interaction of each solvent molecule in the reciprocal term.
+Additionally, there is a correction term $E_\text{self}$ (called $E_\text{corr}$ in the original publication \cite{Chen2021}), which corrects for the self-interaction of each solvent molecule in the reciprocal term.
 
 \begin{equation}
-	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
+	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{self}
 \end{equation}
 %\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. } - ok? -fwa
-The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
+The short-range Lennard-Jones contribution is computed in the direct space, using a distance cutoff.
+Furthermore, a long-range correction term is computed that accounts for the contributions above this cutoff assuming a homogeneous distribution of particles.
 
 \begin{equation}
-	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{corr}
+	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{lj\_corr}
 \end{equation}
-\todo{Is $E_{corr}$ the same in eq 13 and 14? How is it calculated? -vah}
-
 
 \section{Cheatsheet}
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
