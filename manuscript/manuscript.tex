@@ -277,8 +277,6 @@ We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files.
 We recommend using a current version of \software{PyMol}\cite{pymol} or \software{VMD}\cite{vmd}.
 
-
-
 \section{Running GIST}
 %\subsection{Running the GIST analysis}
 To run a GIST analyis, the following is required:
@@ -855,8 +853,49 @@ To include the effect of the lid closing transition in the binding process, free
 %You will likely want to reference your GitHub repository as a central point to access all of this information, and then the GitHub repository may link out to other content as needed.
 
 \section{Recent developments}
+In recent years, several updates to the original GIST implementation have been published.
+The basic functionality of the program, however, has not been changed.
+In this chapter, we will shortly present each of those updates.
+\subsection{GPU implementation}
+In Reference~\cite{Kraml2020}, a GPU implementation of the energy calculation was implemented, which typically increases the speed by 1--2 orders of magnitude.
+
+If \software{cpptraj} is compiled with GPU support, the energy calculation uses the GPU automatically, without any additional input.
+However, PME-GIST is not supported on the GPU.
+
+\subsection{PME implementation}
+In Reference~\cite{Chen2021}, a PME implementation of the GIST energy was presented.
+For typical systems, this implementation is slightly slower than GPU-GIST, but much faster than the original CPU code.
+Furthermore, PME-GIST offers the best agreement between GIST energies and those observed in an MD simulation.
+
+To run a PME-GIST calculation, the \inlinecode{pme} flag to the \inlinecode{gist} action in \software{cpptraj} can be used.
+The output will contain two additional columns: \inlinecode{PME\_dens} and \inlinecode{PME\_norm}.
+They contain the potential of solute and solvent evaluated at the solvent positions and divided by two.
+Furthermore, the \inlinecode{Eww} and \inlinecode{Esw} columns are also computed using PME, and are reported as usual.
+For typical use cases, it is recommended to use \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
+
 \subsection{GIST with non-water solvents}
+In References~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
+
+To run a GIST calculation in a solvent other than water, use the \inlinecode{solute} flag together with a \software{cpptraj} selection mask.
+Everything that is not in the \inlinecode{solute} mask is treated as solvent.
+If there are multiple solvent species, use the \inlinecode{solventmols} option as described in Section~\ref{sec-salt-water}.
+The code will automatically choose three atoms which are used to define the solvent orientation, and print this selection to the output.
+
+Sometimes, \software{cpptraj} does not automatically choose the optimal atoms.
+In methanol, for instance, one can either incorporate the C--H bonds or the O--H bond in the selection.
+The latter is probably more relevant since it can incorporate hydrogen bonding effects.
+Assuming that the alcohol hydrogen is called H1, this could be specified as follows:
+
+\begin{lstlisting}[style=cpptraj]
+gist gridcntr <x> <y> <z> \
+griddim <Nx> <Ny> <Nz> gridspacn <val> \
+solute ^1 rigidatoms O1 H1 C1
+\end{lstlisting}
+
+Note that the central atom of the \inlinecode{rigidatoms} selection goes first.
+
 \subsection{GIST with salt-water mixtures}
+\label{sec-salt-water}
 In \cite{Waibl2021-gist-salt}, an extension of GIST was presented that can use salt-water mixtures as a solvent.
 This allows treating salting-out effects, although it was shown that the salting-out coefficient is over-predicted by GIST unless higher-order entropies are incorporated.
 Generally, GIST should be able to treat arbitrary solvent mixtures as long as each molecule is sufficiently rigid.
@@ -904,20 +943,19 @@ The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference 
 
 \subsection{Solvent Accessible Surface Area (SASA)}
 
-The solvent accessible surface area (SASA) represents  the voxels that are close to the protein surface and occupied by oxygen water.
-It represents the surface where water can go, and potentially surfaces that a ligand atom can occupy.
+The solvent accessible surface (SASA) represents the interface between regions that are occupied by the solute, and those which can be accessed by the solvent.
+GIST provides a very natural way of creating a SASA using an isosurface of the oxygen density gO.
+It can be visualized in PyMOL as follows:
 
-
-The surface is generated from the oxygen density (gO.dx) file using \software{gistpp}. 
-A voxel is deemed to be  part of the surface if it is occupied by water (gO > 0.3) and has at least one neighboring empty voxel (gO < 0.1).
-
-\begin{lstlisting}[style=bash]
-	gistpp -op sasa -i gO.dx -o sasa.dx
+\begin{lstlisting}[style=pymol]
+load ../gist.pdb
+load ../gist-gO.dx
+isomesh sas, gist-gO, 0.1
 \end{lstlisting}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1.0\linewidth]{streptavidin_sasa_close.png}
+	\includegraphics[width=1.0\linewidth]{figures/sasa-simple.png}
 	\caption{SASA for streptavidin focused on the binding pocket}\label{streptavidin_sasa}
 \end{figure}
 
@@ -937,12 +975,12 @@ For example, voxels that are part of the binding pocket can be defined using a l
 \end{lstlisting}
 
 
-In this example, the region defined in the binding pocket includes all voxels that are within 3.5 A of the heavy atoms of biotin. 
+In this example, the region defined in the binding pocket includes all voxels that are within \SI{3.5}{\angstrom} of the heavy atoms of biotin. 
 
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\linewidth]{streptavidin_bp_close.png}
-	\caption{Volume of strepatividin defined around 3.5 A of biotin. }\label{streptavidin_bp_close}
+	\caption{Volume of streptavidin defined around \SI{3.5}{\angstrom} of biotin. }\label{streptavidin_volume}
 \end{figure}
 
 \section{Theory}
@@ -1119,19 +1157,18 @@ The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are 
 \end{equation}
 
 In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space using a distance cutoff, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
-Additionally, there is a correction term $E_\text{corr}$, which corrects for the self-interaction of each solvent molecule in the reciprocal term.
+Additionally, there is a correction term $E_\text{self}$ (called $E_\text{corr}$ in the original publication \cite{Chen2021}), which corrects for the self-interaction of each solvent molecule in the reciprocal term.
 
 \begin{equation}
-	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{corr}
+	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{self}
 \end{equation}
 %\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. } - ok? -fwa
-The Lennard-Jones contribution is computed in the direct space, using a distance cutoff. The short-range contribution is the LJ energy within the set cutoff and the long-range correction term accounts for the contributions above this cutoff.
+The short-range Lennard-Jones contribution is computed in the direct space, using a distance cutoff.
+Furthermore, a long-range correction term is computed that accounts for the contributions above this cutoff assuming a homogeneous distribution of particles.
 
 \begin{equation}
-	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{corr}
+	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{lj\_corr}
 \end{equation}
-\todo{Is $E_{corr}$ the same in eq 13 and 14? How is it calculated? -vah}
-
 
 \section{Cheatsheet}
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
