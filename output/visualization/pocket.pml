@@ -54,7 +54,7 @@ def show_surfaces(map, levels, colors, transparencies, group_name=None):
     cmd.group(group_name, " ".join(new_maps))
 
 show_surfaces("gist-E2", -levels, blues, transparencies, "gist-E2-negative")
-show_surfaces("gist-E2", levels, reds, transparencies, "gist-E2-positive")
+show_surfaces("gist-E2", levels/2, reds, transparencies, "gist-E2-positive")
 show_surfaces("gist-S", -levels, greens, transparencies)
 python end
 
