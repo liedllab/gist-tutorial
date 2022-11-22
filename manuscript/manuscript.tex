@@ -32,19 +32,25 @@
 %%% IMPORTANT USER CONFIGURATION
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\versionnumber}{1.3}  % you should update the minor version number in preprints and major version number of submissions.
-\newcommand{\githubrepository}{\url{https://github.com/myaccount/homegithubrepository}}  %this should be the main github repository for this article
+\newcommand{\versionnumber}{1.0}  % you should update the minor version number in preprints and major version number of submissions.
+\newcommand{\githubrepository}{\url{https://github.com/liedllab/gist-tutorial}}  %this should be the main github repository for this article
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ARTICLE SETUP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{This is the title [Article v\versionnumber]}
+\title{Quantifying Spatially Resolved Hydration Thermodynamics Using Grid Inhomogeneous Solvation Theory [Article v\versionnumber]}
 
-\author[1*]{Firstname Middlename Surname}
-\author[1,2\authfn{1}\authfn{3}]{Firstname Middlename Familyname}
-\author[2\authfn{1}\authfn{4}]{Firstname Initials Surname}
-\author[2*]{Firstname Surname}
-\affil[1]{Institution 1}
+\author[1\authfn{1}]{Franz Waibl}
+\author[1\authfn{1}]{Valentin J Hoerschinger}
+\author[2]{Vjay Molino}
+\author[1]{Monica L Fern{\'a}ndez-Quintero}
+%\author[1,2]{Firstname Middlename Familyname}
+%\author[2]{Firstname Initials Surname}
+\author[4]{Daniel R Roe}
+\author[1*]{Klaus R Liedl}
+\author[2*]{Michael K Gilson}
+\author[2*]{Tom Kurtzman}
+\affil[1]{Department of General, Inorganic and Theoretical Chemistry, University of Innsbruck, Austria}
 \affil[2]{Institution 2}
 
 \corr{email1@example.com}{FMS}  % Correspondence emails.  FMS and FS are the appropriate authors initials.
@@ -54,10 +60,10 @@
 \orcid{Author 2 name}{EEEE-FFFF-GGGG-HHHH}
 
 \contrib[\authfn{1}]{These authors contributed equally to this work}
-\contrib[\authfn{2}]{These authors also contributed equally to this work}
+%\contrib[\authfn{2}]{These authors also contributed equally to this work}
 
-\presentadd[\authfn{3}]{Department, Institute, Country}
-\presentadd[\authfn{4}]{Department, Institute, Country}
+%\presentadd[\authfn{3}]{Department of General, Inorganic and Theoretical Chemistry, University of Innsbruck, Austria}
+%\presentadd[\authfn{4}]{Department, Institute, Country}
 
 \blurb{This LiveCoMS document is maintained online on GitHub at \githubrepository; to provide feedback, suggestions, or help improve it, please visit the GitHub repository and participate via the issue tracker.}
 
@@ -121,10 +127,11 @@
 
 \begin{abstract}
 Grid inhomogeneous solvation theory (GIST) is a method to compute the free energy of solvation of a compound on a 3-dimensional grid based on molecular dynamics (MD) simulations.
-The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses on both proteins and small molecules. However, this versatility also comes with a higher entry barrier for new users.
+The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses on both proteins and small molecules. However, this versatility also comes with a significant entry barrier for new users.
 
 In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis at the example of the streptavidin-biotin complex.
-Furthermore, we discuss the theory of GIST with a focus on practical aspects, and show several pitfalls and technical difficulties that may occur during a GIST study.
+Furthermore, we discuss the theory of GIST with a focus on practical aspects.
+We highlight potential pitfalls and show how to avoid technical difficulties.
 We assume familiarity with molecular dynamics simulations as well as the AmberTools package.
 
 %This particular document provides a skeleton illustrating key sections for a Tutorial document.
@@ -145,12 +152,14 @@ We assume familiarity with molecular dynamics simulations as well as the AmberTo
 \todo{ (vah) Sources and better description of all these methods, more literature research, QSAR based methods? better flow }
 
 \todo{IMO, our article looks too dry. We should have something nice (e.g., an illustration of the GIST method) on the 1st or 2nd page -fwa.}
-
+\todo{Potentially relevant: 10.1021/acs.jcim.7b00520 }
 
 Solvation thermodynamics govern any process involving solutes in a solvent.
+%Cite "Theory of Simple Liquids"?
 %Solutes are constantly interacting with solvents in their environment, necessitating a good description of these interactions for accurate computational predictions. 
-The free energy of solvation is defined as the work needed to insert a solute into a solvent. Especially the interaction with water is of utmost importance, as many biological processes occur in a aqueous environment. 
-It thereby strongly influences real-world problems such as hydrophobic effects, the binding of ligands to a biomolecule, as well as the dynamics and folding of proteins.
+The free energy of solvation is defined as the reversible work needed to insert a solute into the solvent \cite{ben-naim-book}.
+Especially the interaction with water is of utmost importance, as many biological processes occur in aqueous environment \cite{Privalov2017-water-review}.
+It drives real-world effects such as hydrophobic interactions, binding of ligands to a biomolecule, as well as dynamics and folding of proteins.
 
 %The computational calculation of thermodynamical solvation properties is therefore of particular interest and has been tackled by a wide array of methods.
 %Quantum mechanical methods provide the most rigorous description of the underlying potential energy surface (PES) but suffer from high computational cost, allowing only the treatment of small systems and few solvent molecules. 
@@ -158,52 +167,52 @@ It thereby strongly influences real-world problems such as hydrophobic effects, 
 
 A wide range of methods have been devised to compute the free energy of hydration.
 Data-driven methods such as QSPR or UNIFAC can deliver good results \cite{Borhani2019-qspr,Fredenslund1975-unifac}, but might be limited to molecules that are similar to those in the training set.
-Polarizable continuum models (PCMs) \cite{Miertus1981-pcm,Klamt1993-cosmo} such as treat the solvent phase as a homogeneous phase that reacts to the electrostatic potential of the solute \cite{Mennucci2010-pcm}.
+Polarizable continuum models (PCMs) \cite{Miertus1981-pcm} such as COSMO \cite{Klamt1993-cosmo} treat the solvent as a homogeneous phase that reacts to the electrostatic potential of the solute \cite{Mennucci2010-pcm}.
 %Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
 %This allows for the treatment of large biological systems such as proteins in aqueous solution.
-Methods such as MM/PBSA or MM/GBSA \cite{Sitkoff1994-pbsa,Kollman2000-mmpbsa} combine an implicit solvent treatment of electrostatics with structural sampling of the solute.
-They can quickly provide results for a large number of structures, but yield inaccurate results when compared to more rigorous explicit solvent methods \cite{Genheden2015-mmpbsa-review}.
+Methods such as MM/PBSA or MM/GBSA \cite{Sitkoff1994-pbsa,Kollman2000-mmpbsa} combine an implicit treatment of solvent electrostatics with structural sampling of the solute.
+They can quickly provide results for a large number of structures, but can yield inaccurate results when compared to more rigorous explicit solvent methods \cite{Genheden2015-mmpbsa-review}.
 
 On the other hand, explicit solvation methods model the solvent using individual molecules.
 They are generally more accurate than implicit methods, but require a statistical sampling of the solvent conformations \cite{Liu2016-md-solubility,Swails2014-cphmd}.
-Molecular dynamics (MD) simulations provide an accurate way of modeling solvent packing in confined areas \cite{}\todo{ask Tom for a citation!} and general hydrophobic effects \cite{Pratt2016-hydrophobicity}.
+Molecular dynamics (MD) simulations provide an accurate way of modeling solvent packing in confined areas \cite{Haider2016-water-on-surfaces} and general hydrophobic effects \cite{Pratt2016-hydrophobicity}.
 
 The free energy of solvation can be calculated in a statistically rigorous way using alchemical methods \cite{Liu2016-md-solubility,Mobley2009-dgsolv,Mobley2014-freesolv} such as free energy perturbation (FEP) \cite{Zwanzig1954-reweighting} or thermodynamic integration (TI) \cite{Kirkwood1935-ti}.
-However, they are unable to provide a spatial interpretation of the results.
-Furthermore, splitting the resulting free energy into contributions for the enthalpy and entropy is challenging \cite{Peter2004-alchemical-entropy}.
+However, those methods are unable to provide a spatial interpretation of the results.
+Furthermore, splitting the free energy into enthalpy and entropy contributions is challenging \cite{Peter2004-alchemical-entropy}.
 %Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
 %However, the seperation of enthalpic and entropic contributions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
 
 Methods derived from statistical mechanics bridge this gap by providing three-dimensional resolution.
-Two major groups of methods that fall into this group are those based on inhomogeneous solvation theory (IST) \cite{Lazaridis1998} and those based on the Ornstein--Zernike (OZ) equation \cite{Hansen2013-simple-liquids}.
+Two major flavors of methods in this group are those based on inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998} and those based on the Ornstein--Zernike (OZ) equation \cite{Hansen2013-simple-liquids}.
 The most important example of OZ-based methods is the reference interaction site model (RISM) \cite{Chandler1972-rism} as well as its extension to three dimensions (3D-RISM) \cite{Kovalenko1998-3drism}.
-Those methods compute the solvent distributions by self-consistent solution of the OZ integral equation to predict solvation thermodynamics.
+Those methods compute the atomic solvent distributions by self-consistently solving the OZ integral equation to predict solvation thermodynamics.
 %The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute structure.
 
 On the other hand, methods based on IST generally use a molecular solvent distribution obtained from an MD simulation to compute the free energy of hydration from its enthalpic and entropic contributions.
-Examples of those methods include grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012,Ramsey2016}, WaterMap \cite{Young2007-watermap,Abel2008-watermap}, SSTMap \cite{Haider2018-sstmap}, and STOW \cite{Li2012-stow}.
+Examples of those methods include grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012,Ramsey2016}, WaterMap \cite{Young2007-watermap,Abel2008-watermap}, SSTMap \cite{Haider2018-sstmap}, STOW \cite{Li2012-stow} and Solvaware \cite{Huggins2016-solvaware}.
 The main limitation of those methods is that they rely on an infinite expansion of the entropy in terms of the density distribution, which is truncated after the first or, sometimes, the second \cite{Nguyen2016-gist-second-order,Waibl2022-gist-solvents} term.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems.
 
 In this tutorial, we aim to give the reader an introduction into GIST and its application to calculate solution thermodynamics properties of interest. 
 
 GIST is based on IST, solving the integral equations on a grid. 
-This approach is more general than other IST-based methods because it accounts for all solvent regions rather than focusing on high-occopancy solvation sites.
+This approach is more general than other IST-based methods because it accounts for all solvent regions rather than focusing on high-occupancy solvation sites.
 %By simulating the dynamics of a solvent around the solute, GIST calculates thermodynamic properties for a standard solvation process as described by Ben-Naim \cite{ben-naim-book}.
-It estimates the solvent density from a molecular dynamics (MD) trajectory and allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
-It has been shown that GIST can produce comparable accuracy to TI by approximating the higher-order entropies as a fraction of the first-order entropy (using a factor of \SI{-0.4} for water) \cite{Chen2021,Waibl2022-gist-solvents}.
+It estimates the solvent density from an MD trajectory and allows for a full localization of entropic and enthalpic contributions on the grid around the solute.
+For small molecules, GIST has been shown to reach comparable accuracy to TI by approximating the higher-order entropies as a fraction of the first-order entropy, using a factor of \SI{-0.4} for water \cite{Chen2021,Waibl2022-gist-solvents}.
 %applying a linear correction factor (0.6 for water) to the first-order entropy as follows \cite{Chen2021,Waibl2022-gist-solvents}:
 %\begin{equation}
 %S^\textit{total} = S^\textit{1st-order} \times f
 %\end{equation}
 
-Recent work has improved the calculation speed tremendously, allowing for the treatment of large biological systems such as proteases or antibodies.
+Recently, GIST was implemented on the GPU, tremendously improving the calculation speed, and allowing for the treatment of large biological systems such as proteases or antibodies \cite{Kraml2019-gigist}.
 Furthermore, an implementation based on the particle mesh Ewald (PME) \cite{Darden1993-pme} method was presented, which improves the consistency between GIST and popular molecular dynamics engines. 
-Yet further changes allow the inclusion of other rigid solvents than water or 
-allow for the treatment of solvent mixtures and ions in solution. 
-\todo{Sources!}
+Yet further changes allow the inclusion of other rigid solvents than water \cite{Kraml2020,Waibl2022-gist-solvents} or 
+allow for the treatment of salt-water mixtures as solvents \cite{Waibl2021-gist-salt}.
 
-While previous tutorials gave insightful pointers how to setup and run GIST calculations, their post-processing was often treated less rigorously. While building on these tutorials, an updated guide to calculating solvation properties using GIST is therefore presented here to address recent improvements to the method as well as provide a basic template for the analysis and interpretation of GIST calculations.
+While previous publications \cite{Ramsey2016} and tutorials\footnote{See \url{http://ambermd.org/tutorials/advanced/tutorial25/}} gave insightful pointers how to setup and run GIST calculations, the post-processing was often treated less rigorously. While building on these tutorials, we provide an updated guide to calculating solvation properties using GIST to address recent improvements.
+Furthermore, we aim to establish a template for the analysis and interpretation of GIST calculations.
 
 %Here you would explain what problem you are tackling and briefly motivate your work.
 %
@@ -215,18 +224,16 @@ While previous tutorials gave insightful pointers how to setup and run GIST calc
 
 \subsection{Scope}
 
-This tutorial provides an example of a GIST workflow that can be easily adapted towards different systems. 
-In addition to a short introduction of the method and the theory behind it, we present an overview of the various different flavors of GIST methods.
-We ease the user into the basic usage of GIST by presenting a calculation for a small molecule.
-Building on the basics, a more advanced GIST study of the streptavidin-biotin complex is presented, which reflects on many common aspects of GIST studies.
-Using these test systems, we present solvation analysis of a small molecule (biotin) as well as a biomolecule (streptavidin).
+This tutorial provides an example of a GIST workflow that can be easily adapted to different systems. 
+In addition to a short introduction of the method and the theory behind it, we present an overview of the different implementations of GIST.
+We ease the user into basic GIST analysis at the example of biotin.
+Building on the basics, we present a more advanced GIST study of the streptavidin-biotin complex, reflecting on many common aspects of GIST studies.
 We show how to interpret the three-dimensional contributions of solvation free energy in a binding pocket and around the ligand.
+Additionally, we compute the binding contribution of the free energy of solvation, which requires accurate post-processing of the GIST outputs to avoid unfavorable summation of bias.
+We believe that this example study covers a wide range of applications.
 
-Additionally, we compute the binding contribution of the free energy of solvation, which requires accurate post-processing of the GIST outputs to avoid unfavorable summation of bias in the GIST calculation.
-We believe that this example study covers a wide range of applications of the GIST method.
-
-Furthermore, we discuss several technical aspects  and typical pitfalls of GIST analyses, such as the normalization of voxel values and how to deal with double counting of energy contributions. 
-Additionally, we provide a python library to unify the analysis of GIST data produced by various versions of GIST and make the post-processing of GIST results more accessible.
+Furthermore, we discuss several technical aspects and typical pitfalls of GIST analyses, such as the normalization of voxel values and how to deal with double counting of energy contributions. 
+Additionally, we provide a Python library (\software{gisttools}) to unify the analysis of GIST data produced by various versions of GIST and make the post-processing of GIST results more accessible.
 
 After completing this tutorial, we expect the reader to be able to run their own GIST study. 
 
@@ -241,14 +248,13 @@ After completing this tutorial, we expect the reader to be able to run their own
 
 \subsection{Background knowledge}
 This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD) simulations.
-The user should be able to run MD simulations and work with their output data.
+The user should be able to run MD simulations and analyze the resulting trajectories.
 Previous experience of GIST is not necessary.
-However, we only provide a short explanation of the theory behind GIST in section \ref{sec:theory} at the end of this tutorial. For more detailed information, we point the reader towards the primary sources for more detailed information.
+However, we only provide a short summary of the theory behind GIST in section~\ref{sec:theory} at the end of this tutorial.
+For more detailed information, we point the reader towards the primary sources.
 
 The presented analyses are run in Python.
-While no programming experience should be necessary to follow the tutorial, a basic understanding of Python is advantageous to adjust the code towards different requirements and use-cases. 
-We provide a Jupyter notebook which contains the presented analyses. 
-Therefore, an understanding of Jupyter notebooks is beneficial to reproduce the analyses.
+While no programming experience is necessary to follow the tutorial, a basic understanding of Python is advantageous to adjust the code towards different requirements and use-cases.
 
 \subsection{Software/system requirements}
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
@@ -256,16 +262,16 @@ The main implementation of GIST is part of the MD analysis software \software{cp
 
 A recent version of \software{cpptraj} should be used, such as the one provided in AmberTools22 or a recent installation from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 
-The closed-source Amber simulation engine is used in this tutorial to run the necessary MD simulations.
-If no Amber installation is available, the MD can be performed other simulation engines, as long as the topology and trajectory can be produced in a format supported by \software{cpptraj}.
+The closed-source Amber simulation engine is used in this tutorial to run the MD simulations.
+If Amber is not available, other MD engines can be used as long as topologies and trajectories can be produced in a format supported by \software{cpptraj}.
 If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
 %We should actually test that!
-Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation due to the loss of precision for the atom positions.
+Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation due to the loss of precision for the atom positions. \todo{This might be in the technical part}
 
 Furthermore, a recent Python version (>3.6) should be available with the following packages installed:
 \begin{itemize}
 	\item \software{gisttools} (\url{https://github.com/liedllab/gisttools})
-	\item \software{mdtraj (\url{https://www.mdtraj.org/})}
+	\item \software{mdtraj (\url{https://www.mdtraj.org/}) \cite{McGibbon2015-mdtraj}}
 \end{itemize}
 
 We also show examples using the \software{gistpp} program, which can be obtained from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation).
@@ -274,14 +280,13 @@ If the reader prefers to skip the MD and GIST calculation, we also provide the G
 We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
 %We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
 
-For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files.
-We recommend using a current version of \software{PyMol}\cite{pymol} or \software{VMD}\cite{vmd}.
+For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
 
 \section{Running GIST}
 %\subsection{Running the GIST analysis}
 To run a GIST analyis, the following is required:
 \begin{itemize}
-	\item A running installation of \software{cpptraj}.
+	\item \software{cpptraj}.
 	\item A topology of the molecule of interest in a solvent box.
 	\item An MD trajectory of that system.
 \end{itemize}
@@ -289,19 +294,20 @@ GIST analysis can be divided in three steps: defining a region of interest, runn
 \cite{Ramsey2016}
 
 \paragraph{Identify and define the region of interest}
-In order to run a GIST analysis, the region where the solvent properties will be calculated must be first defined. This region is represented by a rectangular grid centered at (x, y, z) with $N_x \times N_y \times N_z$ voxels, where each voxel is cubic with a sidelength of \inlinecode{gridspacn}.
-While integrals over GIST quantities are independent of the voxel size, individual voxel values converge slower at high resolutions.\pdfcomment{The calculation actually can actually get faster at higher resolution, because the same grid is used in the nearest-neighbor search.}
+In order to run a GIST analysis, one must define the region where solvent properties will be calculated.
+This region is represented by a rectangular grid with given position, size, and voxel spacing.
 The default value of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
+While integrals of GIST quantities over the grid are independent of the voxel size, individual values converge slower at high resolutions.
 
 The grid is defined by parameters of the \inlinecode{gist} command in \software{cpptraj}.
-The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing in \AA by \inlinecode{gridspacn}.
+The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing (voxel side-length) in \AA by \inlinecode{gridspacn}.
 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 
-Often, the region of interest will be defined by the surrounding of a molecule, which might either be a ligand in the binding pocket or also the whole protein. 
+Often, the region of interest will be defined as the surrounding of a molecule, which might for example be a ligand in the binding pocket or the whole protein.
 A helper script called \inlinecode{FindCentroid.py} for this purpose is supplied with this tutorial, and can be used as follows:
 
 \begin{lstlisting}[style=bash]
@@ -320,29 +326,33 @@ gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 \
 go
 \end{lstlisting}
 
-The first line specifies the amber topology file that was used to run MD. The second line species the trajectory file.
-Note that the solute should not move significantly for a GIST calculation.
-This is typically achieved by using restraints on the solute coordinates.
-The third line tells \software{cpptraj} to run a GIST calculation using the region defined and print the output of the calculation in a file called \inlinecode{gist.dat}. The last instructs cpptraj to run the calculation.
-The syntax for running \software{cpptraj} given this input file is:
+The first line specifies the Amber topology file that was used to run MD. The second line species the trajectory file.
+Note that the solute should not move significantly for a GIST calculation, since IST does not take the solute degrees of freedom into account.
+This is typically achieved using restraints on the solute heavy atoms.
+The third line tells \software{cpptraj} to run a GIST calculation using the specified region and print the output in a file called \inlinecode{gist.dat}.
+The last line instructs \software{cpptraj} to run the calculation.
 
+The syntax for running \software{cpptraj} given this input file is:
 \begin{lstlisting}[style=bash]
 cpptraj -i gist.in
 \end{lstlisting}
 
-The \inlinecode{gist} action has a large number of options to modify the GIST calculation or its' output. A full list is provided at the end of this tutorial or through cpptrajs manual. The major options are summarized in the following table:
+The \inlinecode{gist} action has a large number of options to modify the GIST calculation or its output.
+A full list is provided at the end of this tutorial or through the \software{cpptraj} manual.
+The most important options are summarized in the following table:
 
 \begin{table}[h]
-	\caption{The major options available in cpptrajs' GIST implementation.}\label{tab:GIST_options}
+	\caption{The main options for GIST in \software{cpptraj}.}\label{tab:GIST_options}
 	\small
 	\begin{tabularx}{\columnwidth}{@{}llXl@{}}
 		\toprule
 		Command       & Options & Explanation & Default  \\
 		\midrule
 		gridcntr    & <y> <y> <z> & Coordinates of the grid center in \AA & 0 0 0  \\
-		griddim     & <nx> <ny> <nz> & Number of voxels along each axis defining the grid size & 40 40 40\\
+		griddim     & <nx> <ny> <nz> & Number of voxels per axis & 40 40 40\\
 		gridspacn & <dval> &Grid spacing / voxel dimensions in  \AA & 0.5    \\
 		refdens         & <rdval> & Reference density of the bulk water in molecules/\AA$^3$ . & 0.0334    \\
+		temp & <tval> & System temperature in Kelvin & 300 \\
 		\bottomrule
 	\end{tabularx}
 \end{table}
@@ -352,8 +362,9 @@ Densities of typical water models can be found in the \software{cpptraj} manual.
 For other models, the density should be computed from a pure water simulation.
  
 \paragraph{Postprocessing and Analyzing GIST results}
-Cpptraj outputs the quantities calculated as a "open data explorer" (.dx) file format which can be easily visualized in Pymol or VMD.
-Aside from the thermodynamic quantities, GIST also calculates the number densities of hydrogen and oxygen in each voxel. Here is a list of the most important quantities calculated by GIST:
+Cpptraj outputs quantities in OpenDX (.dx) file format which can be visualized in Pymol or VMD.
+Aside from thermodynamic quantities, GIST also calculates the number density of each atomic element in the solvent.
+Here is a list of the most important quantities calculated by GIST:
 
 \begin{itemize}
 	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. For water, gO and gH are produced.}
@@ -369,19 +380,23 @@ Aside from the thermodynamic quantities, GIST also calculates the number densiti
 	\item{[dipolez] z-component of the mean water dipole moment density}
 \end{itemize}
 
-Several dx files are written by default, such as the energies, entropies, number density of oxygen, and number density of hydrogen. All calculated quantities are written to the output file (output.dat) and can be used to generate DX files for other quantities. A full list of all calculated properties found in the output in addition to the ones mentioned above is provided at the end of the tutorial.
+Several dx files are written by default, such as the energy, entropy, and atomic number densities.
+All calculated quantities are written to the output file (default \inlinecode{gist-output.dat}) and can be used to generate DX files for other quantities.
+A full list of all properties in the output is provided at the end of the tutorial.
 
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
-During the tutorial, we will
+We will
 \begin{enumerate}
-	\item set up and run GIST calculations for a small molecule as well as a protein binding pocket.
-	\item compute the free energy of solvation for a small molecule using GIST.
-	\item visualize local contributions to $\dgsolv$ in the streptavidin binding pocket as well as around biotin.
-	\item compute the binding free energy of the complex from the individual energy contributions combined with the contribution of hydration computed using GIST.
+	\item set up and run GIST calculations for a small molecule (biotin) and a protein (streptavidin) binding pocket.
+	\item compute the free energy of solvation for biotin using GIST.
+	\item visualize local contributions to $\dgsolv$ in the streptavidin binding pocket and around biotin.
+	\item compute the hydration contribution to the binding. Combined with the biotin--streptavidin interaction energy, the binding free energy can be estimated.
 	\item explore advantages and disadvantages of the GIST method when used to calculate  $\dgsolv$
 \end{enumerate}
-The tutorial is divided into a beginners part and an advanced part. In the beginners part, we will take a look at how to run GIST calculations for small molecules and interpret the output for a small molecule. In the advanced part, we will apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of binding for a small molecule into this pocket using an end-state approach. In addition, while the beginners part focuses only on GIST calculation run, we will discuss all steps along the way in detail in the advanced section.
+
+In the first part of the tutorial, we will look at how to run GIST calculations for small molecules and interpret the output.
+Afterwards, we will apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-state approach based on GIST. In addition, we will discuss all steps in further detail at the end. \todo{TODO}
 
 \subsection{Streptavidin/Biotin}
 The streptavidin-biotin complex is one of the strongest known non-covalent interactions involving a small molecule.
@@ -389,7 +404,7 @@ Therefore, the combination of streptavidin and biotin is used routinely in biote
 
 \newcommand{\appr}{{\mathord{\sim}}}
 In nature, streptavidin occurs as a tetramer, and binds biotin with a binding constant of \SI{\sim e-14}{\per\Molar} \cite{Dundas2013-streptavidin-review}.
-The binding to the closed conformation of the tetramer has been estimated to have a free energy of \SI{26.6}{\kilo\calorie\per\mol} \cite{Bansal2018-biotin}.
+The binding to the closed conformation of the tetramer has been estimated to have a free energy of \SI{-26.6}{\kilo\calorie\per\mol} \cite{Bansal2018-biotin}.
 Here, we will investigate the binding of biotin to a closed streptavidin monomer for simplicity.
 
 \subsection{Tutorial data}
