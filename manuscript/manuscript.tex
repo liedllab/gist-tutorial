@@ -385,6 +385,10 @@ Several dx files are written by default, such as the energy, entropy, and atomic
 All calculated quantities are written to the output file (default \inlinecode{gist-output.dat}) and can be used to generate DX files for other quantities.
 A full list of all properties in the output is provided at the end of the tutorial.
 
+Energy and entropy quantities are reported in two different ways in the GIST output.
+The \inlinecode{\_dens} quantities are normalized by the voxel volume and can be used to compute integrals.
+The \inlinecode{\_norm} quantities are instead normalized by the average number of solvents in the respective voxel, and are useful to visualize local water properties.
+
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
 We will
@@ -431,11 +435,46 @@ A good starting point (though a bit dated) for the parametrization and solvation
 \subsubsection{Equilibration}
 Equilibrate your solvated biotin in an NVT or NpT ensemble.
 Even when running the simulation in NVT, it is advisable to include an NpT equilibration step to adjust the box size beforehand.
-Use enough equilibration time to allow the water to relax around your biotin structure.
+Use enough equilibration time to allow the solvent to relax. 
+For water, \SI{0.5}{\nano\second} are usually sufficient to equilibrate the density, but narrow binding pockets can take longer.
 
 \subsubsection{MD simulation}
-\todo{Move simulation part from complex to here}
+Now, you can run restrained MD simulations based on the equilibrated structures.
+Restraints should be used because IST theory is not defined for moving solutes.
+We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place.
+We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}.
+A simulation length of at least \SI{20}{\nano\second} is recommended to obtain statistically independent snapshots of the water molecules.
 
+An example Amber input file for GIST might look like this:
+\begin{lstlisting}[style=amber-in]
+restrained 100 ns NpT
+&cntrl
+ntx=5, irest=1,
+ioutfm=1,
+ntb=2, iwrap=1,
+ntr=1, restraint_wt=100.0,
+restraintmask="!@H=&!:WAT",
+ntp=1, pres0=1.0, taup=1.0,
+ntc=2, ntf=2,
+ntt=3, tempi=300.0, temp0=300.0, gamma_ln=2,
+nstlim=50000000, dt=0.002,
+ntwr=50000, ntwx=5000, ntpr=5000,
+/
+\end{lstlisting}
+Note that these are very standard MD settings except for the restraints.
+
+Run the MD using \software{pmemd.cuda}:
+\begin{lstlisting}[style=bash]
+pmemd.cuda \
+-O \
+-i 100ns-npt-restraint.in \
+-o md-01.out \
+-p solvated.parm7 \
+-c EQUIL-DONE.rst \
+-x md-01.nc \
+-r md-01.ncrst \
+-ref EQUIL-DONE.rst
+\end{lstlisting}
 
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 \subsubsection{System Preparation and Equilibration}
@@ -451,7 +490,7 @@ In our example, we only use a single equilibrated structure.
 A more sophisticated approach would be to identify one or several dominant structures out of the ensemble.
 Depending on what properties you are interested in, it might be beneficial to run an MD simulation choose dominant structures through clustering.
 
-When starting from a crystal structure, care has to be taken during the preparation step.
+When starting from a crystal structure, care has to be taken during the preparation.
 Make sure to choose a proper protonation state for all titratable moeties.
 You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics.
 A good criterion for validating the box size is to check whether the water on the outside of the box behaves bulk-like according to the GIST output.
@@ -472,54 +511,18 @@ trajout streptavidin/pre-equil.ncrst
 %We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
 
 Use the \software{equilibration.py} script (or your own) to perform short NVT and NpT equilibration runs on the complex structure.
-Note that the equilibration script contains unrestrained NpT steps, because restraining two molecules at the same time might interfere with the pressure equilibration.
+It is important to include unrestrained NpT steps, because restraining two molecules at the same time might interfere with the pressure equilibration.
 
 Then split the equilibrated structure into biotin and streptavidin parts using \software{cpptraj\_remove\_mol.sh}.
-After that, you can use \software{equilibration.py -R} to run short restrained 
+After that, use \software{equilibration.py -R} to run short restrained 
 equilibrations (where only the water is allowed to move) on the individual 
 systems.
+By using restraints, we can make sure that the monomer conformations match the complex.
 
-\subsubsection{Running MD for GIST}
+\subsubsection{MD Simulation}
+The MD can be run as described above for each monomer and the complex.
 
-Now, you can run restrained MD simulations based on the equilibrated structures for subsequent GIST analyses.
-Restraints should be used during the MD because IST theory is not defined for moving solutes.
-We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place.
-We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}.
-A simulation length of at least \SI{20}{\nano\second} is recommended to obtain statistically independent snapshots of the water molecules.
-
-An example Amber input file for GIST might look like this:
-\begin{lstlisting}[style=amber-in]
-restrained 100 ns NpT
-&cntrl
-  ntx=5, irest=1,
-  ioutfm=1,
-  ntb=2, iwrap=1,
-  ntr=1, restraint_wt=100.0,
-  restraintmask="!@H=&!:WAT",
-  ntp=1, pres0=1.0, taup=1.0,
-  ntc=2, ntf=2,
-  ntt=3, tempi=300.0, temp0=300.0, gamma_ln=2,
-  nstlim=50000000, dt=0.002,
-  ntwr=50000, ntwx=5000, ntpr=5000,
-/
-\end{lstlisting}
-Note that these are very standard MD settings except for the restraints.
-
-Run the MD using \software{pmemd.cuda}:
-\begin{lstlisting}[style=bash]
-pmemd.cuda \
-	-O \
-	-i 100ns-npt-restraint.in \
-	-o md-01.out \
-	-p solvated.parm7 \
-	-c EQUIL-DONE.rst \
-	-x md-01.nc \
-	-r md-01.ncrst \
-	-ref EQUIL-DONE.rst
-\end{lstlisting}
-
-
-\subsection{GIST analysis of Streptavidin-Biotin}
+\subsubsection{GIST analysis of Streptavidin-Biotin}
 For easier post-processing, here we use grids that contain the whole molecule.
 Smaller grids encompassing only the binding site could be used for streptavidin and the complex, but this would complicate the analysis.
 %This could in theory be avoided for streptavidin and the complex, since only the surrounding of the biotin molecule (i.e., the binding pocket) is required for the analysis.
@@ -552,7 +555,7 @@ FindCentroid.py here.
 What does gisttools do if the grid is too small? -vah }
 A buffer distance of \SI{15.0}{\angstrom} is reasonable for biotin, but smaller values are sufficient for the larger streptavidin and complex systems.
 
-Now, you can finally run the actual GIST analysis.
+Now, you can finally run the GIST analysis.
 Center the molecule as above, to make sure that its position matches the grid parameters you decided on.
 We recommend using either the PME or GPU implementation of GIST.
 For the GPU version, cpptraj needs to be compiled with the \inlinecode{-cuda} flag.
@@ -567,9 +570,9 @@ gist griddim 100 100 100 out gist.dat \
   refdens 0.03287 pme
 \end{lstlisting}
 
-\subsection{Reference Values and Radial Convergence}
+\subsubsection{Reference Values and Radial Convergence}
 All GIST quantities should be expressed relative to bulk.
-This automatically done for the entropy, using the bulk density specified by \inlinecode{refdens}.
+This is automatically done by \software{cpptraj} for the entropy, using the bulk density specified by \inlinecode{refdens}.
 The solute-solvent energy $E_{sw}$ naturally tends towards zero in bulk.
 However, the solvent-solvent energy $E_{ww}$ needs to be referenced.
 
@@ -589,7 +592,7 @@ Alternatively, the solvent-solvent energy in a large GIST grid converges to the 
 Therefore, the reference energy can be obtained by binning the voxels by their distance to the solute, and evaluate Equation~\ref{eq_ewwref} within each bin.
 If this value converges, this can be used as $E_{ww}^\textit{ref}$.
 
-\software{gisttools} contains functionality to perform this analysis easily.
+\software{gisttools} contains functions to facilitate this analysis.
 There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value.
 Although it has a simple convergence check built-in, it is always recommended to check the convergence by hand.
 
@@ -638,8 +641,8 @@ In \software{gisttools}, this is done simply by setting \inlinecode{gist.eww\_re
 %    -i2 gist-gO-abs.dx -o gist-Eww-ref-dens.dx
 %\end{lstlisting}
 
-Now, add all free energy contributions to obtain the spatially resolved $\dgsolv$.
-In \software{gisttools}, this is done automatically, and can be accessed using the \inlinecode{A\_dens} and \inlinecode{A\_norm} data rows. \todo{norm and dens not defined. }
+Now, sum all free energy contributions to obtain the spatially resolved $\dgsolv$.
+In \software{gisttools}, this is done automatically and can be accessed using the \inlinecode{A\_dens} and \inlinecode{A\_norm} data rows.
 
 \newcommand{\coordinate}{\mathbf{r}}
 \begin{equation}
@@ -673,7 +676,7 @@ Especially the solvent-solvent energy is not perfectly flat, indicating that the
 %but is also complicated because the solute is charged.
 Both the entropy and $E_{sw}$ can be considered converged around \SI{10}{\angstrom}.
 While this is not true for $E_{ww}$, we will see below that the energy difference upon binding converges more readily than its individual contributions.
-\todo{vah: Is that shown somewhere yet?}
+\todo{vah: Is that shown somewhere yet -> fwa?}
 
 \begin{figure}
 	\centering
@@ -681,14 +684,14 @@ While this is not true for $E_{ww}$, we will see below that the energy differenc
 	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute. All quantities cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}\label{fig_radial_convergence}
 \end{figure}
 
-\subsection{Visualizing $\dgsolv$}
+\subsubsection{Visualizing $\dgsolv$}
 Next, we want to visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
 You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST\@.
 With \software{gistpp}, you can use the file from the convergence check. Additional OpenDX files can be produced using \inlinecode{gistpp -op makedx}.
 With \software{gisttools}, you can create one using e.g., \inlinecode{gist.save\_dx("A\_dens", "A\_dens.dx")}.
 
 It might also be interesting to visualize the average energy of a water molecule at each grid voxel.
-This quantity is given by 2*Eww + Esw.
+This quantity is given by $2E_{ww} + E_{sw}$.
 The energy referencing leads to non-zero normalized values where the population is zero.
 While this is irrelevant for further post-processing, it is advantageous for visualization to set those empty regions to zero.
 An OpenDX file can be produced using \software{gisttools} as follows:
@@ -702,7 +705,7 @@ gist.loc[gist['population'] == 0, 'E_norm'] = 0
 gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 \end{lstlisting}
 
-Visualize the free energy, the total energy, and the entropy, at several iso-levels.
+Visualize the free energy, the energy, and the entropy, at several isolevels.
 
 Adapt the above PyMOL script to visualize the average energy per solvent at a positive and a negative isolevel, as well as regions of negative entropy per solvent.
 The expected representation of the streptavidin binding pocket is shown in Figure~\ref{fig_binding_pocket_pymol}.
@@ -713,19 +716,19 @@ The expected representation of the streptavidin binding pocket is shown in Figur
 	\caption{Free energy contributions in the streptavidin binding pocket. Red: high solvent energy (at +3 kcal/mol). Blue: low solvent energy (at -2 kcal/mol). Green: low solvent entropy $T\Delta S^{six}$ (at -2 kcal/mol).}\label{fig_binding_pocket_pymol}
 \end{figure}
 
-You should find that there are several regions in the binding pocket that feature a high solvent energy and/or low solvent entropy.
+You should find that there are several regions in the binding pocket that feature a high solvent energy and/or low entropy.
 However, such regions also exist outside of the binding pocket, and there are also low-energy regions within the binding pocket.
-Therefore, the strong affinity to biotin can not be explained solely by the hydration contribution, and the direct interaction energy also needs to be taken into account.
+Therefore, the strong affinity to biotin cannot be explained only by hydration, and the direct interaction energy also needs to be taken into account.
 
-\subsection{Contribution of Hydration to Binding}
-In the next step, calculate the $\dgsolv$ contributions around the biotin ligand in each of the three systems (biotin, streptavidin, and complex).
-Note that our integration region does not fully reach into bulk, but also comprises regions that are close to the streptavidin protein. 
+\subsubsection{Contribution of Hydration to Binding}
+In the next step, calculate the $\dgsolv$ contributions around biotin in each system (biotin, streptavidin, and complex).
+Note that our integration region does not fully reach into bulk, and some of the boundary regions are close to streptavidin. 
 Therefore, our results for each system will depend on the exact position of the integration boundary. 
 To avoid inconsistencies, it is important to choose exactly the same integration region for each system.
 Although we kept the systems rigid, the center of mass might have been shifted during pressure equilibration.
-Therefore, we align the complex structure to the streptavidin system and use the shifted biotin coordinates to define the integration region.
+Therefore, we align the complex structure to streptavidin and use the shifted biotin coordinates to define the integration region.
 
-We recommend using a \software{Jupyter Notebook} for the following analyses, although they can also be done in a script or an interactive Python prompt.
+We recommend using a \software{Jupyter Notebook} for the following analyses.
 The code is not explained in detail here, but should be clear after reading the previous sections.
 
 Load the files and double check the frame numbers and reference density.
@@ -754,8 +757,8 @@ compl.eww_ref = compl.detect_reference_value()
 print("Complex:", compl.eww_ref)
 \end{lstlisting}
 
-Subtract a reference entropy from the dTSsix columns.
-\todo{Is there actually a reason why this is not in gisttools itself implemented? -vah}
+Subtract a reference entropy from the \inlinecode{dTSsix} columns.
+\todo{Update with newest gisttools -> fwa}
 \begin{lstlisting}[style=python]
 def reference_entropy(gf):
     if 'dTSsix_unref_norm' not in gf.data.columns:
@@ -771,7 +774,7 @@ reference_entropy(compl)
 
 Compute the atom positions that define the integration region.
 For the streptavidin integral, we align the complex structure onto streptavidin and then use the biotin positions as centers.
-Note that we use \software{mdtraj} here, since \software{gisttools} stores the reference structure as a \inlinecode{mdtraj.Trajectory} object, but any other library for post-processing of trajectories works as well.
+Note that we use \software{mdtraj} here, since \software{gisttools} stores the reference structure as an \software{mdtraj} \inlinecode{Trajectory} object.
 \begin{lstlisting}[style=python]
 col = 'dTSsix_dens'
 def select(traj, sel):
@@ -779,7 +782,7 @@ def select(traj, sel):
     return traj.atom_slice(traj.top.select(sel))
 # we multiply by 10 to convert nm to Angstrom.
 compl_x = select(compl.struct, biotin_mask).xyz[0] * 10.
-biotin_x = select(biotin.struct, biotin_mask).xyz[0] * 10.
+biotin_x = select(biotin.struct, biotin_mask).xyz[0]*10.
 aligned = compl.struct[:].superpose(strept.struct, \
     atom_indices=strept.struct.top.select(strept_mask))
 aligned = select(aligned, biotin_mask)
@@ -809,9 +812,9 @@ plt.ylabel('dG contribution [kcal/mol]')
 \end{lstlisting}
 % \todo{\$\textbackslash AA\$ should produce an angstrom sign in matplotlib (what a pain to have this printed out in \LaTeX\ tho) -vah} -- Å produces an angstrom sign ;-)
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
-You will find that the energy is strongly unfavorable to binding, because we do not yet include the interaction energy between biotin and streptavidin.
+You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 
-Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this energy difference.
+Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST\@.
 An example \software{cpptraj} input might look like:
 \begin{lstlisting}[style=cpptraj]
@@ -830,17 +833,17 @@ avg(biotin[total])
 avg(diff)
 \end{lstlisting}
 
-It has been shown in literature \cite{Chen2021,Waibl2022-gist-solvents} that the total solvation entropy in water is best approximated by 0.6 times the first order entropy.
+It has been shown \cite{Chen2021,Waibl2022-gist-solvents} that the solvation entropy in water is best approximated by 0.6 times the first order entropy.
 Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 %\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah. Ok? -fwa}
 \todo{this table is super confusing to me. What's "total"? Doesn't seem to be E-TS. Diff is also not the sum of other total entries. Shouldn't it be TS instead of S?-vah}
 \begin{table}[h]
-	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``total'' is calculated as $E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$.}\label{tab_dg_monomers_dimer}
+	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``Diff'' is calculated as $E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$.}\label{tab_dg_monomers_dimer}
 	\small
 	\begin{tabular}{@{}lrrrrr@{}}
 		\toprule
-		System       & E(internal) & $\Delta E^\textit{GIST}$ & $\Delta S^\textit{GIST}$ & $\Delta S^\textit{scaled}$ & total \\
+		System       & E(internal) & $\Delta E^\textit{GIST}$ & $T\Delta S^\textit{GIST}$ & $T\Delta S^\textit{scaled}$ & Diff \\
 		\midrule
 		complex      & -1303.4 & -361.2 & -233.1 & -139.9 & -1524.7 \\
 		streptavidin & -1180.7 & -360.8 & -242.4 & -145.4 & -1396.1 \\
@@ -856,53 +859,50 @@ This is expected: if the molecules were not able to form any interactions, but i
 In this case, we find that the energy of solvation and the internal energy of the complex more or less cancel out, indicating that binding is largely entropy-driven in this case.
 At first, this is surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions \cite{mpye2020-biotin-itc,hyre2006-biotin-itc}.
 However, we do not take the conformational transition of the streptavidin binding pocket into account.
+
 Prior computational studies suggest a $\Delta G$ of \SI{-26.6}{\kilo\calorie\per\mole} for the binding of biotin into the closed conformation of streptavidin \cite{Bansal2018-biotin}.
 This indicates that our result is in good agreement with literature.
-However, the conformational changes of the binding pocket would need to be described to improve the agreement with experiments.
-\todo{Should we include a short introduction to other solvents with GIST? What about solvent/ion mixtures? Can we somehow distinguish python code from input files optically? -vah}
-\subsection{Further steps}
-In this tutorial, we obtained a value for the binding of biotin into the closed conformation of the streptavidin binging pocket.
-To investigate the effect of different conformations on the binding affinity, you can perform molecular dynamics simulations of the complex and/or monomers and perform GIST on multiple cluster representatives.
-To include the effect of the lid closing transition in the binding process, free energy calculation methods such as umbrella sampling can be used.
+To improve the agreement with ITC measurements, the conformational changes of the binding pocket should be included.
 
-Smaller GIST grids could be used by focusing on the binding pocket, or by rotating the molecule by its principal axes to fit the cuboid grid more exactly.
-However, this should be done \emph{before} the MD, since rotating the trajectory damages the periodic box information.
-%\section{Content and links}
-%
-%A tutorial will normally draw on additional files and materials; clearly indicate where and how these are available, with links, and how they are being archived for the long-term and maintained so they stay current.
-%You will likely want to reference your GitHub repository as a central point to access all of this information, and then the GitHub repository may link out to other content as needed.
+\subsubsection{Further steps}
+In this tutorial, we obtained a value for the binding of biotin into the closed conformation of the streptavidin binding pocket.
+To investigate the effect of different conformations on the binding affinity, you can perform molecular dynamics simulations of the complex and/or monomers and perform GIST on multiple cluster representatives.
+To include the effect of lid closing in the binding process, free energy calculation methods such as umbrella sampling can be used.
+
+To speed up the calculation, smaller GIST grids could be used by focusing on the binding pocket, or by rotating the molecule by its principal axes to fit the cuboid grid more exactly.
+However, this should be done \emph{before} the MD, since rotating the trajectory damages the periodic box information \todo{@Dan: is this still the case?}.
 
 \section{Recent developments}
 In recent years, several updates to the original GIST implementation have been published.
 The basic functionality of the program, however, has not been changed.
 In this chapter, we will shortly present each of those updates.
 \subsection{GPU implementation}
-In Reference~\cite{Kraml2020}, a GPU implementation of the energy calculation was implemented, which typically increases the speed by 1--2 orders of magnitude.
+In Reference~\cite{Kraml2020}, a GPU implementation of the energy calculation was presented, which typically increases the speed by 1--2 orders of magnitude.
 
 If \software{cpptraj} is compiled with GPU support, the energy calculation uses the GPU automatically, without any additional input.
-However, PME-GIST is not supported on the GPU.
+However, PME-GIST is not supported on the GPU, and no GPU code will be used when specifying \inlinecode{pme}.
 
 \subsection{PME implementation}
 In Reference~\cite{Chen2021}, a PME implementation of the GIST energy was presented.
 For typical systems, this implementation is slightly slower than GPU-GIST, but much faster than the original CPU code.
 Furthermore, PME-GIST offers the best agreement between GIST energies and those observed in an MD simulation.
 
-To run a PME-GIST calculation, the \inlinecode{pme} flag to the \inlinecode{gist} action in \software{cpptraj} can be used.
+To run PME-GIST, the \inlinecode{pme} flag to \inlinecode{gist} can be used in \software{cpptraj}.
 The output will contain two additional columns: \inlinecode{PME\_dens} and \inlinecode{PME\_norm}.
 They contain the potential of solute and solvent evaluated at the solvent positions and divided by two.
 Furthermore, the \inlinecode{Eww} and \inlinecode{Esw} columns are also computed using PME, and are reported as usual.
-For typical use cases, it is recommended to use \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
+For typical use cases, we recommend using \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
 
 \subsection{GIST with non-water solvents}
 In References~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
 
-To run a GIST calculation in a solvent other than water, use the \inlinecode{solute} flag together with a \software{cpptraj} selection mask.
-Everything that is not in the \inlinecode{solute} mask is treated as solvent.
-If there are multiple solvent species, use the \inlinecode{solventmols} option as described in Section~\ref{sec-salt-water}.
-The code will automatically choose three atoms which are used to define the solvent orientation, and print this selection to the output.
+To run a GIST calculation in a solvent other than water, use \inlinecode{solute} with a \software{cpptraj} selection mask.
+All other molecules will be treated as solvent.
+If there are multiple solvent species, also use the \inlinecode{solventmols} flag as described in Section~\ref{sec-salt-water}.
 
-Sometimes, \software{cpptraj} does not automatically choose the optimal atoms.
-In methanol, for instance, one can either incorporate the C--H bonds or the O--H bond in the selection.
+The code will automatically choose three atoms per molecule to define the solvent orientation, and print this selection to the output.
+Sometimes, however, the automatic selection is not optimal.
+For instance, in methanol one can either incorporate the C--H bonds or the O--H bond in the selection.
 The latter is probably more relevant since it can incorporate hydrogen bonding effects.
 Assuming that the alcohol hydrogen is called H1, this could be specified as follows:
 
@@ -917,10 +917,10 @@ Note that the central atom of the \inlinecode{rigidatoms} selection goes first.
 \subsection{GIST with salt-water mixtures}
 \label{sec-salt-water}
 In \cite{Waibl2021-gist-salt}, an extension of GIST was presented that can use salt-water mixtures as a solvent.
-This allows treating salting-out effects, although it was shown that the salting-out coefficient is over-predicted by GIST unless higher-order entropies are incorporated.
+This allows treating salting-out effects, although it was shown that the salting-out coefficient is over-predicted by GIST because of the first-order entropy approximation.
 Generally, GIST should be able to treat arbitrary solvent mixtures as long as each molecule is sufficiently rigid.
 
-The \software{cpptraj} implementation of GIST allows the user to specify which components of the system to treat as a solute, using the \inlinecode{solute} keyword.
+In the \software{cpptraj} implementation of GIST, the \inlinecode{solute} keyword specifies which components of the system are treated as a solute.
 Everything else will be treated as solvent.
 If the solvent contains more than one molecular species, a list of solvent molecule names (i.e., ``\inlinecode{solventmols WAT,NA,CL}'') must be specified.
 For each molecule in this list, densities (e.g., \inlinecode{g\_mol\_NA}) and energies (e.g., \inlinecode{Eww\_mol\_NA}) will be computed and written to .dx files.
