@@ -350,7 +350,7 @@ The most important options are summarized in the following table:
 		Command       & Options & Explanation & Default  \\
 		\midrule
 		gridcntr    & <y> <y> <z> & Coordinates of the grid center in \AA & 0 0 0  \\
-		griddim     & <nx> <ny> <nz> & Number of voxels per axis & 40 40 40\\
+		griddim     & <nx> <ny> <nz> & Number of voxels per axis & 40 40 40\pdfcomment{Overfull hbox?}\\
 		gridspacn & <dval> &Grid spacing / voxel dimensions in  \AA & 0.5    \\
 		refdens         & <rdval> & Reference density of the bulk water in molecules/\AA$^3$ . & 0.0334    \\
 		temp & <tval> & System temperature in Kelvin & 300 \\
@@ -814,6 +814,15 @@ plt.ylabel('dG contribution [kcal/mol]')
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 
+You can also plot the difference between the complex and monomer contributions against the distance to biotin, using the complex coordinates for the holo structure.
+The expected result is shown in Figure~\ref{fig-dg-sums}.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\linewidth]{figures/deltaG-difference.png}
+	\caption{TODO caption}\label{fig-dg-sums}
+\end{figure}
+
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST\@.
 An example \software{cpptraj} input might look like:
@@ -837,7 +846,7 @@ It has been shown \cite{Chen2021,Waibl2022-gist-solvents} that the solvation ent
 Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 %\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah. Ok? -fwa}
-\todo{this table is super confusing to me. What's "total"? Doesn't seem to be E-TS. Diff is also not the sum of other total entries. Shouldn't it be TS instead of S?-vah}
+
 \begin{table}[h]
 	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``Diff'' is calculated as $E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$.}\label{tab_dg_monomers_dimer}
 	\small
@@ -947,13 +956,14 @@ The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference 
 
 % The current font makes the O look like a tofu / placeholder
 \begin{lstlisting}[style=pymol]
-	load streptavidin.pdb
-	as surface
-	color gray70, streptavidin
-	load gist-gO.dx, gO
-	isomesh gO_high, gO, 2
-	color slate, gO_high
+load streptavidin.pdb
+as surface
+color gray70, streptavidin
+load gist-gO.dx, gO
+isomesh gO_high, gO, 2
+color slate, gO_high
 \end{lstlisting}
+
 
 \begin{figure}
 	\centering
@@ -1178,16 +1188,16 @@ The electrostatic and Lennard-Jones parts $E_\text{elec}$ and $E_\text{lj}$ are 
 
 In PME-GIST, the system is treated as periodic, and the electrostatic energy is split into a short-range term $E_\text{dir}$, which is calculated in direct space using a distance cutoff, and a long-range term $E_\text{rec}$, which is calculated in reciprocal space.
 Additionally, there is a correction term $E_\text{self}$ (called $E_\text{corr}$ in the original publication \cite{Chen2021}), which corrects for the self-interaction of each solvent molecule in the reciprocal term.
-
 \begin{equation}
-	E_\textit{elec} = E_\textit{dir} + E_\textit{rec} + E_\textit{self}
+	E_\textit{elec} = E_\text{dir} + E_\text{rec} + E_\text{self}
 \end{equation}
+
 %\todo{How is E$_{dir}$ treated? Is there a cutoff as well (PME GIST paper seems to indicate so)? If so, we should probably note that. } - ok? -fwa
 The short-range Lennard-Jones contribution is computed in the direct space, using a distance cutoff.
 Furthermore, a long-range correction term is computed that accounts for the contributions above this cutoff assuming a homogeneous distribution of particles.
 
 \begin{equation}
-	E_\textit{lj} = E_\textit{lj,\ short} +  E_\textit{lj\_corr}
+	E_\text{lj} = E_\text{lj,\ short} +  E_\text{lj,\ corr}
 \end{equation}
 
 \section{Cheatsheet}
