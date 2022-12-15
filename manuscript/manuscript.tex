@@ -430,7 +430,7 @@ A good starting point (though a bit dated) for the parametrization and solvation
 
 \subsubsection{Equilibration}
 Equilibrate your solvated biotin in an NVT or NpT ensemble.
-Even when running the simulation in NVT, it is advisable to include an NpT equilibration step to adjust the box size beforehand.
+Even when running the production simulation in NVT, it is advisable to include an NpT equilibration step to adjust the box size beforehand.
 Use enough equilibration time to allow the water to relax around your biotin structure.
 
 \subsubsection{MD simulation}
@@ -439,7 +439,7 @@ Now, you can run restrained MD simulations based on the equilibrated structures 
 Restraints should be used during the MD because IST theory is not defined for moving solutes.
 We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place.
 We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}.
-A simulation length of at least \SI{20}{\nano\second} is recommended to obtain statistically independent snapshots of the water molecules.
+A simulation length of at least \SI{20}{\nano\second} is recommended to obtain statistically independent snapshots of the water molecules. 
 
 An example Amber input file for GIST might look like this:
 \begin{lstlisting}[style=amber-in]
@@ -471,7 +471,47 @@ Run the MD using \software{pmemd.cuda}:
 	-r md-01.ncrst \
 	-ref EQUIL-DONE.rst
 \end{lstlisting}
+\subsubsection{GIST analysis}
+To start our GIST analysis of biotin, we'll first have to decide on the parameters defining the GIST grid during the analyis.
+We recommend that you center the biotin molecule in space:
+\begin{lstlisting}[style=cpptraj]
+	parm solvated.parm7
+	trajin md-01.nc 1 1 1
+	autoimage !(:WAT) origin
+	strip :WAT
+	trajout biotin-centered.pdb
+\end{lstlisting}
 
+To decide on a grid size, find the extent (minimum and maximum) of the x-, \mbox{y-,} and z-coordinates of the molecule.
+This can be done e.g., using the \software{mdtraj} package in Python.
+\begin{lstlisting}[style=python]
+	import mdtraj as md
+	pdb = md.load("biotin-centered.pdb")
+	# mdtraj converts to nm.
+	# *10 to convert back to Angstrom.
+	min = pdb.xyz[0].min(0) * 10.
+	max = pdb.xyz[0].max(0) * 10.
+	print(*list(zip("xyz", min, max)), sep="\n")
+\end{lstlisting}
+For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{15}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+15)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
+To get bulk-like water properties at the grid border, a buffer distance of \SI{15.0}{\angstrom} is reasonable for biotin.
+
+Now, you can finally run the actual GIST analysis.
+Center the molecule as above, to make sure that its position matches the grid parameters you decided on.
+We recommend using either the PME or GPU implementation of GIST.
+For the GPU version, cpptraj needs to be compiled with the \inlinecode{-cuda} flag.
+While the GPU version is generally faster, the PME implementation matches the energy of the Amber MD engine more closely.
+
+\begin{lstlisting}[style=cpptraj]
+	parm solvated.parm7
+	trajin md-01.nc
+	autoimage !(:WAT) origin
+	# optionally remove the "pme" option
+	gist griddim 100 100 100 out gist.dat \
+	refdens 0.03287 pme
+\end{lstlisting}
+\subsubsection{Interpreting and visualizing the results}
+\todo{write this, show the various GIST properties here: Eww, Esw, S. Show how to calculate A and E with gisttools}
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 \subsubsection{System Preparation and Equilibration}
 If you want to skip this section, run 
@@ -483,10 +523,9 @@ in the code folder. This assumes that you have Python and Amber set up properly 
 The choice of initial structure is crucial to the GIST results.
 Crystal structures may not represent the dominant solution structure for a given target.
 In our example, we only use a single equilibrated structure.
-A more sophisticated approach would be to identify one or several dominant structures out of the ensemble.
-Depending on what properties you are interested in, it might be beneficial to run an MD simulation choose dominant structures through clustering.
+A more sophisticated approach would identify one or several dominant structures out of the ensemble - either gathered from experimental data or by clustering an MD simulation.
 
-When starting from a crystal structure, care has to be taken during the preparation step.
+When starting from an experimental structure, care has to be taken during the preparation step.
 Make sure to choose a proper protonation state for all titratable moeties.
 You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics.
 A good criterion for validating the box size is to check whether the water on the outside of the box behaves bulk-like according to the GIST output.
@@ -506,7 +545,7 @@ trajout streptavidin/pre-equil.ncrst
 (Adapt for biotin as necessary.)
 %We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
 
-Use the \software{equilibration.py} script (or your own) to perform short NVT and NpT equilibration runs on the complex structure.
+Use the \software{equilibration.py} script (or your own procedure) to perform short NVT and NpT equilibration runs on the complex structure.
 Note that the equilibration script contains unrestrained NpT steps, because restraining two molecules at the same time might interfere with the pressure equilibration.
 
 Then split the equilibrated structure into biotin and streptavidin parts using \software{cpptraj\_remove\_mol.sh}.
@@ -554,7 +593,7 @@ pmemd.cuda \
 \end{lstlisting}
 
 
-\subsection{GIST analysis of Streptavidin-Biotin}
+\subsubsection{GIST analysis of Streptavidin-Biotin}
 For easier post-processing, here we use grids that contain the whole molecule.
 Smaller grids encompassing only the binding site could be used for streptavidin and the complex, but this would complicate the analysis.
 %This could in theory be avoided for streptavidin and the complex, since only the surrounding of the biotin molecule (i.e., the binding pocket) is required for the analysis.
