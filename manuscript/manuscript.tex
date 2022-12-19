@@ -470,6 +470,7 @@ An example Amber input file for GIST might look like this:
 	ntwr=50000, ntwx=5000, ntpr=5000,
 	/
 \end{lstlisting}
+
 This file will run a 100 ns NpT MD simulation while keeping all atoms except for hydrogens and waters restrained. Note that these are very standard MD settings except for the restraints.
 
 Run the MD using \software{pmemd.cuda}:
@@ -494,7 +495,6 @@ We recommend that you center the biotin molecule in space:
 	strip :WAT
 	trajout biotin-centered.pdb
 \end{lstlisting}
-
 To decide on a grid size, find the extent (minimum and maximum) of the x-, \mbox{y-,} and z-coordinates of the molecule.
 This can be done e.g., using the \software{mdtraj} package in Python.
 \begin{lstlisting}[style=python]
@@ -524,7 +524,9 @@ While the GPU version is generally faster, the PME implementation matches the en
 	refdens 0.03287 pme
 \end{lstlisting}
 \subsubsection{Interpreting and visualizing the results}
-\todo{write this, show the various GIST properties here: Eww, Esw, S.}
+
+\todo{write this, show the various GIST properties here: Eww, Esw, S. Show how to calculate A and E with gisttools}
+
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
