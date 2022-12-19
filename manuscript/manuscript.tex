@@ -382,13 +382,21 @@ Here is a list of the most important quantities calculated by GIST:
 \end{itemize}
 
 Several dx files are written by default, such as the energy, entropy, and atomic number densities.
-All calculated quantities are written to the output file (default \inlinecode{gist-output.dat}) and can be used to generate DX files for other quantities.
+All calculated quantities are written to the output file (default \inlinecode{gist-output.dat}) and can be used to generate DX files for other quantities. 
 A full list of all properties in the output is provided at the end of the tutorial.
 
-Energy and entropy quantities are reported in two different ways in the GIST output.
+The output is organized by voxel and sorted according to their x,y, and z coordinates, describing the center point of the voxel.
+Energy and entropy quantities are reported in two different ways ´
 The \inlinecode{\_dens} quantities are normalized by the voxel volume and can be used to compute integrals.
-The \inlinecode{\_norm} quantities are instead normalized by the average number of solvents in the respective voxel, and are useful to visualize local water properties.
-
+The \inlinecode{\_norm} quantities are instead normalized by the number of solvents in the respective voxel averaged over all considered frames, and are useful to visualize local water properties.
+Therefore, to convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel k to a \inlinecode{\_dens} quantity $X^k_{dens}$ the following equation is applied:
+\begin{equation}
+	X^k_{dens} = \frac{X^k_{norm}}{V^k} \cdot \frac{N^k_{solvent}}{N_{frames}} 
+\end{equation}
+with $V^k$, the volume of voxel $k$, $N^k_{solvent}$, the solvent population in voxel $k$, and $N_{frames}$, the number of simulation frames considered in the GIST analysis. Acoordingly, converting $X^k_{dens}$ to  $X^k_{norm}$ is possible using the following equation:
+\begin{equation}
+	X^k_{norm} = X^k_{dens} \cdot V^k \cdot \frac{N_{frames}}{N_{frames}N^k_{solvent}} 
+\end{equation}
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
 We will
@@ -494,9 +502,9 @@ This can be done e.g., using the \software{mdtraj} package in Python.
 	pdb = md.load("biotin-centered.pdb")
 	# mdtraj converts to nm.
 	# *10 to convert back to Angstrom.
-	min = pdb.xyz[0].min(0) * 10.
-	max = pdb.xyz[0].max(0) * 10.
-	print(*list(zip("xyz", min, max)), sep="\n")
+	min_xyz = pdb.xyz[0].min(0) * 10.
+	max_xyz = pdb.xyz[0].max(0) * 10.
+	print(*list(zip("xyz", min_xyz, max_xyz)), sep="\n")
 \end{lstlisting}
 For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{15}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+15)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
 To get bulk-like water properties at the grid border, a buffer distance of \SI{15.0}{\angstrom} is reasonable for biotin.
@@ -516,8 +524,9 @@ While the GPU version is generally faster, the PME implementation matches the en
 	refdens 0.03287 pme
 \end{lstlisting}
 \subsubsection{Interpreting and visualizing the results}
-\todo{write this, show the various GIST properties here: Eww, Esw, S. Show how to calculate A and E with gisttools}
+\todo{write this, show the various GIST properties here: Eww, Esw, S.}
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
+In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
 If you want to skip this section, run 
 \begin{lstlisting}[style=bash]
@@ -565,50 +574,18 @@ The MD can be run as described above for each monomer and the complex.
 \subsubsection{GIST analysis of Streptavidin-Biotin}
 For easier post-processing, here we use grids that contain the whole molecule.
 Smaller grids encompassing only the binding site could be used for streptavidin and the complex, but this would complicate the analysis.
-%This could in theory be avoided for streptavidin and the complex, since only the surrounding of the biotin molecule (i.e., the binding pocket) is required for the analysis.
 Furthermore, we recommend that you center the molecule in space.
-For each system (biotin, streptavidin, complex), produce a centered pdb file using \software{cpptraj}:
-\begin{lstlisting}[style=cpptraj]
-parm solvated.parm7
-trajin md-01.nc 1 1 1
-autoimage !(:WAT) origin
-strip :WAT
-trajout solute-centered.pdb
-\end{lstlisting}
+Calculate the GIST grid parameters as outlined in the biotin section for the complex and streptavidin and run the GIST analysis.
+For larger systems like whole proteins you can usually get away with a smaller buffer region compared to small molecules.
+To test whether your grid is large enough look at solvent properties close to the grid edges, e.g. the solvent-solvent energies.
+If these correspond to the respective bulk properties, it can be assumed that your grid is large enough to capture all perturbations of the solute on the solvent.
+Note that a different box-size or number of solvent molecules can skew the bulk properties slightly compared to the reference values provided above.
+In that case, checking for convergence of the solvent properties near the grid borders is sufficient but you might want to modify your reference values according to your results then as described in the next section.
 
-Then, find the extent (minimum and maximum) of the x-, \mbox{y-,} and z-coordinates for each system.
-This can be done e.g., using the \software{mdtraj} package in Python.
-\begin{lstlisting}[style=python]
-import mdtraj as md
-pdb = md.load("solute-centered.pdb")
-# mdtraj converts to nm.
-# *10 to convert back to Angstrom.
-min = pdb.xyz[0].min(0) * 10.
-max = pdb.xyz[0].max(0) * 10.
-print(*list(zip("xyz", min, max)), sep="\n")
-\end{lstlisting}
-Then, decide on grid dimensions for every system.
-For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{15}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+15)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
-\todo{ This is handled differently by FindCentroid.py: d = max - min; voxelnr = 
-d*5 for x,y,z each; we should handle it similiar or at least mention 
-FindCentroid.py here. 
-What does gisttools do if the grid is too small? -vah }
-A buffer distance of \SI{15.0}{\angstrom} is reasonable for biotin, but smaller values are sufficient for the larger streptavidin and complex systems.
 
-Now, you can finally run the GIST analysis.
-Center the molecule as above, to make sure that its position matches the grid parameters you decided on.
-We recommend using either the PME or GPU implementation of GIST.
+For the GIST analysis, we recommend using either the PME or GPU implementation of GIST.
 For the GPU version, cpptraj needs to be compiled with the \inlinecode{-cuda} flag.
 While the GPU version is generally faster, the PME implementation matches the energy of the Amber MD engine more closely.
-
-\begin{lstlisting}[style=cpptraj]
-parm solvated.parm7
-trajin md-01.nc
-autoimage !(:WAT) origin
-# optionally remove the "pme" option
-gist griddim 100 100 100 out gist.dat \
-  refdens 0.03287 pme
-\end{lstlisting}
 
 \subsubsection{Reference Values and Radial Convergence}
 All GIST quantities should be expressed relative to bulk.
@@ -850,18 +827,18 @@ plt.axvline(cutoff)
 plt.xlabel('distance to biotin [Å]')
 plt.ylabel('dG contribution [kcal/mol]')
 \end{lstlisting}
-% \todo{\$\textbackslash AA\$ should produce an angstrom sign in matplotlib (what a pain to have this printed out in \LaTeX\ tho) -vah} -- Å produces an angstrom sign ;-)
+
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 
 You can also plot the difference between the complex and monomer contributions against the distance to biotin, using the complex coordinates for the holo structure.
 The expected result is shown in Figure~\ref{fig-dg-sums}.
-
-\begin{figure}
-	\centering
-	\includegraphics[width=1.0\linewidth]{figures/deltaG-difference.png}
-	\caption{TODO caption}\label{fig-dg-sums}
-\end{figure}
+\todo{This figure is missing -vah}
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=1.0\linewidth]{figures/deltaG-difference.png}
+%	\caption{TODO caption}\label{fig-dg-sums}
+%\end{figure}
 
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST\@.
