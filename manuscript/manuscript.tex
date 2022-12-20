@@ -275,13 +275,16 @@ Furthermore, a recent Python version (>3.6) should be available with the followi
 	\item \software{mdtraj (\url{https://www.mdtraj.org/}) \cite{McGibbon2015-mdtraj}}
 \end{itemize}
 
-We also show examples using the \software{gistpp} program, which can be obtained from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation).
+
 
 If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
 We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
 %We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
 
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
+
+Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
+Its usage and some examples were shown in a previous tutorial on GIST\cite{Ramsey2016}.
 
 \section{Running GIST}
 \label{sec:running_GIST}
@@ -524,7 +527,7 @@ While the GPU version is generally faster, the PME implementation matches the en
 	gist griddim 100 100 100 out gist.dat \
 	refdens 0.03287 pme
 \end{lstlisting}
-\subsubsection{Interpreting and visualizing the results}
+\subsubsection{Working with the GIST results}
 Running the GIST analysis above, an output data file (gist.dat) containing all calculated quantities for each voxel in the system is produced. 
 Additionally as outlined in section \ref{sec:running_GIST}, various quantities are written to OPenDX files for accessible visualisation.
 
@@ -534,7 +537,8 @@ To faciliate an accessible way to interact with your GIST data, we recommend usi
 	import matplotlib.pyplot as plt
 	gist = load_gist_file(
 	"gist.dat", struct="solute-centered.pdb",  eww_ref=-9.539)
-	print(f'n_frames = {gist.n_frames}, rho0 = {gist.rho0}')
+	print(f'n_frames = {gist.n_frames}')
+	print(f'rho0 = {gist.rho0}')
 \end{lstlisting}
 All information from the output file is now accessible through the gist object. 
 If the number of frames of the simulation ($n_frames$) and the reference density (rho0) are not provided, they are automatically detected from the GIST data. 
@@ -563,17 +567,16 @@ Information about the grid is stored in the grid property of the gist object, st
 	print(gist.grid)
 	print(gist.struct)
 \end{lstlisting}
-Gisttools also provides minimal OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities ($X_dens$):
+Gisttools also provides minimal OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities (X\_dens):
 
 \begin{lstlisting}[style=python]
-	gist.save_dx('A_dens', fname)
+	gist.save_dx('A_dens', ')
 	with open(fname) as f:
-		for l in f.readlines(300):
-			print(l, end='')
+		print([next(f) for x in range(10)])
 \end{lstlisting}
 
-
-
+\subsubsection{Visualization the GIST results}
+Visualizing the GIST quantities is possible through the OpenDX (.dx) files, either provided directly from the GIST calculation or output by the gisttools library. 
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
@@ -757,7 +760,7 @@ While this is not true for $E_{ww}$, we will see below that the energy differenc
 \subsubsection{Visualizing $\dgsolv$}
 Next, we want to visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
 You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST\@.
-With \software{gistpp}, you can use the file from the convergence check. Additional OpenDX files can be produced using \inlinecode{gistpp -op makedx}.
+%With \software{gistpp}, you can use the file from the convergence check. Additional OpenDX files can be produced using \inlinecode{gistpp -op makedx}.
 With \software{gisttools}, you can create one using e.g., \inlinecode{gist.save\_dx("A\_dens", "A\_dens.dx")}.
 
 It might also be interesting to visualize the average energy of a water molecule at each grid voxel.
