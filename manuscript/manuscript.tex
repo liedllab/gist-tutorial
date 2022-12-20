@@ -284,6 +284,7 @@ We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
 
 \section{Running GIST}
+\label{sec:running_GIST}
 %\subsection{Running the GIST analysis}
 To run a GIST analyis, the following is required:
 \begin{itemize}
@@ -448,7 +449,7 @@ For water, \SI{0.5}{\nano\second} are usually sufficient to equilibrate the dens
 
 \subsubsection{MD simulation}
 \todo{Move simulation part from complex to here}
-Now, you can run restrained MD simulations based on the equilibrated structures for subsequent GIST analyses.
+Now, you can run a restrained MD simulation based on the equilibrated structure of biotin for the subsequent GIST analysis.
 Restraints should be used during the MD because IST theory is not defined for moving solutes.
 We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place.
 We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}.
@@ -524,6 +525,7 @@ While the GPU version is generally faster, the PME implementation matches the en
 	refdens 0.03287 pme
 \end{lstlisting}
 \subsubsection{Interpreting and visualizing the results}
+As outlined in section \ref{sec:running_GIST}
 
 \todo{write this, show the various GIST properties here: Eww, Esw, S. Show how to calculate A and E with gisttools}
 
@@ -543,8 +545,12 @@ A more sophisticated approach would identify one or several dominant structures 
 
 When starting from an experimental structure, care has to be taken during the preparation step.
 Make sure to choose a proper protonation state for all titratable moeties.
+
 You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics.
 A good criterion for validating the box size is to check whether the water on the outside of the box behaves bulk-like according to the GIST output.
+Note that due to the solute restraints, some important solvent sites might be unavailable to exchange with the bulk solvent.
+Make sure to explicitly place water at such sites, if they are important to the process of interest e.g. waters in confined binding pockets, as they might be missed by automated solvation procedures.
+It is good practice to check your restrained MD simulation or solvent populations obtained by GIST afterwards to confirm wether all important solvent sites were properly solvated.
 
 When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are two options for dealing with configurational diversity in the structures.
 One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the conformations.
