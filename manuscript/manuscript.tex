@@ -525,9 +525,54 @@ While the GPU version is generally faster, the PME implementation matches the en
 	refdens 0.03287 pme
 \end{lstlisting}
 \subsubsection{Interpreting and visualizing the results}
-As outlined in section \ref{sec:running_GIST}
+Running the GIST analysis above, an output data file (gist.dat) containing all calculated quantities for each voxel in the system is produced. 
+Additionally as outlined in section \ref{sec:running_GIST}, various quantities are written to OPenDX files for accessible visualisation.
 
-\todo{write this, show the various GIST properties here: Eww, Esw, S. Show how to calculate A and E with gisttools}
+To faciliate an accessible way to interact with your GIST data, we recommend using the gisttools library for python3. Open the GIST output with gisttools:
+\begin{lstlisting}[style=python]
+	from gisttools.gist import load_gist_file
+	import matplotlib.pyplot as plt
+	gist = load_gist_file(
+	"gist.dat", struct="solute-centered.pdb",  eww_ref=-9.539)
+	print(f'n_frames = {gist.n_frames}, rho0 = {gist.rho0}')
+\end{lstlisting}
+All information from the output file is now accessible through the gist object. 
+If the number of frames of the simulation ($n_frames$) and the reference density (rho0) are not provided, they are automatically detected from the GIST data. 
+We will discuss a way to similarly detect the reference energy of the solvent-solvent energy Eww in the advanced section.
+
+The GIST data can be accessed and modified from the gist object in various ways.
+Gisttools provides access to single or multiple voxels through a .loc property similiar to the pandas library. 
+GIST quantity data for all voxels can be accessed through directly indexing the gist object, either by providing a single name or a list of names.
+Indexing with .loc works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
+\begin{lstlisting}[style=python]
+	display(gist.loc[0, 'population'])
+	display(gist.loc[0])
+	display(gist.loc[[0,1], ['x', 'y', 'z']])
+	display(gist['dTSsix_norm'].head())
+	display(gist[['Eww_norm', 'Esw_norm']].head())
+\end{lstlisting}
+
+Gisttools provides access to all quantities listed in the GIST output file.
+In addition it calculates the total enthalpy per voxel (Eall) as a sum of Eww and Esw and the free energy of solvation (A) per voxel as a sum of Eall and -dTSsix:
+\begin{lstlisting}[style=python]
+	display(gist[['A_norm', 'Eall_norm']].head())
+\end{lstlisting}
+
+Information about the grid is stored in the grid property of the gist object, structural data is stored as mdtraj trajectory in the struct property:
+\begin{lstlisting}[style=python]
+	print(gist.grid)
+	print(gist.struct)
+\end{lstlisting}
+Gisttools also provides minimal OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities ($X_dens$):
+
+\begin{lstlisting}[style=python]
+	gist.save_dx('A_dens', fname)
+	with open(fname) as f:
+		for l in f.readlines(300):
+			print(l, end='')
+\end{lstlisting}
+
+
 
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
