@@ -365,7 +365,8 @@ The most important options are summarized in the following table:
 Setting the reference density $\rho_0$ according to the solvent model used in your simulation is important to get correct results. You will also want to reference the bulk mean solvent-solvent enthalpy $E_{ww}$ correctly, though we will show ways to do this differently in a later section of the tutorial.
 
 Densities of typical water models can be found in the \software{cpptraj} manual.
-We also provide the densities for water models commonly used with AMBER forcefields in table \ref{tab:ref_densities}. These densities were calculated from 1$\mu$s MD simulations. Pressure was kept constant at 1 bar with the Berendsen barostat and the water box was prepared with tleap to a size of 100$\cdot$100$\cdot$100\AA before pressure equilibration. The temperature was kept constant at 300 K with the Langevin thermostat.
+We also provide the densities for water models commonly used with AMBER forcefields in table \ref{tab:ref_densities}. These densities were calculated from 1$\mu$s MD simulations. Pressure was kept constant at 1 bar with the Berendsen barostat and the water box was prepared with tleap to a size of 100$\cdot$100$\cdot$100\AA\ before pressure equilibration. The temperature was kept constant at 300 K with the Langevin thermostat.
+\todo{vah -> Finish these calculations}
 \begin{table}[h]
 	\caption{Reference density $\rho_0$ and mean water-water energy $E_{ww, norm}$ for various water models from NpT simulations at 300K/1bar.}\label{tab:ref_densities}
 	\small
@@ -472,7 +473,7 @@ Use enough equilibration time to allow the solvent to relax.
 For water, \SI{0.5}{\nano\second} are usually sufficient to equilibrate the density, but narrow binding pockets can take longer.
 
 \subsubsection{MD simulation}
-\todo{Move simulation part from complex to here}
+
 Now, you can run a restrained MD simulation based on the equilibrated structure of biotin for the subsequent GIST analysis.
 Restraints should be used during the MD because IST theory is not defined for moving solutes.
 We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place.
@@ -996,7 +997,7 @@ The output will contain two additional columns: \inlinecode{PME\_dens} and \inli
 They contain the potential of solute and solvent evaluated at the solvent positions and divided by two.
 Furthermore, the \inlinecode{Eww} and \inlinecode{Esw} columns are also computed using PME, and are reported as usual.
 For typical use cases, we recommend using \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
-
+\todo{vah: The cpptraj manual says that GIST PME energies cannot be decomposed into Esw and Eww -> what's true? Seems to conflict with what is written in this section.}
 \subsection{GIST with non-water solvents}
 In References~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
 
@@ -1227,7 +1228,7 @@ When computing the total $E_{ww}$ of the system, double-counting of interactions
 The total solvent-solvent energy of the system is as follows:
 
 \begin{equation}
-	\Delta E^\text{total}_{ww} = \sum_{k}^\text{voxels} \frac{E_{ww,k}^\text{corr}}{2}
+	\Delta E^\text{R}_{ww} = \sum_{k}^\text{voxels} \frac{E_{ww,k}^\text{corr}}{2}
 %	\Delta E^R_{ww} = n^R E^\text{bulk}_{ww} - E^\textit{R,corr}_{ww}
 \end{equation}
 
@@ -1235,13 +1236,16 @@ However, when water is replaced from a small region $R$ of interest, such as a s
 Therefore, there is no double counting, and the full solvent-solvent energy should be used.
 
 \begin{equation}
-	\Delta E^\text{total}_{ww} = \sum_{k}^{\text{voxels in }R} E_{ww,k}^\text{corr}
+	\Delta E^\text{R}_{ww} = \sum_{k}^{\text{voxels in }R} E_{ww,k}^\text{corr}
 %	\Delta E^\textit{R,norm}_\textit{ww} = E^\textit{R,norm}_\textit{ww} - 2E^\textit{bulk}_\textit{ww}
 \end{equation}
 
 When the region $R$ comprises more than one molecule, interactions within this region are double-counted while interactions to the outside are not.
-This could be solved using the solvent-solvent energy between each pair of voxels $E_{ww,kl}$.
-While this is supported by the standard GIST implementation, it is rarely done due to the large size of the $E_{ww,kl}$ matrix.
+This could be solved using the solvent-solvent energy between each pair of voxels $E_{ww,k\;l}$:
+\begin{equation}
+	\Delta E^\text{R}_{ww} = 2\left(\sum_{k}^\text{voxels in R} E_{ww,k}^\text{corr}-\sum_{k}^\text{voxels in R}\sum_{l}^\text{l>k} E_{ww, k\;l}\right)
+\end{equation}
+While this is supported by the standard GIST implementation, it is rarely done due to the large size of the $E_{ww,k\;l}$ matrix.
 
 Integrating GIST values over the whole grid corresponds to a process where all the solvent is removed into bulk.
 However, when integrating over a small region, this process is less well-defined, since it is unclear to what extent the remaining solvent would reorganize.
