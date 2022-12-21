@@ -362,9 +362,30 @@ The most important options are summarized in the following table:
 	\end{tabularx}
 \end{table}
 
-Setting the reference density according to the water model used in your simulation is important to get correct results.
+Setting the reference density $\rho_0$ according to the solvent model used in your simulation is important to get correct results. You will also want to reference the bulk mean solvent-solvent enthalpy $E_{ww}$ correctly, though we will show ways to do this differently in a later section of the tutorial.
+
 Densities of typical water models can be found in the \software{cpptraj} manual.
-For other models, the density should be computed from a pure water simulation.
+We also provide the densities for water models commonly used with AMBER forcefields in table \ref{tab:ref_densities}. These densities were calculated from 1$\mu$s MD simulations. Pressure was kept constant at 1 bar with the Berendsen barostat and the water box was prepared with tleap to a size of 100$\cdot$100$\cdot$100\AA before pressure equilibration. The temperature was kept constant at 300 K with the Langevin thermostat.
+\begin{table}[h]
+	\caption{Reference density $\rho_0$ and mean water-water energy $E_{ww, norm}$ for various water models from NpT simulations at 300K/1bar.}\label{tab:ref_densities}
+	\small
+	\begin{tabularx}{\columnwidth}{@{}lrr@{}}
+		\toprule
+		Water Model       & $\rho_0$ /\AA$^{-3}$ & $E_{ww, norm}$ /$kcal\cdot mol^{-1} \cdot water^{-1}$  \\
+		\midrule
+		TIP3P    & 0.0329 & -9.533   \\
+		TIP3PFB  & 0.0334 & -11.369  \\
+		TIP4P    & 0.0332 & -9.856   \\
+		TIP4P/Ew & 0.0332 & -11.036  \\
+		TIP5P    & 0.0329 & -9.596   \\
+		SPC/E    & 0.0333 & -11.123  \\
+		OPC      & XXXX   & XXXX     \\
+		OPC3     & XXXX   & XXXX     \\
+		POL3     & XXXX   & XXXX     \\
+		\bottomrule
+	\end{tabularx}
+\end{table}
+If your simulation settings diverge significantly from the above setting or for other solvent models not listed either here or in the \software{cpptraj} manual, the density should be computed from a pure solvent simulation beforehand.
  
 \paragraph{Postprocessing and Analyzing GIST results}
 Cpptraj outputs quantities in OpenDX (.dx) file format which can be visualized in Pymol or VMD.
@@ -519,6 +540,7 @@ We recommend using either the PME or GPU implementation of GIST.
 For the GPU version, cpptraj needs to be compiled with the \inlinecode{-cuda} flag.
 While the GPU version is generally faster, the PME implementation matches the energy of the Amber MD engine more closely.
 
+
 \begin{lstlisting}[style=cpptraj]
 	parm solvated.parm7
 	trajin md-01.nc
@@ -541,7 +563,7 @@ To faciliate an accessible way to interact with your GIST data, we recommend usi
 	print(f'rho0 = {gist.rho0}')
 \end{lstlisting}
 All information from the output file is now accessible through the gist object. 
-If the number of frames of the simulation ($n_frames$) and the reference density (rho0) are not provided, they are automatically detected from the GIST data. 
+If the number of frames of the simulation (n\_frames) and the reference density (rho0) are not provided, they are automatically detected from the GIST data. 
 We will discuss a way to similarly detect the reference energy of the solvent-solvent energy Eww in the advanced section.
 
 The GIST data can be accessed and modified from the gist object in various ways.
@@ -570,8 +592,8 @@ Information about the grid is stored in the grid property of the gist object, st
 Gisttools also provides minimal OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities (X\_dens):
 
 \begin{lstlisting}[style=python]
-	gist.save_dx('A_dens', ')
-	with open(fname) as f:
+	gist.save_dx('A_dens','A.dx')
+	with open('A.dx') as f:
 		print([next(f) for x in range(10)])
 \end{lstlisting}
 
