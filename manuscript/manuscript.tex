@@ -598,8 +598,7 @@ Gisttools also provides minimal OpenDX writing capabilities to visualize the cal
 		print([next(f) for x in range(10)])
 \end{lstlisting}
 
-\subsubsection{Visualization the GIST results}
-Visualizing the GIST quantities is possible through the OpenDX (.dx) files, either provided directly from the GIST calculation or output by the gisttools library. 
+This tutorial discusses the visualisation of OpenDX files in section \ref{sec:visualisation.}
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
@@ -817,6 +816,7 @@ However, such regions also exist outside of the binding pocket, and there are al
 Therefore, the strong affinity to biotin cannot be explained only by hydration, and the direct interaction energy also needs to be taken into account.
 
 \subsubsection{Contribution of Hydration to Binding}
+\label{sec:binding_contributions}
 In the next step, calculate the $\dgsolv$ contributions around biotin in each system (biotin, streptavidin, and complex).
 Note that our integration region does not fully reach into bulk, and some of the boundary regions are close to streptavidin. 
 Therefore, our results for each system will depend on the exact position of the integration boundary. 
@@ -908,16 +908,52 @@ plt.ylabel('dG contribution [kcal/mol]')
 \end{lstlisting}
 
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
-You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
+You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin. To make this easier, gisttool includes a function to integrate in a radius around atom centers:
+\begin{lstlisting}[style=python]
+centers = {biotin: biotin_x, 
+	   strept: strept_x, 
+	   compl: compl_x}
+names = {biotin: 'Biotin', 
+	   strept: 'Streptavidin', 
+	   compl: 'Complex'}
+cols = ['Eall_dens','dTSsix_dens']
+rmax = 12
+results = { names[gist] : 
+	   gist.integrate_around(
+	   		cols, rmax, centers[gist]) 
+	   for gist in [biotin, strept, compl]}
+display( pd.DataFrame( results ))
 
+\end{lstlisting}
+You can also plot the difference between the complex and monomer contributions against the distance to biotin, using the complex coordinates for the holo structure:
+\begin{lstlisting}[style=python]
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
+cutoff = 12
+ax1.plot(bins, np.cumsum(biotin_rdf), label='biotin')
+ax1.plot(bins, np.cumsum(strept_rdf), label='streptavidin')
+ax1.plot(bins, np.cumsum(compl_rdf), label='complex')
+ax1.legend()
+ax1.axvline(cutoff, color='k', linestyle='--')
+ax1.set_xlabel('distance to biotin [Å]')
+ax1.set_ylabel('$\Delta G$ contributions [Å]')
+ax1.grid()
+
+difference = compl_rdf - biotin_rdf - strept_rdf
+ax2.plot(bins, np.cumsum(difference))
+ax2.axvline(cutoff, color='k', linestyle='--')
+ax2.set_xlabel('distance to biotin [Å]')
+ax2.set_ylabel('$\Delta \Delta G$ [kcal/mol]')
+ax2.grid()
+plt.show()
+\end{lstlisting}
 You can also plot the difference between the complex and monomer contributions against the distance to biotin, using the complex coordinates for the holo structure.
 The expected result is shown in Figure~\ref{fig-dg-sums}.
-\todo{This figure is missing -vah}
-%\begin{figure}
-%	\centering
-%	\includegraphics[width=1.0\linewidth]{figures/deltaG-difference.png}
-%	\caption{TODO caption}\label{fig-dg-sums}
-%\end{figure}
+\todo{Missing caption}
+\begin{figure}
+	\centering
+	\includegraphics[width=1.0\linewidth]{figures/deltaG-difference.png}
+	\caption{TODO caption}\label{fig-dg-sums}
+\end{figure}
 
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST\@.
@@ -1044,19 +1080,19 @@ The current implementation of the entropy calculation in \software{cpptraj} requ
 To compute the first-order entropy of the ions, as well as an approximate second order entropy, Python code is available on \url{https://github.com/liedllab/second-disorder}.
 
 \section{Visualization}
-
+\label{sec:visualization}
 \subsection{Visualizing DX files}
 A minimal PyMOL input to visualize a dx file is shown here.
 For reference, an input structure is loaded from a file named \inlinecode{streptavidin.pdb}.
 The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
 The expected output is shown in Figure~\ref{fig-streptavidin_gO}.
-
+\todo{VJ -> include the PyMOL settings somewhere, this is not the default output}
 % The current font makes the O look like a tofu / placeholder
 \begin{lstlisting}[style=pymol]
-load streptavidin.pdb
+load output/streptavidin/gist.pdb, streptavidin
 as surface
 color gray70, streptavidin
-load gist-gO.dx, gO
+load output/streptavidin/gist-gO.dx, gO
 isomesh gO_high, gO, 2
 color slate, gO_high
 \end{lstlisting}
@@ -1088,21 +1124,39 @@ isomesh sas, gist-gO, 0.1
 \end{figure}
 
 Here, the SASA was generated from a simulation of the holo protein structure.
-When the ligand is placed in the binding pocked, all atoms are within the SASA. 
+When the ligand is placed in the binding pocked, all atoms are within the SASA.
+\todo{I doubt this is the holo/complex, should be the apo streptavidin, right? -vah´}
 
 \subsection{Defining the binding pocket}
 Specific regions in a protein can be defined to calculate the thermodynamic quantities for that region.
 This is significant specially when calculating the properties of water that will be expelled when a ligand binds to the protein.
 
-For example, voxels that are part of the binding pocket can be defined using a ligand molecule and a distance criteria. In \software{gistpp}, voxels that are within the distance criteria from any ligand heavy atom is considered as part of the region. The resulting file is a binary file and can be visualized using \software{pymol}. \todo{Not GISTPP}
+For example, voxels that are part of the binding pocket can be defined using a ligand molecule and a distance criteria. 
+%In \software{gistpp}, voxels that are within the distance criteria from any ligand heavy atom is considered as part of the region. The resulting file is a binary file and can be visualized using \software{pymol}. \todo{Not GISTPP}
+In section~\ref{sec:binding_contributions} we show how to integrate over regions such as the binding pocket. To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. Here, we show what this would look like for a radius of \SI{3.5}{\angstrom} around the heavy atoms of biotin. 
+%\begin{lstlisting}[style=bash]
+%gistpp -op defbp -i gO.dx -i2 ligand.pdb 
+%
+%-opt const 3.5 -o gO_3.5.dx
+%\end{lstlisting}
+\begin{lstlisting}[style=python]
+def select(traj, sel):
+	"Slice a Trajectory by selection mask."
+	return traj.atom_slice(traj.top.select(sel))
+### Load GIST data
+compl = gt.gist.load_gist_file(
+	'complex/gist/gistoutlong.dat', 
+	struct='complex/gist/gist_nowat.pdb')
+### Define ligand atoms and find voxels around them
+rmax = 3.5
+biotin_mask = 'resname BTN and not element H'
+btn = select(compl.struct, biotin_mask).xyz[0] * 10.
+ind, _, _ = compl.distance_to_spheres(btn, rmax)
 
-\begin{lstlisting}[style=bash]
-gistpp -op defbp -i gO.dx -i2 ligand.pdb 
-
--opt const 3.5 -o gO_3.5.dx
+### Set voxels within 3.5A to 1, write out dx file
+compl.loc[ind, 'BP'] = 1
+compl.save_dx('BP', 'binding_pocket.dx')
 \end{lstlisting}
-
-Here, the binding pocket includes all voxels within \SI{3.5}{\angstrom} of the heavy atoms of biotin. 
 
 \begin{figure}
 	\centering
