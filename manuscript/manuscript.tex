@@ -22,6 +22,16 @@
 \usepackage[version=4]{mhchem}
 \usepackage{siunitx}
 \DeclareSIUnit\Molar{M}
+\DeclareSIUnit\calorie{cal}
+\DeclareSIUnit\kcalPerMolASqr{\kilo\calorie\per\mole\per\angstrom\squared}
+%\DeclareSIUnit{\Molar}{M}
+\DeclareSIUnit\angstrom{\text{\AA}}
+%\DeclareSIPrefix\micro{\text{\textmu}}{0}
+\sisetup{
+	%math-rm=\mathsf,
+	text-rm=\sffamily
+}
+
 \usepackage[italic,LGRgreek]{mathastext}
 \graphicspath{{figures/}}
 
@@ -110,9 +120,6 @@
 }
 \lstset{style=code}
 
-\DeclareSIUnit{\calorie}{cal}
-\DeclareSIUnit{\kcalPerMolASqr}{\kilo\calorie\per\mole\per\angstrom\squared}
-\DeclareSIUnit{\Molar}{M}
 
 % TODO: delete for final build
 \usepackage{pdfcomment}
@@ -362,10 +369,13 @@ The most important options are summarized in the following table:
 	\end{tabularx}
 \end{table}
 
-Setting the reference density $\rho_0$ according to the solvent model used in your simulation is important to get correct results. You will also want to reference the bulk mean solvent-solvent enthalpy $E_{ww}$ correctly, though we will show ways to do this differently in a later section of the tutorial.
+It is important to set the reference density $\rho_0$ according to the solvent model used in your simulation.
+The solvent-solvent enthalpy $E_{ww}$ also needs to be referenced, but this is usually done in the post-processing stage.
 
 Densities of typical water models can be found in the \software{cpptraj} manual.
-We also provide the densities for water models commonly used with AMBER forcefields in table \ref{tab:ref_densities}. These densities were calculated from 1$\mu$s MD simulations. Pressure was kept constant at 1 bar with the Berendsen barostat and the water box was prepared with tleap to a size of 100$\cdot$100$\cdot$100\AA\ before pressure equilibration. The temperature was kept constant at 300 K with the Langevin thermostat.
+We also provide the densities for water models commonly used with AMBER forcefields in table \ref{tab:ref_densities}.
+These densities were calculated from \SI{1}{\micro\second}\pdfcomment{weird small mu symbol} MD simulations at \SI{1}{\bar} and \SI{300}{\kelvin} using the Berendsen barostat and the Langevin thermostat.
+The water boxes were prepared with \software{tleap} to a size of \SI{100 x 100 x 100}{\angstrom} before pressure equilibration.
 \todo{vah -> Finish these calculations}
 \begin{table}[h]
 	\caption{Reference density $\rho_0$ and mean water-water energy $E_{ww, norm}$ for various water models from NpT simulations at 300K/1bar.}\label{tab:ref_densities}
@@ -408,21 +418,19 @@ Here is a list of the most important quantities calculated by GIST:
 \end{itemize}
 
 Several dx files are written by default, such as the energy, entropy, and atomic number densities.
-All calculated quantities are written to the output file (default \inlinecode{gist-output.dat}) and can be used to generate DX files for other quantities. 
+All calculated quantities are written to the output file (default \inlinecode{gist-output.dat}) and can be used to generate DX files for other quantities.
 A full list of all properties in the output is provided at the end of the tutorial.
 
-The output is organized by voxel and sorted according to their x,y, and z coordinates, describing the center point of the voxel.
-Energy and entropy quantities are reported in two different ways ´
+The output is organized by voxel and sorted according to their x, y, and z coordinates, describing the center point of the voxel.
+Energy and entropy quantities are reported in two different ways.
 The \inlinecode{\_dens} quantities are normalized by the voxel volume and can be used to compute integrals.
 The \inlinecode{\_norm} quantities are instead normalized by the number of solvents in the respective voxel averaged over all considered frames, and are useful to visualize local water properties.
-Therefore, to convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel k to a \inlinecode{\_dens} quantity $X^k_{dens}$ the following equation is applied:
+To convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \inlinecode{\_dens} quantity $X^k_{dens}$, the following equation can be applied:
 \begin{equation}
-	X^k_{dens} = \frac{X^k_{norm}}{V^k} \cdot \frac{N^k_{solvent}}{N_{frames}} 
+	X^k_{dens} = \frac{X^k_{norm}}{V^k} \cdot \frac{N^k_{solvent}}{N_{frames}}
 \end{equation}
-with $V^k$, the volume of voxel $k$, $N^k_{solvent}$, the solvent population in voxel $k$, and $N_{frames}$, the number of simulation frames considered in the GIST analysis. Acoordingly, converting $X^k_{dens}$ to  $X^k_{norm}$ is possible using the following equation:
-\begin{equation}
-	X^k_{norm} = X^k_{dens} \cdot V^k \cdot \frac{N_{frames}}{N_{frames}N^k_{solvent}} 
-\end{equation}
+with $V^k$, the volume of voxel $k$, $N^k_{solvent}$, the solvent population in voxel $k$, and $N_{frames}$, the number of simulation frames considered in the GIST analysis.
+
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
 We will
@@ -482,8 +490,8 @@ A simulation length of at least \SI{20}{\nano\second} is recommended to obtain s
 
 An example Amber input file for GIST might look like this:
 \begin{lstlisting}[style=amber-in]
-	restrained 100 ns NpT
-	&cntrl
+restrained 100 ns NpT
+&cntrl
 	ntx=5, irest=1,
 	ioutfm=1,
 	ntb=2, iwrap=1,
@@ -494,43 +502,44 @@ An example Amber input file for GIST might look like this:
 	ntt=3, tempi=300.0, temp0=300.0, gamma_ln=2,
 	nstlim=50000000, dt=0.002,
 	ntwr=50000, ntwx=5000, ntpr=5000,
-	/
+/
 \end{lstlisting}
 
-This file will run a 100 ns NpT MD simulation while keeping all atoms except for hydrogens and waters restrained. Note that these are very standard MD settings except for the restraints.
+This file will run a \SI{100}{\nano\second} NpT MD simulation while keeping all atoms except for hydrogens and waters restrained.
+Note that these are very standard MD settings except for the restraints.
 
 Run the MD using \software{pmemd.cuda}:
 \begin{lstlisting}[style=bash]
-	pmemd.cuda \
-	-O \
-	-i 100ns-npt-restraint.in \
-	-o md-01.out \
-	-p solvated.parm7 \
-	-c EQUIL-DONE.rst \
-	-x md-01.nc \
-	-r md-01.ncrst \
-	-ref EQUIL-DONE.rst
+pmemd.cuda \
+-O \
+-i 100ns-npt-restraint.in \
+-o md-01.out \
+-p solvated.parm7 \
+-c EQUIL-DONE.rst \
+-x md-01.nc \
+-r md-01.ncrst \
+-ref EQUIL-DONE.rst
 \end{lstlisting}
 \subsubsection{GIST analysis}
 To start our GIST analysis of biotin, we'll first have to decide on the parameters defining the GIST grid during the analyis.
 We recommend that you center the biotin molecule in space:
 \begin{lstlisting}[style=cpptraj]
-	parm solvated.parm7
-	trajin md-01.nc 1 1 1
-	autoimage !(:WAT) origin
-	strip :WAT
-	trajout biotin-centered.pdb
+parm solvated.parm7
+trajin md-01.nc 1 1 1
+autoimage !(:WAT) origin
+strip :WAT
+trajout biotin-centered.pdb
 \end{lstlisting}
 To decide on a grid size, find the extent (minimum and maximum) of the x-, \mbox{y-,} and z-coordinates of the molecule.
 This can be done e.g., using the \software{mdtraj} package in Python.
 \begin{lstlisting}[style=python]
-	import mdtraj as md
-	pdb = md.load("biotin-centered.pdb")
-	# mdtraj converts to nm.
-	# *10 to convert back to Angstrom.
-	min_xyz = pdb.xyz[0].min(0) * 10.
-	max_xyz = pdb.xyz[0].max(0) * 10.
-	print(*list(zip("xyz", min_xyz, max_xyz)), sep="\n")
+import mdtraj as md
+pdb = md.load("biotin-centered.pdb")
+# mdtraj converts to nm.
+# *10 to convert back to Angstrom.
+min_xyz = pdb.xyz[0].min(0) * 10.
+max_xyz = pdb.xyz[0].max(0) * 10.
+print(*list(zip("xyz", min_xyz, max_xyz)), sep="\n")
 \end{lstlisting}
 For a system centered at the origin with a spacing of \SI{0.5}{\angstrom} and a buffer of, e.g., \SI{15}{\angstrom} between the solute and the grid wall, you need $4.0\times (d+15)$ bins in the respective direction, where $d$ is the larger of $-$min and $+$max in the respective direction.
 To get bulk-like water properties at the grid border, a buffer distance of \SI{15.0}{\angstrom} is reasonable for biotin.
@@ -543,25 +552,25 @@ While the GPU version is generally faster, the PME implementation matches the en
 
 
 \begin{lstlisting}[style=cpptraj]
-	parm solvated.parm7
-	trajin md-01.nc
-	autoimage !(:WAT) origin
-	# optionally remove the "pme" option
-	gist griddim 100 100 100 out gist.dat \
-	refdens 0.03287 pme
+parm solvated.parm7
+trajin md-01.nc
+autoimage !(:WAT) origin
+# optionally remove the "pme" option
+gist griddim 100 100 100 out gist.dat \
+refdens 0.03287 pme
 \end{lstlisting}
 \subsubsection{Working with the GIST results}
 Running the GIST analysis above, an output data file (gist.dat) containing all calculated quantities for each voxel in the system is produced. 
-Additionally as outlined in section \ref{sec:running_GIST}, various quantities are written to OPenDX files for accessible visualisation.
+Additionally as outlined in section \ref{sec:running_GIST}, various quantities are written to OpenDX files.
 
-To faciliate an accessible way to interact with your GIST data, we recommend using the gisttools library for python3. Open the GIST output with gisttools:
+To interact with your GIST data, we recommend the gisttools library for python3. Open the GIST output with gisttools:
 \begin{lstlisting}[style=python]
-	from gisttools.gist import load_gist_file
-	import matplotlib.pyplot as plt
-	gist = load_gist_file(
-	"gist.dat", struct="solute-centered.pdb",  eww_ref=-9.539)
-	print(f'n_frames = {gist.n_frames}')
-	print(f'rho0 = {gist.rho0}')
+from gisttools.gist import load_gist_file
+import matplotlib.pyplot as plt
+gist = load_gist_file(
+"gist.dat", struct="solute-centered.pdb",  eww_ref=-9.539)
+print(f'n_frames = {gist.n_frames}')
+print(f'rho0 = {gist.rho0}')
 \end{lstlisting}
 All information from the output file is now accessible through the gist object. 
 If the number of frames of the simulation (n\_frames) and the reference density (rho0) are not provided, they are automatically detected from the GIST data. 
@@ -572,33 +581,25 @@ Gisttools provides access to single or multiple voxels through a .loc property s
 GIST quantity data for all voxels can be accessed through directly indexing the gist object, either by providing a single name or a list of names.
 Indexing with .loc works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
 \begin{lstlisting}[style=python]
-	display(gist.loc[0, 'population'])
-	display(gist.loc[0])
-	display(gist.loc[[0,1], ['x', 'y', 'z']])
-	display(gist['dTSsix_norm'].head())
-	display(gist[['Eww_norm', 'Esw_norm']].head())
+gist.loc[0, 'population'] # single value
+gist.loc[0] # Series
+gist.loc[[0,1], ['x', 'y', 'z']] # DataFrame
+gist['dTSsix_norm'].head() # Series
+gist[['Eww_norm', 'Esw_norm']].head() # DataFrame
 \end{lstlisting}
 
 Gisttools provides access to all quantities listed in the GIST output file.
-In addition it calculates the total enthalpy per voxel (Eall) as a sum of Eww and Esw and the free energy of solvation (A) per voxel as a sum of Eall and -dTSsix:
-\begin{lstlisting}[style=python]
-	display(gist[['A_norm', 'Eall_norm']].head())
-\end{lstlisting}
+Additionally, it calculates the total enthalpy per voxel (Eall) as a sum of Eww and Esw, and the free energy of solvation (A) by subtracting dTSsix from Eall.
 
-Information about the grid is stored in the grid property of the gist object, structural data is stored as mdtraj trajectory in the struct property:
-\begin{lstlisting}[style=python]
-	print(gist.grid)
-	print(gist.struct)
-\end{lstlisting}
+Information about the grid is stored in the grid property of the gist object, structural data is stored as an \software{mdtraj} trajectory in the struct property:
+
 Gisttools also provides minimal OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities (X\_dens):
 
 \begin{lstlisting}[style=python]
-	gist.save_dx('A_dens','A.dx')
-	with open('A.dx') as f:
-		print([next(f) for x in range(10)])
+gist.save_dx('A_dens','A.dx')
 \end{lstlisting}
 
-This tutorial discusses the visualisation of OpenDX files in section \ref{sec:visualisation.}
+This tutorial discusses the visualization of OpenDX files in Section~\ref{sec:visualization}.
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
@@ -611,16 +612,16 @@ in the code folder. This assumes that you have Python and Amber set up properly 
 The choice of initial structure is crucial to the GIST results.
 Crystal structures may not represent the dominant solution structure for a given target.
 In our example, we only use a single equilibrated structure.
-A more sophisticated approach would identify one or several dominant structures out of the ensemble - either gathered from experimental data or by clustering an MD simulation.
+A more sophisticated approach would be to identify several dominant structures in the ensemble -- either from experimental ensembles or by clustering an MD simulation.
 
 When starting from an experimental structure, care has to be taken during the preparation step.
 Make sure to choose a proper protonation state for all titratable moeties.
 
 You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics.
 A good criterion for validating the box size is to check whether the water on the outside of the box behaves bulk-like according to the GIST output.
-Note that due to the solute restraints, some important solvent sites might be unavailable to exchange with the bulk solvent.
-Make sure to explicitly place water at such sites, if they are important to the process of interest e.g. waters in confined binding pockets, as they might be missed by automated solvation procedures.
-It is good practice to check your restrained MD simulation or solvent populations obtained by GIST afterwards to confirm wether all important solvent sites were properly solvated.
+Note that, due to the restraints, some solvent sites might be inaccessible to the bulk solvent.
+To investigate such positions, make sure to explicitly place water molecules there.
+It is good practice to check your restrained MD simulation or solvent populations obtained by GIST to confirm whether all relevant sites were properly solvated.
 
 When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are two options for dealing with configurational diversity in the structures.
 One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the conformations.
