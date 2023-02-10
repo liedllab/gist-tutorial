@@ -429,7 +429,7 @@ To convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \i
 \begin{equation}
 	X^k_{dens} = \frac{X^k_{norm}}{V^k} \cdot \frac{N^k_{solvent}}{N_{frames}}
 \end{equation}
-with $V^k$, the volume of voxel $k$, $N^k_{solvent}$, the solvent population in voxel $k$, and $N_{frames}$, the number of simulation frames considered in the GIST analysis.
+with $V^k$, the volume of voxel $k$, $N^k_{solvent}$, the number of solvent molecules in $k$ over all simulation frames, and $N_{frames}$, the number of frames.
 
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
@@ -1035,7 +1035,6 @@ The output will contain two additional columns: \inlinecode{PME\_dens} and \inli
 They contain the potential of solute and solvent evaluated at the solvent positions and divided by two.
 Furthermore, the \inlinecode{Eww} and \inlinecode{Esw} columns are also computed using PME, and are reported as usual.
 For typical use cases, we recommend using \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
-\todo{vah: The cpptraj manual says that GIST PME energies cannot be decomposed into Esw and Eww -> what's true? Seems to conflict with what is written in this section.}
 \subsection{GIST with non-water solvents}
 In References~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
 
