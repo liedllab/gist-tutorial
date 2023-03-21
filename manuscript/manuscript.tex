@@ -949,11 +949,10 @@ plt.show()
 \end{lstlisting}
 You can also plot the difference between the complex and monomer contributions against the distance to biotin, using the complex coordinates for the holo structure.
 The expected result is shown in Figure~\ref{fig-dg-sums}.
-\todo{Missing caption}
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\linewidth]{figures/deltaG-difference.png}
-	\caption{TODO caption}\label{fig-dg-sums}
+	\caption{Left: $\dgsolv$ contributions around the location of biotin in the binding pocket, evaluated in the biotin, streptavidin, and complex systems. Each line represents a cumulative sum plotted against the distance to biotin. Right: The hydration contribution to binding, evaluated as the difference between the lines in the left panel. The vertical dashed line is at 12 \AA\ and represents the chosen integration cutoff.}\label{fig-dg-sums}
 \end{figure}
 
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
@@ -1087,7 +1086,7 @@ A minimal PyMOL input to visualize a dx file is shown here.
 For reference, an input structure is loaded from a file named \inlinecode{streptavidin.pdb}.
 The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
 The expected output is shown in Figure~\ref{fig-streptavidin_gO}.
-\todo{VJ -> include the PyMOL settings somewhere, this is not the default output}
+\todo{vah -> include the PyMOL settings somewhere, this is not the default output}
 % The current font makes the O look like a tofu / placeholder
 \begin{lstlisting}[style=pymol]
 load output/streptavidin/gist.pdb, streptavidin
@@ -1131,9 +1130,7 @@ isomesh sas, gist-gO, 0.1
 	\caption{SASA for streptavidin focused on the binding pocket}\label{fig-streptavidin_sasa}
 \end{figure}
 
-Here, the SASA was generated from a simulation of the holo protein structure.
-When the ligand is placed in the binding pocked, all atoms are within the SASA.
-\todo{I doubt this is the holo/complex, should be the apo streptavidin, right? -vah´}
+Here, the SASA was generated from a simulation of water around streptavidin without biotin, leaving the binding site solvent-accessible.
 
 \subsection{Defining the binding pocket}
 Specific regions in a protein can be defined to calculate the thermodynamic quantities for that region.
