@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if [ -z "$5" ]; then
 	echo Usage: $0 IN_PARM IN_RST N_TO_REMOVE OUT_PARM OUT_RST
