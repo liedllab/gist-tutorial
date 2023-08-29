@@ -962,7 +962,7 @@ results = {
 	name: gist.integrate_around(
 	cols, rmax, centers[name])
 	for name, gist in gist_objs.items()}
-display(pd.DataFrame(results))
+print(pd.DataFrame(results))
 	
 \end{lstlisting}
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
