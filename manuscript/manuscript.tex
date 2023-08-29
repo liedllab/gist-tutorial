@@ -752,6 +752,7 @@ If the curve diverges even for large integration distances you might need to twe
 \begin{lstlisting}[style=python]
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
+import numpy as np
 # adapt eww_ref according to the used solvent model!
 gist = load_gist_file('gist.dat',
     struct='solute-centered.pdb', eww_ref=-9.533)
