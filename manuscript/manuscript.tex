@@ -536,7 +536,7 @@ pmemd.cuda \
 \end{lstlisting}
 \subsubsection{GIST analysis}
 To start our GIST analysis of biotin, we'll first have to decide on the parameters defining the GIST grid during the analysis.
-We will need a solute structure without water for the analysis of our future GIST results. As we ran our MD simulation with periodic boundaries, we always need to reimage all molecules to the original box using cpptrajs \inlinecode{autoimage} function. We also recommend that you center the biotin molecule to the coordinate origin, as this simplifies the definition of our grid origin later on. The following code snippets are 
+We will need a solute structure without water for the analysis of our future GIST results. As we ran our MD simulation with periodic boundaries, we always need to reimage all molecules to the original box using cpptraj's \inlinecode{autoimage} function. We also recommend that you center the biotin molecule to the coordinate origin, as this simplifies the definition of our grid origin later on. The following code snippets are 
 \begin{lstlisting}[style=cpptraj]
 parm solvated.parm7 
 trajin md-01.nc 1 1 1 
