@@ -876,6 +876,7 @@ For the streptavidin integral, we align the complex structure onto streptavidin 
 Here, we compute the histogram of the contributions of single properties to assess the convergence.
 
 \begin{lstlisting}[style=python]
+import mdtraj as md
 col = 'dTSsix_dens'
 def select(traj, sel):
     # Slice a Trajectory by selection mask.
