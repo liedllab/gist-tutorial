@@ -763,6 +763,9 @@ plt.plot(bins, np.cumsum(eww), label='Eww')
 plt.plot(bins, np.cumsum(esw), label='Esw')
 plt.plot(bins, np.cumsum(dg), label='dG')
 plt.plot(bins, np.cumsum(s), label='dS')
+plt.legend()
+plt.xlabel("distance cutoff (Angstrom)")
+plt.ylabel("free energy contribution [kcal/mol]")
 \end{lstlisting}
 
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
