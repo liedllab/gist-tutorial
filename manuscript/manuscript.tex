@@ -753,15 +753,15 @@ If the curve diverges even for large integration distances you might need to twe
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
 import numpy as np
-# adapt eww_ref according to the used solvent model!
+# adapt eww_ref according to the used solvent model! 
 gist = load_gist_file('gist.dat',
     struct='solute-centered.pdb', eww_ref=-9.533)
 bins, (dg, esw, eww, s) = gist.rdf(
     ['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
     bins=100, rmax=20., normalize='none')
-plt.plot(bins, np.cumsum(dg), label='dG')
 plt.plot(bins, np.cumsum(eww), label='Eww')
 plt.plot(bins, np.cumsum(esw), label='Esw')
+plt.plot(bins, np.cumsum(dg), label='dG')
 plt.plot(bins, np.cumsum(s), label='dS')
 \end{lstlisting}
 
