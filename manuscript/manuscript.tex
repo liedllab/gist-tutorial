@@ -949,6 +949,7 @@ The expected result is shown in Figure~\ref{fig-dg-sums}.
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
  To make this easier, gisttool includes a function to integrate in a radius around atom centers:
 \begin{lstlisting}[style=python]
+import pandas as pd
 centers = {'biotin': biotin_x, 
 	'strept': strept_x, 
 	'compl': compl_x}
