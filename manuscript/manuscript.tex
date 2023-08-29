@@ -881,6 +881,8 @@ def select(traj, sel):
     # Slice a Trajectory by selection mask.
     return traj.atom_slice(traj.top.select(sel))
 # we multiply by 10 to convert nm to Angstrom.
+biotin_mask = 'resname BTN and not element H'
+strept_mask = 'not resname BTN and not resname WAT and not element H'
 compl_x = select(compl.struct, biotin_mask).xyz[0] * 10.
 biotin_x = select(biotin.struct, biotin_mask).xyz[0]*10.
 aligned = compl.struct[:].superpose(strept.struct, \
