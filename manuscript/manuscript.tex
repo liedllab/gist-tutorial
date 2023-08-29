@@ -878,7 +878,7 @@ Here, we compute the histogram of the contributions of single properties to asse
 \begin{lstlisting}[style=python]
 col = 'dTSsix_dens'
 def select(traj, sel):
-    'Slice a Trajectory by selection mask.'
+    # Slice a Trajectory by selection mask.
     return traj.atom_slice(traj.top.select(sel))
 # we multiply by 10 to convert nm to Angstrom.
 compl_x = select(compl.struct, biotin_mask).xyz[0] * 10.
@@ -1148,7 +1148,7 @@ In section~\ref{sec:binding_contributions} we show how to integrate over regions
 
 \begin{lstlisting}[style=python]
 def select(traj, sel):
-	'Slice a Trajectory by selection mask.'
+	# Slice a Trajectory by selection mask.
 	return traj.atom_slice(traj.top.select(sel))
 ### Load GIST data
 compl = gt.gist.load_gist_file(
