@@ -1151,6 +1151,7 @@ For example, voxels that are part of the binding pocket can be defined using a l
 In section~\ref{sec:binding_contributions} we show how to integrate over regions such as the binding pocket. To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. Here, we show what this would look like for a radius of \SI{3.5}{\angstrom} around the heavy atoms of biotin. 
 
 \begin{lstlisting}[style=python]
+import gisttools as gt
 def select(traj, sel):
 	# Slice a Trajectory by selection mask.
 	return traj.atom_slice(traj.top.select(sel))
