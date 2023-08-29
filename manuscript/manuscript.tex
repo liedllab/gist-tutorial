@@ -949,19 +949,19 @@ The expected result is shown in Figure~\ref{fig-dg-sums}.
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
  To make this easier, gisttool includes a function to integrate in a radius around atom centers:
 \begin{lstlisting}[style=python]
-	centers = {'biotin': biotin_x, 
-		'strept': strept_x, 
-		'compl': compl_x}
-	gist_objs = {'biotin': biotin, 
-		'strept': strept, 
-		'compl': compl}
-	cols = ['Eall_dens','dTSsix_dens']
-	rmax = 12
-	results = {
-		name: gist.integrate_around(
-		cols, rmax, centers[name])
-		for name, gist in gist_objs.items()}
-	display(pd.DataFrame(results))
+centers = {'biotin': biotin_x, 
+	'strept': strept_x, 
+	'compl': compl_x}
+gist_objs = {'biotin': biotin, 
+	'strept': strept, 
+	'compl': compl}
+cols = ['Eall_dens','dTSsix_dens']
+rmax = 12
+results = {
+	name: gist.integrate_around(
+	cols, rmax, centers[name])
+	for name, gist in gist_objs.items()}
+display(pd.DataFrame(results))
 	
 \end{lstlisting}
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
