@@ -282,6 +282,9 @@ Furthermore, a recent Python version (3.6 or newer) should be available with the
 \begin{itemize}
 	\item \software{gisttools} (\url{https://github.com/liedllab/gisttools}, $\geq$ 0.2)
 	\item \software{mdtraj} (\url{https://www.mdtraj.org/}, $\geq$ 1.9.7) \cite{McGibbon2015-mdtraj}
+	\item \software{matplotlib} (\url{https://matplotlib.org/}, $\geq$ 3.7.0) \cite{Hunter2007-matplotlib}
+	\item \software{numpy} (\url{https://numpy.org/}, $\geq$ 1.23.5) \cite{harris2020-numpy}
+	\item \software{pandas} (\url{https://pandas.pydata.org/}, $\geq$ 1.5.3) \cite{pandas-2023_8239932}
 \end{itemize}
 
 
@@ -533,7 +536,7 @@ pmemd.cuda \
 \end{lstlisting}
 \subsubsection{GIST analysis}
 To start our GIST analysis of biotin, we'll first have to decide on the parameters defining the GIST grid during the analysis.
-We will need a solute structure without water for the analysis of our future GIST results. As we ran our MD simulation with periodic boundaries, we always need to reimage all molecules to the original box using cpptrajs \inlinecode{autoimage} function. We also recommend that you center the biotin molecule to the coordinate origin, as this simplifies the definition of our grid origin later on. The following code snippets are 
+We will need a solute structure without water for the analysis of our future GIST results. As we ran our MD simulation with periodic boundaries, we always need to reimage all molecules to the original box using cpptraj's \inlinecode{autoimage} function. We also recommend that you center the biotin molecule to the coordinate origin, as this simplifies the definition of our grid origin later on. The following code snippets are 
 \begin{lstlisting}[style=cpptraj]
 parm solvated.parm7 
 trajin md-01.nc 1 1 1 
@@ -752,16 +755,20 @@ If the curve diverges even for large integration distances you might need to twe
 \begin{lstlisting}[style=python]
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
-# adapt eww_ref according to the used solvent model!
+import numpy as np
+# adapt eww_ref according to the used solvent model! 
 gist = load_gist_file('gist.dat',
     struct='solute-centered.pdb', eww_ref=-9.533)
 bins, (dg, esw, eww, s) = gist.rdf(
     ['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
     bins=100, rmax=20., normalize='none')
-plt.plot(bins, np.cumsum(dg), label='dG')
 plt.plot(bins, np.cumsum(eww), label='Eww')
 plt.plot(bins, np.cumsum(esw), label='Esw')
+plt.plot(bins, np.cumsum(dg), label='dG')
 plt.plot(bins, np.cumsum(s), label='dS')
+plt.legend()
+plt.xlabel("distance cutoff [Å]")
+plt.ylabel("free energy contribution [kcal/mol]")
 \end{lstlisting}
 
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
@@ -872,11 +879,14 @@ For the streptavidin integral, we align the complex structure onto streptavidin 
 Here, we compute the histogram of the contributions of single properties to assess the convergence.
 
 \begin{lstlisting}[style=python]
+import mdtraj as md
 col = 'dTSsix_dens'
 def select(traj, sel):
-    'Slice a Trajectory by selection mask.'
+    # Slice a Trajectory by selection mask.
     return traj.atom_slice(traj.top.select(sel))
 # we multiply by 10 to convert nm to Angstrom.
+biotin_mask = 'resname BTN and not element H'
+strept_mask = 'not resname BTN and not resname WAT and not element H'
 compl_x = select(compl.struct, biotin_mask).xyz[0] * 10.
 biotin_x = select(biotin.struct, biotin_mask).xyz[0]*10.
 aligned = compl.struct[:].superpose(strept.struct, \
@@ -942,19 +952,20 @@ The expected result is shown in Figure~\ref{fig-dg-sums}.
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
  To make this easier, gisttool includes a function to integrate in a radius around atom centers:
 \begin{lstlisting}[style=python]
-	centers = {'biotin': biotin_x, 
-		'strept': strept_x, 
-		'compl': compl_x}
-	gist_objs = {'biotin': biotin, 
-		'strept': strept, 
-		'compl': compl}
-	cols = ['Eall_dens','dTSsix_dens']
-	rmax = 12
-	results = {
-		name: gist.integrate_around(
-		cols, rmax, centers[name])
-		for name, gist in gist_objs.items()}
-	display(pd.DataFrame(results))
+import pandas as pd
+centers = {'biotin': biotin_x, 
+	'strept': strept_x, 
+	'compl': compl_x}
+gist_objs = {'biotin': biotin, 
+	'strept': strept, 
+	'compl': compl}
+cols = ['Eall_dens','dTSsix_dens']
+rmax = 12
+results = {
+	name: gist.integrate_around(
+	cols, rmax, centers[name])
+	for name, gist in gist_objs.items()}
+print(pd.DataFrame(results))
 	
 \end{lstlisting}
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
@@ -999,7 +1010,7 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 \end{table}
 
 Even though streptavidin-biotin is known to be a very stable complex, the solvation energy favors the dissociation.
-This is expected: the binding of biotin to streptavidin is faciliated over a large number of H-bonds and over polar interactions. As such, water is favourably solvates both biotin and streptavidin and an energetic penalty is paid when replacing it during the binding process. 
+This is expected: the binding of biotin to streptavidin is faciliated over a large number of H-bonds and over polar interactions. As such, water favourably solvates both biotin and streptavidin and an energetic penalty is paid when displacing it during the binding process. 
 
 In this case, we find that the energy of solvation and the internal energy of the complex more or less cancel out, indicating that binding is largely entropy-driven in this case.
 At first, this is surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions \cite{mpye2020-biotin-itc,hyre2006-biotin-itc}.
@@ -1143,8 +1154,9 @@ For example, voxels that are part of the binding pocket can be defined using a l
 In section~\ref{sec:binding_contributions} we show how to integrate over regions such as the binding pocket. To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. Here, we show what this would look like for a radius of \SI{3.5}{\angstrom} around the heavy atoms of biotin. 
 
 \begin{lstlisting}[style=python]
+import gisttools as gt
 def select(traj, sel):
-	'Slice a Trajectory by selection mask.'
+	# Slice a Trajectory by selection mask.
 	return traj.atom_slice(traj.top.select(sel))
 ### Load GIST data
 compl = gt.gist.load_gist_file(
