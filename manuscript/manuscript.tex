@@ -223,7 +223,7 @@ GIST is an implementation of IST on a three-dimensional grid. It can be seen as 
 This implies a higher versatility, but also puts more responsibility on the user in terms of correct post-processing.
 
 Since the density is computed from an MD simulation, GIST can accurately treat confined water regions, which are challenging for implicit-solvent methods such as GBSA and self-consistent theories such as 3D-RISM \cite{Kovalenko1998-3drism}.
-While the need for MD simulations comes at a large computational cost, GIST is still more efficient than end-state approaches such as TI \cite{Kirkwood1935-ti} or FEP \cite{Zwanzig1954-reweighting}, with applications to large systems such as serine proteases \cite{Kraml2019-gigist} or antibody fragments \cite{Waibl2021-gist-antibodies}.
+While the need for MD simulations comes at a large computational cost, GIST is still more efficient than end-states approaches such as TI \cite{Kirkwood1935-ti} or FEP \cite{Zwanzig1954-reweighting}, with applications to large systems such as serine proteases \cite{Kraml2019-gigist} or antibody fragments \cite{Waibl2021-gist-antibodies}.
 On the other hand, the first-order approximation means that the solvation entropy is less accurately described than in TI or FEP \cite{Chen2021,Waibl2021-gist-salt}.
 %The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute structure.
 %Here you would explain what problem you are tackling and briefly motivate your work.
@@ -446,7 +446,7 @@ The tutorial is structured as follows:
 \end{enumerate}
 
 In the first part, we show how to run GIST calculations for small molecules and interpret the output.
-Afterwards, we apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-state approach based on GIST. In addition, we discuss all steps in further detail at the end. 
+Afterwards, we apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-states approach based on GIST. In addition, we discuss all steps in further detail at the end. 
 
 \subsection{Streptavidin/Biotin}
 The streptavidin-biotin complex binding is one of the strongest known non-covalent interactions involving a small molecule.
@@ -548,7 +548,7 @@ Here, we calculate the bounds around the whole protein for a grid with \SI{0.5}{
 
 
 Now, you can finally run the actual GIST analysis.
-Center the molecule as above, to make sure that its position matches the grid parameters you decided on.
+Center the molecule as above, to verify that its position matches the grid parameters you decided on.
 We recommend using either the PME or GPU implementation of GIST.
 For the GPU version, cpptraj needs to be compiled with the \inlinecode{-cuda} flag.
 While the GPU version is generally faster, the PME implementation matches the energy of the Amber MD engine more closely.
@@ -563,7 +563,7 @@ gist griddim 100 100 100 out gist.dat \
 refdens 0.03287 pme
 \end{lstlisting}
 \subsubsection{Working with the GIST results}
-Running the GIST analysis above, an output data file (gist.dat) containing all calculated quantities for each voxel in the system is produced. 
+Running the GIST analysis above, an output data file (gist.dat) containing all calculated quantities for each voxel in the grid is produced. 
 Additionally as outlined in section \ref{sec:running_GIST}, various quantities are written to OpenDX files.
 
 To interact with your GIST data, we recommend the gisttools library for python3. Open the GIST output with gisttools:
@@ -581,7 +581,7 @@ We will discuss a way to similarly detect the reference energy of the solvent-so
 
 The GIST data can be accessed and modified from the gist object in various ways.
 Gisttools provides access to single or multiple voxels through a .loc property similiar to the pandas library. 
-GIST quantity data for all voxels can be accessed through directly indexing the gist object, either by providing a single name or a list of names.
+GIST quantity data for all voxels can be accessed by directly indexing the gist object, either by providing a single name or a list of names.
 Indexing with .loc works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
 \begin{lstlisting}[style=python]
 gist.loc[0, 'population'] # single value
@@ -604,7 +604,7 @@ gist.save_dx('A_dens','A.dx')
 
 This tutorial discusses the visualization of OpenDX files in Section~\ref{sec:visualization}.
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
-In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
+In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline potential pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
 If you want to skip this section, run 
 \begin{lstlisting}[style=bash]
@@ -647,7 +647,7 @@ Then split the equilibrated structure into biotin and streptavidin parts using \
 After that, use \software{equilibration.py -R} to run short restrained 
 equilibrations (where only the water is allowed to move) on the individual 
 systems.
-By using restraints, we can make sure that the monomer conformations match the complex.
+By using restraints, we can ensure that the monomer conformations match the complex.
 
 \subsubsection{MD Simulation}
 The MD can be run as described above for each monomer and the complex.
