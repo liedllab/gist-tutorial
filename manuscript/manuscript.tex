@@ -427,7 +427,7 @@ A full list of all properties in the output is provided at the end of the tutori
 The output is organized by voxel and sorted according to their x, y, and z coordinates, describing the center point of the voxel.
 Energy and entropy quantities are reported in two different ways.
 The \inlinecode{\_dens} quantities are normalized by the voxel volume and can be used to compute integrals.
-The \inlinecode{\_norm} quantities are instead normalized by the number of solvents in the respective voxel averaged over all considered frames, and are useful to visualize local water properties.
+The \inlinecode{\_norm} quantities are instead normalized by the solvent number density in the respective voxel averaged over all considered frames, and are useful to visualize local water properties.
 To convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \inlinecode{\_dens} quantity $X^k_{dens}$, the following equation can be applied:
 \begin{equation}
 	X^k_{dens} = \frac{X^k_{norm}}{V^k} \cdot \frac{N^k_{solvent}}{N_{frames}}
