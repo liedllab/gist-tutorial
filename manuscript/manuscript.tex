@@ -56,6 +56,7 @@
 \author[1]{Monica L Fern{\'a}ndez-Quintero}
 %\author[1,2]{Firstname Middlename Familyname}
 %\author[2]{Firstname Initials Surname}
+\author[2]{Steven Ramsey}
 \author[4]{Daniel R Roe}
 \author[1*]{Klaus R Liedl}
 \author[3*]{Michael K Gilson}
@@ -141,7 +142,7 @@
 Grid inhomogeneous solvation theory (GIST) is a method to compute the free energy of solvation of a compound on a 3-dimensional grid based on molecular dynamics (MD) simulations.
 The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses on both proteins and small molecules. However, this versatility also comes with a significant entry barrier for new users.
 
-In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis at the example of the streptavidin-biotin complex.
+In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis using the streptavidin-biotin complex as an demonstrative system.
 Furthermore, we discuss the theory of GIST with a focus on practical aspects.
 We highlight potential pitfalls and show how to avoid technical difficulties.
 We assume familiarity with molecular dynamics simulations as well as the AmberTools package.
@@ -218,7 +219,7 @@ Furthermore, IST does not consider the internal degrees of freedom of the solven
 Therefore, IST-based approaches can only be used with sufficiently rigid solvents.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems.
 
-GIST is an implementation of IST on a three-dimensional grid. It can be seen as a more general version of WaterMap \cite{Abel2008-watermap,Young2007-watermap} that provides solvation thermodynamics on the entire grid, rather than high-density clusters in a binding pocket.
+GIST is an implementation of IST on a three-dimensional grid. It can be seen as a more general version of WaterMap \cite{Abel2008-watermap,Young2007-watermap} that provides solvation thermodynamics on a space filling grid, rather than high-density clusters in a binding pocket.
 This implies a higher versatility, but also puts more responsibility on the user in terms of correct post-processing.
 
 Since the density is computed from an MD simulation, GIST can accurately treat confined water regions, which are challenging for implicit-solvent methods such as GBSA and self-consistent theories such as 3D-RISM \cite{Kovalenko1998-3drism}.
@@ -261,7 +262,7 @@ After completing this tutorial, we expect the reader to be able to run their own
 \subsection{Background knowledge}
 This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD) simulations.
 The user should be able to run MD simulations and analyze the resulting trajectories.
-Previous experience of GIST is not necessary, although we recommend reading the works referenced in section~\ref{sec:theory}.
+Previous experience of GIST is not necessary, although we recommend reading the articles referenced in section~\ref{sec:theory}.
 
 The presented analyses are run in Python.
 While no programming experience is necessary to follow the tutorial, a basic understanding of Python is advantageous to adjust the code towards different requirements and use-cases.
@@ -273,7 +274,7 @@ The main implementation of GIST is part of the MD analysis software \software{cp
 A recent version of \software{cpptraj} should be used. We recommend using at least version 6.15.2, which can be obtained from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 
 The Amber simulation engine is used in this tutorial to run the MD simulations.
-While Amber is free for non-commercial use, it might not always be available in industry settings.
+While Amber is free for non-commercial use, it might not always be available in industrial settings.
 In that case, other MD engines can be used as long as topologies and trajectories can be produced in a format supported by \software{cpptraj}.
 If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
 %We should actually test that!
@@ -312,7 +313,7 @@ GIST analysis can be divided in three steps: defining a region of interest, runn
 In order to run a GIST analysis, one must define the region where solvent properties will be calculated.
 This region is represented by a rectangular grid with given position, size, and voxel spacing.
 The default value of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
-While integrals of GIST quantities over the grid are independent of the voxel size, individual values converge slower at high resolutions.
+While integrals of GIST quantities over the grid are independent of the voxel size, values for each voxel converge slower at high resolutions.
 
 The grid is defined by parameters of the \inlinecode{gist} command in \software{cpptraj}.
 The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing (voxel side-length) in \AA{} by \inlinecode{gridspacn}.
