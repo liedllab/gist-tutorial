@@ -346,7 +346,8 @@ Note that the solute should not move significantly for a GIST calculation, since
 This is typically achieved using restraints on the solute heavy atoms.
 This command tells \software{cpptraj} to run a GIST calculation using the specified region and print the output in a file called \inlinecode{gist.dat}. You will need to load and image your trajectory before running this command. An overview of how to work with \software{cpptraj} is provided in the program's documentation \cite{cpptraj_doc}, AMBER tutorials \cite{amber_tut_cpptraj} or on the AMBER-hub website \cite{amber_hub}.
 
-To use OpenMP or GPU-accelerated (using CUDA) versions of cpptraj, a different executable name such as \inlinecode{cpptraj.OMP} or \inlinecode{cpptraj.cuda} is often used. Therefore, make sure to use the right compilation and executable, to get full benefit of the various improvements to  GIST.
+To use OpenMP, MPI or GPU-accelerated (using CUDA) versions of cpptraj, a different executable name such as \inlinecode{cpptraj.OMP}, \inlinecode{cpptraj.MPI} or \inlinecode{cpptraj.cuda} is often used.
+Therefore, make sure to use the right compilation and executable, to get full benefit of the various improvements to GIST.
 The \inlinecode{gist} action has a large number of options to modify the GIST calculation or its output.
 A full list is provided at the end of this tutorial or through the \software{cpptraj} manual.
 The most important options are summarized in the following table:
@@ -545,13 +546,13 @@ bounds !(:WAT) dx 0.5 offset 30 name MyGrid out bounds.dat
 \end{lstlisting}
 Here, we calculate the bounds around the whole protein for a grid with \SI{0.5}{\angstrom} side-lenght voxels and a buffer zone of \SI{15.0}{\angstrom}. Note that the offset is given in terms of number of additional voxels, not voxel dimension. By varying the atom mask in the \inlinecode{bound} command, it is possible to center the grid on a region of interest, similiar to the \software{FindCentroid.py} script.
 
-
 Now, you can finally run the actual GIST analysis.
 Center the molecule as above, to make sure that its position matches the grid parameters you decided on.
-We recommend using either the PME or GPU implementation of GIST.
-For the GPU version, cpptraj needs to be compiled with the \inlinecode{-cuda} flag.
-While the GPU version is generally faster, the PME implementation matches the energy of the Amber MD engine more closely.
-
+We recommend using either the GPU or MPI-accelerated PME implementation of GIST.
+While the GPU version is faster when limited CPU resources are available, the PME implementation matches the energy of the Amber MD engine more closely.
+More recently, MPI support was added for both the energy and entropy calculation\cite{Roe2023-mpi-gist}. 
+The MPI implementation scales well over multiple CPU cores and can be combined with either the GPU or PME implementations for maximum efficiency. 
+A speed comparison of the various parallelization implementations is shown in \cite{Roe2023-mpi-gist}.
 
 \begin{lstlisting}[style=cpptraj]
 parm solvated.parm7
@@ -661,11 +662,6 @@ To test whether your grid is large enough look at solvent properties close to th
 If these correspond to the respective bulk properties, it can be assumed that your grid is large enough to capture all perturbations of the solute on the solvent.
 Note that a different box-size or number of solvent molecules can skew the bulk properties slightly compared to the reference values provided above.
 In that case, checking for convergence of the solvent properties near the grid borders is sufficient but you might want to modify your reference values according to your results then as described in the next section.
-
-
-For the GIST analysis, we recommend using either the PME or GPU implementation of GIST.
-For the GPU version, cpptraj needs to be compiled with the \inlinecode{-cuda} flag.
-While the GPU version is generally faster, the PME implementation matches the energy of the Amber MD engine more closely.
 
 \subsubsection{Reference Values and Radial Convergence}
 All GIST quantities should be expressed relative to bulk.
@@ -1011,15 +1007,19 @@ However, PME-GIST is not supported on the GPU, and no GPU code will be used when
 \subsection{PME implementation}
 In Reference~\cite{Chen2021}, a PME implementation of the GIST energy was presented.
 For typical systems, this implementation is slightly slower than GPU-GIST, but much faster than the original CPU code.
-Furthermore, PME-GIST offers the best agreement between GIST energies and those observed in an MD simulation.
+Furthermore, PME-GIST offers the best agreement between GIST energies and those observed in an classical MD simulation.
 
 To run PME-GIST, the \inlinecode{pme} flag to \inlinecode{gist} can be used in \software{cpptraj}.
 The output will contain two additional columns: \inlinecode{PME\_dens} and \inlinecode{PME\_norm}.
 They contain the potential of solute and solvent evaluated at the solvent positions and divided by two.
 Furthermore, the \inlinecode{Eww} and \inlinecode{Esw} columns are also computed using PME, and are reported as usual.
 For typical use cases, we recommend using \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
+
+\subsection{MPI parallelization}
+The most recent addition to GIST is the MPI parallelization of both energy and entropy calculations\cite{Roe2023-mpi-gist}.
+Since the MPI parallelization is orthogonal to the other improvements, it can be used with both PME or GPU accelerated GIST.
 \subsection{GIST with non-water solvents}
-In References~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
+In references~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
 
 To run a GIST calculation in a solvent other than water, use \inlinecode{solute} with a \software{cpptraj} selection mask.
 All other molecules will be treated as solvent.
@@ -1061,7 +1061,9 @@ solute !(:WAT,NA,CL) solventmols WAT,NA,CL
 \end{lstlisting}
 
 The current implementation of the entropy calculation in \software{cpptraj} requires at least 3 atoms in the main solvent.
-To compute the first-order entropy of the ions, as well as an approximate second order entropy, Python code is available on \url{https://github.com/liedllab/second-disorder}.
+Note that the calculation of the reference value is complicated by the introduction of additional solvents.
+For an overview of how to correctly handle such calculations, refer to reference \cite{Waibl2021-gist-salt}.
+Additionally, to compute the first-order entropy of the ions, as well as an approximate second order entropy, Python code is available on \url{https://github.com/liedllab/second-disorder}.
 
 \section{Visualization}
 \label{sec:visualization}
@@ -1320,7 +1322,7 @@ The checklist ``The CPPTRAJ GIST action'' provides a cheat sheet summarizing the
 GIST calculations in cpptraj can be sped up through various levels of 
 parallelization.
 If cpptraj was compiled with the '-cuda' configure flag set, the GPU accelerated version of GIST is used automatically. 
-Furthermore, if cpptraj was compiled with OpenMP support, the entropy calculation will be parallelized.
+In addition, OpenMP and MPI parallelization are available if cpptraj was compiled the necessary options. 
 
 For detailed instructions on how to install \software{cpptraj}, we refer the reader to the AmberMD GitHub page \url{https://github.com/Amber-MD/cpptraj}.
 
