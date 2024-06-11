@@ -144,7 +144,7 @@ The high spatial resolution of the GIST output, as well as the decomposition int
 In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis at the example of the streptavidin-biotin complex.
 Furthermore, we discuss the theory of GIST with a focus on practical aspects.
 We highlight potential pitfalls and show how to avoid technical difficulties.
-We assume familiarity with molecular dynamics simulations as well as the AmberTools package.
+We assume familiarity with molecular dynamics simulations as well as the AmberTools  package \cite{Case2023-ambertools}.
 
 %This particular document provides a skeleton illustrating key sections for a Tutorial document.
 %Please see the sample \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates} for additional information on and examples of using the LiveCoMS LaTeX class.
@@ -268,14 +268,14 @@ While no programming experience is necessary to follow the tutorial, a basic und
 
 \subsection{Software/system requirements}
 %Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
-The main implementation of GIST is part of the MD analysis software \software{cpptraj} released with AmberTools \cite{amber22}.
+The main implementation of GIST is part of the MD analysis software \software{cpptraj} released with AmberTools \cite{amber24, Case2023-ambertools}.
 
 A recent version of \software{cpptraj} should be used. We recommend using at least version 6.15.2, which can be obtained from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 
 The Amber simulation engine is used in this tutorial to run the MD simulations.
 While Amber is free for non-commercial use, it might not always be available in industry settings.
 In that case, other MD engines can be used as long as topologies and trajectories can be produced in a format supported by \software{cpptraj}.
-If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
+If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools \cite{Case2023-ambertools} and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
 %We should actually test that!
 Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation due to the loss of precision for the atom positions. For further reference, the influence of compression on energy calculations was discussed in a recent publication \cite{Roe2022-compression}.
 
