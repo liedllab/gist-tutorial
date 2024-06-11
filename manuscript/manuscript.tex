@@ -56,6 +56,7 @@
 \author[1]{Monica L Fern{\'a}ndez-Quintero}
 %\author[1,2]{Firstname Middlename Familyname}
 %\author[2]{Firstname Initials Surname}
+\author[2]{Steven Ramsey}
 \author[4]{Daniel R Roe}
 \author[1*]{Klaus R Liedl}
 \author[3*]{Michael K Gilson}
@@ -141,7 +142,7 @@
 Grid inhomogeneous solvation theory (GIST) is a method to compute the free energy of solvation of a solute molecule on a 3-dimensional grid based on molecular dynamics (MD) simulations.
 The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses on both proteins and small molecules. However, this versatility also comes with a significant entry barrier for new users.
 
-In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis at the example of the streptavidin-biotin complex.
+In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis using the streptavidin-biotin complex as an demonstrative system.
 Furthermore, we discuss the theory of GIST with a focus on practical aspects.
 We highlight potential pitfalls and show how to avoid technical difficulties.
 We assume familiarity with molecular dynamics simulations as well as the AmberTools  package \cite{Case2023-ambertools}.
@@ -218,11 +219,11 @@ Furthermore, IST does not consider the internal degrees of freedom of the solven
 Therefore, IST-based approaches can only be used with sufficiently rigid solvents.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems as solute molecules.
 
-GIST is an implementation of IST on a three-dimensional grid. It can be seen as a more general version of WaterMap \cite{Abel2008-watermap,Young2007-watermap} that provides solvation thermodynamics on the entire grid, rather than high-density clusters in a binding pocket.
+GIST is an implementation of IST on a three-dimensional grid. It can be seen as a more general version of WaterMap \cite{Abel2008-watermap,Young2007-watermap} that provides solvation thermodynamics on a space filling grid, rather than high-density clusters in a binding pocket.
 This implies a higher versatility, but also puts more responsibility on the user in terms of correct post-processing.
 
 Since the density is computed from an MD simulation, GIST can accurately treat confined water regions, which are challenging for implicit-solvent methods such as GBSA and self-consistent theories such as 3D-RISM \cite{Kovalenko1998-3drism}.
-While the need for MD simulations comes at a large computational cost, GIST is still more efficient than end-state approaches such as TI \cite{Kirkwood1935-ti} or FEP \cite{Zwanzig1954-reweighting}, with applications to large systems such as serine proteases \cite{Kraml2019-gigist} or antibody fragments \cite{Waibl2021-gist-antibodies}.
+While the need for MD simulations comes at a large computational cost, GIST is still more efficient than end-states approaches such as TI \cite{Kirkwood1935-ti} or FEP \cite{Zwanzig1954-reweighting}, with applications to large systems such as serine proteases \cite{Kraml2019-gigist} or antibody fragments \cite{Waibl2021-gist-antibodies}.
 On the other hand, the first-order approximation means that the solvation entropy is less accurately described than in TI or FEP \cite{Chen2021,Waibl2021-gist-salt}.
 %The 3D-RISM approach allows for a decomposition into entropic and enthalpic terms as well as a full localization of the underlying distributions to the solute molecule structure.
 %Here you would explain what problem you are tackling and briefly motivate your work.
@@ -261,7 +262,7 @@ After completing this tutorial, we expect the reader to be able to run their own
 \subsection{Background knowledge}
 This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD) simulations.
 The user should be able to run MD simulations and analyze the resulting trajectories.
-Previous experience of GIST is not necessary, although we recommend reading the works referenced in section~\ref{sec:theory}.
+Previous experience of GIST is not necessary, although we recommend reading the articles referenced in section~\ref{sec:theory}.
 
 The presented analyses are run in Python.
 While no programming experience is necessary to follow the tutorial, a basic understanding of Python is advantageous to adjust the code towards different requirements and use-cases.
@@ -273,7 +274,7 @@ The main implementation of GIST is part of the MD analysis software \software{cp
 A recent version of \software{cpptraj} should be used. We recommend using at least version 6.15.2, which can be obtained from GitHub (\url{https://github.com/Amber-MD/cpptraj}).
 
 The Amber simulation engine is used in this tutorial to run the MD simulations.
-While Amber is free for non-commercial use, it might not always be available in industry settings.
+While Amber is free for non-commercial use, it might not always be available in industrial settings.
 In that case, other MD engines can be used as long as topologies and trajectories can be produced in a format supported by \software{cpptraj}.
 If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools \cite{Case2023-ambertools} and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
 %We should actually test that!
@@ -312,7 +313,7 @@ GIST analysis can be divided in three steps: defining a region of interest, runn
 In order to run a GIST analysis, one must define the region where solvent properties will be calculated.
 This region is represented by a rectangular grid with given position, size, and voxel spacing.
 The default value of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
-While integrals of GIST quantities over the grid are independent of the voxel size, individual values converge slower at high resolutions.
+While integrals of GIST quantities over the grid are independent of the voxel size, values for each voxel converge slower at high resolutions.
 
 The grid is defined by parameters of the \inlinecode{gist} command in \software{cpptraj}.
 The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing (voxel side-length) in \AA{} by \inlinecode{gridspacn}.
@@ -377,7 +378,7 @@ We also provide the densities for water models commonly used with AMBER force fi
 These densities were calculated from \SI{100}{\nano\second} MD simulations at \SI{1}{\bar} and \SI{300}{\kelvin} using the Berendsen barostat and the Langevin thermostat.
 The water boxes were prepared with \software{tleap} to a size of \SI{100}{\angstrom} x \SI{100}{\angstrom} x \SI{100}{\angstrom} before pressure equilibration.
 
-Due to the varying sizes of the boxes, the reference energies used in this context may not align with those specified in the Amber manual. Generally, it is recommended that the size of the reference water box closely matches that of the production system. Therefore, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small. While the impact on density is not as pronounced, deviations from the specified settings can lead to differences of up to 0.005 kcal/mol in the $E_{ww, norm}$ value for water boxes. These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
+Due to the varying sizes of the boxes, the reference energies used in this context may not align with those specified in the Amber manual. Generally, it is recommended that the size of the reference water box closely matches that of the production system. Therefore, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small. While the impact on density is not as pronounced, deviations from the specified settings can lead to differences of up to 0.005 kcal/mol in the energy per water molecule ($E_{ww, norm}$) for water boxes. These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
 
 \begin{table}[h]
 	\caption{Reference density $\rho_0$ and mean water-water energy $E_{ww, norm}$ for various water models from NpT simulations of N$_{WAT}$ water solvent molecules at \SI{300}{\kelvin} and 1bar.}\label{tab:ref_densities}
@@ -427,7 +428,7 @@ A full list of all properties in the output is provided at the end of the tutori
 The output is organized by voxel and sorted according to their x, y, and z coordinates, describing the center point of the voxel.
 Energy and entropy quantities are reported in two different ways.
 The \inlinecode{\_dens} quantities are normalized by the voxel volume and can be used to compute integrals.
-The \inlinecode{\_norm} quantities are instead normalized by the number of solvents in the respective voxel averaged over all considered frames, and are useful to visualize local water properties.
+The \inlinecode{\_norm} quantities are instead normalized by the solvent number density in the respective voxel averaged over all considered frames, and are useful to visualize local water properties.
 To convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \inlinecode{\_dens} quantity $X^k_{dens}$, the following equation can be applied:
 \begin{equation}
 	X^k_{dens} = \frac{X^k_{norm}}{V^k} \cdot \frac{N^k_{solvent}}{N_{frames}}
@@ -446,7 +447,8 @@ The tutorial is structured as follows:
 \end{enumerate}
 
 In the first part, we show how to run GIST calculations for small molecule solutes and interpret the output.
-Afterwards, we apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-state approach based on GIST. In addition, we discuss all steps in further detail at the end. 
+Afterwards, we apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-states approach based on GIST. In addition, we discuss all steps in further detail at the end. 
+
 
 \subsection{Streptavidin/Biotin}
 The streptavidin-biotin complex binding is one of the strongest known non-covalent interactions involving a small molecule.
@@ -547,7 +549,8 @@ bounds !(:WAT) dx 0.5 offset 30 name MyGrid out bounds.dat
 Here, we calculate the bounds around the whole protein for a grid with \SI{0.5}{\angstrom} side-lenght voxels and a buffer zone of \SI{15.0}{\angstrom}. Note that the offset is given in terms of number of additional voxels, not voxel dimension. By varying the atom mask in the \inlinecode{bound} command, it is possible to center the grid on a region of interest, similiar to the \software{FindCentroid.py} script.
 
 Now, you can finally run the actual GIST analysis.
-Center the solute molecule as above, to make sure that its position matches the grid parameters you decided on.
+
+Center the solute molecule as above, to verify that its position matches the grid parameters you decided on.
 We recommend using either the GPU or MPI-accelerated PME implementation of GIST.
 While the GPU version is faster when limited CPU resources are available, the PME implementation matches the energy of the Amber MD engine more closely.
 More recently, MPI support was added for both the energy and entropy calculation\cite{Roe2023-mpi-gist}. 
@@ -563,7 +566,7 @@ gist griddim 100 100 100 out gist.dat \
 refdens 0.03287 pme
 \end{lstlisting}
 \subsubsection{Working with the GIST results}
-Running the GIST analysis above, an output data file (gist.dat) containing all calculated quantities for each voxel in the system is produced. 
+Running the GIST analysis above, an output data file (gist.dat) containing all calculated quantities for each voxel in the grid is produced. 
 Additionally as outlined in section \ref{sec:running_GIST}, various quantities are written to OpenDX files.
 
 To interact with your GIST data, we recommend the gisttools library for python3. Open the GIST output with gisttools:
@@ -581,7 +584,7 @@ We will discuss a way to similarly detect the reference energy of the solvent-so
 
 The GIST data can be accessed and modified from the gist object in various ways.
 Gisttools provides access to single or multiple voxels through a .loc property similiar to the pandas library. 
-GIST quantity data for all voxels can be accessed through directly indexing the gist object, either by providing a single name or a list of names.
+GIST quantity data for all voxels can be accessed by directly indexing the gist object, either by providing a single name or a list of names.
 Indexing with .loc works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
 \begin{lstlisting}[style=python]
 gist.loc[0, 'population'] # single value
@@ -604,7 +607,7 @@ gist.save_dx('A_dens','A.dx')
 
 This tutorial discusses the visualization of OpenDX files in Section~\ref{sec:visualization}.
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
-In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
+In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline potential pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
 If you want to skip this section, run 
 \begin{lstlisting}[style=bash]
@@ -647,7 +650,7 @@ Then split the equilibrated structure into biotin and streptavidin parts using \
 After that, use \software{equilibration.py -R} to run short restrained 
 equilibrations (where only the water is allowed to move) on the individual 
 systems.
-By using restraints, we can make sure that the monomer conformations match the complex.
+By using restraints, we can ensure that the monomer conformations match the complex.
 
 \subsubsection{MD Simulation}
 The MD can be run as described above for each monomer and the complex.
@@ -659,7 +662,9 @@ Furthermore, we recommend that you center the solute molecule to the coordinate 
 Calculate the GIST grid parameters as outlined in the biotin section for the complex and streptavidin and run the GIST analysis.
 For larger systems like whole proteins you can usually get away with a smaller buffer region compared to small molecule solutes.
 To test whether your grid is large enough look at solvent properties close to the grid edges, e.g. the solvent-solvent energies.
-If these correspond to the respective bulk properties, it can be assumed that your grid is large enough to capture all perturbations of the solute molecule on the solvent.
+
+If these correspond to the respective bulk properties, it can be assumed that your grid is large enough to fully capture the perturbation of the solvent by the solute molecule.
+
 Note that a different box-size or number of solvent molecules can skew the bulk properties slightly compared to the reference values provided above.
 In that case, checking for convergence of the solvent properties near the grid borders is sufficient but you might want to modify your reference values according to your results then as described in the next section.
 
@@ -673,7 +678,7 @@ The Amber manual provides reference densities and energies for several solvents.
 However, the exact energy values are different when using PME-GIST, and also depend on the box size.
 For quantitative analyses, it is recommended to compute an exact reference energy.
 
-The most accurate method to compute a reference energy is to run a GIST calculation of the pure solvent using the same energy method (PME/GPU) and a similar box size, and then compute the average solvent-solvent energy per solvent molecule.
+The most accurate method to compute a reference energy is to run a GIST calculation of the pure solvent using the same energy method (PME/GPU), a similar box size, at the same temperature and pressure and then compute the average solvent-solvent energy per solvent molecule.
 
 \begin{equation}
 \label{eq_ewwref}
