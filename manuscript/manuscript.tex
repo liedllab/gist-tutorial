@@ -1384,13 +1384,13 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
 The checklist ``The CPPTRAJ GIST action'' provides a cheat sheet summarizing the important options to the GIST action and its output, as well as frequently used equations.
 
-\subsection{Installation}
-GIST calculations in cpptraj can be sped up through various levels of 
-parallelization.
-If cpptraj was compiled with the '-cuda' configure flag set, the GPU accelerated version of GIST is used automatically. 
-In addition, OpenMP and MPI parallelization are available if cpptraj was compiled the necessary options. 
-
-For detailed instructions on how to install \software{cpptraj}, we refer the reader to the AmberMD GitHub page \url{https://github.com/Amber-MD/cpptraj}.
+%\subsection{Installation}
+%GIST calculations in cpptraj can be sped up through various levels of 
+%parallelization.
+%If cpptraj was compiled with the '-cuda' configure flag set, the GPU accelerated version of GIST is used automatically. 
+%In addition, OpenMP and MPI parallelization are available if cpptraj was compiled the necessary options. 
+%
+%For detailed instructions on how to install \software{cpptraj}, we refer the reader to the AmberMD GitHub page \url{https://github.com/Amber-MD/cpptraj}.
 
 \begin{Checklists*}
 
@@ -1424,9 +1424,9 @@ out <output> & Name of the main GIST output file. If not specified set to
 info <info> & Name of main GIST info file. If not specified info is 
 written to standard output. \\
 \bottomrule
-\end{tabular}
+\end{tabular}   
 
-
+\bigskip
 \textbf{Output}\\
 GIST calculations put out a variety of data sorted by voxel into a file 
 specified by the "out" keyword. Some of the output data is also automatically 
@@ -1462,7 +1462,7 @@ Eij & X & (if \inlinecode{doeij} was specified) Water-water interaction matrix. 
 %One example is shown here.
 
 % Here is a single-column checklist that consists of multiple sub-checklists
-\begin{Checklists}[h]
+\begin{Checklists}[H]
 
 \begin{checklist}{Simulation settings}
 \textbf{Each number denotes the minimum setting, with the optimum in brackets.}
