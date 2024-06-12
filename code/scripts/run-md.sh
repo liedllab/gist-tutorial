@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 HELPMESSAGE="Usage:
 $0 [-h|--help] PARMFILE CRDFILE"
