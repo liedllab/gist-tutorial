@@ -113,10 +113,10 @@
  month = jul,
 }
 
-@misc{amber22,
- author = {Case, D.A. and Aktulga, H.M. and Belfon, K. and Ben-Shalom, I.Y. and Berryman, J.T. and Brozell, S.R. and Cerutti, D.S. and Cheatham, T.E. III and Cisneros, G.A. and Cruzeiro, V.W.D. and Darden, T.A. and Duke, R.E. and Giambasu, G. and Gilson, M.K. and Gohlke, H. and Goetz, A.W. and Harris, R. and Izadi, S. and Izmailov, S.A. and Kasavajhala, K. and Kaymak, M.C. and King, E. and Kovalenko, A. and Kurtzman, T. and Lee, T.S. and LeGrand, S. and Li, P. and Lin, C. and Liu, J. and Luchko, T. and Luo, R. and Machado, M. and Man, V. and Manathunga, M. and Merz, K.M. and Miao, Y. and Mikhailovskii, O. and Monard, G. and Nguyen, H. and O'Hearn, K.A. and Onufriev, A. and Pan, F. and Pantano, S. and Qi, R. and Rahnamoun, A. and Roe, D.R. and Roitberg, A. and Sagui, C. and Schott-Verdugo, S. and Shajan, A. and Shen, J. and Simmerling, C.L. and Skrynnikov, N.R. and Smith, J. and Swails, J. and Walker, R.C. and Wang, J and Wang, J. and Wei, H. and Wolf, R.M. and Wu, X. and Xiong, Y. and Xue, Y. and York, D.M. and Zhao, S. and Kollman, P.A.},
- year = {2022},
- title = {Amber 2022},
+@misc{amber24,
+ author = {Case, D.A. and Aktulga, H.M. and Belfon, K. and Ben-Shalom, I.Y. and Berryman, J.T. and Brozell, S.R. and Cerutti, D.S. and Cheatham, T.E. III and Cisneros, G.A. and Cruzeiro, V.W.D. and Darden, T.A. and Forouzesh, N. and Giambasu, G. and Ghazimirsaeed, M. and Giambaşu, K. and Giese, T. and Gilson, M.K. and Gohlke, H. and Goetz, A.W. and Harris, R. and Huang, S. and Izadi, S. and Izmailov, S.A. and Kasavajhala, K. and Kaymak, M.C. and Kovalenko, A. and Kurtzman, T. and Lee, T.S. and Li, P. and Li, Z. and Lin, C. and Liu, J. and Luchko, T. and Luo, R. and Machado, M. and Manathunga, M. and Merz, K.M. and Miao, Y. and Mikhailovskii, O. and Monard, G. and Nguyen, H. and O'Hearn, K.A. and Onufriev, A. and Pan, F. and Pantano, S. and Rahnamoun, A. and Roe, D.R. and Roitberg, A. and Sagui, C. and Schott-Verdugo, S. and Shajan, A. and Shen, J. and Simmerling, C.L. and Skrynnikov, N.R. and Smith, J. and Swails, J. and Walker, R.C. and Wang, J and Wang, J. and Wu, X. and Wu, Y. and Xiong, Y. and Xue, Y. and York, D.M. and Zhao, S. and Zhu, Q. and Kollman, P.A.},
+ year = {2024},
+ title = {Amber 2024},
  publisher = {University of California, San Francisco},
 }
 
@@ -1207,6 +1207,33 @@ abstract = {Abstract Molecular dynamics (MD) simulations are now able to routine
 year = {2022}
 }
 
+@article{Roe2023-mpi-gist,
+	author = {Roe, Daniel R. and Brooks, Bernard R.},
+	title = {MPI-parallelization of the grid inhomogeneous solvation theory calculation},
+	journal = {Journal of Computational Chemistry},
+	volume = {45},
+	number = {10},
+	pages = {633-637},
+	keywords = {GIST, molecular dynamics, parallel analysis, trajectory analysis},
+	doi = {https://doi.org/10.1002/jcc.27278},
+	url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/jcc.27278},
+	eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/jcc.27278},
+	abstract = {Abstract The grid inhomogeneous solvation theory (GIST) method requires the often time-consuming calculation of water–water and water-solute energy on a grid. Previous efforts to speed up this calculation include using OpenMP, GPUs, and particle mesh Ewald. This article details how the speed of this calculation can be increased by parallelizing it with MPI, where trajectory frames are divided among multiple processors. This requires very little communication between individual processes during trajectory processing, meaning the calculation scales well to large processor counts. This article also details how the entropy calculation, which must happen after trajectory processing since it requires information from all trajectory frames, is parallelized via MPI. This parallelized GIST method has been implemented in the freely-available CPPTRAJ analysis software.},
+	year = {2024}
+}
+@article{Case2023-ambertools,
+	author = {Case, David A. and Aktulga, Hasan Metin and Belfon, Kellon and Cerutti, David S. and Cisneros, G. Andrés and Cruzeiro, Vinícius Wilian D. and Forouzesh, Negin and Giese, Timothy J. and Götz, Andreas W. and Gohlke, Holger and Izadi, Saeed and Kasavajhala, Koushik and Kaymak, Mehmet C. and King, Edward and Kurtzman, Tom and Lee, Tai-Sung and Li, Pengfei and Liu, Jian and Luchko, Tyler and Luo, Ray and Manathunga, Madushanka and Machado, Matias R. and Nguyen, Hai Minh and O’Hearn, Kurt A. and Onufriev, Alexey V. and Pan, Feng and Pantano, Sergio and Qi, Ruxi and Rahnamoun, Ali and Risheh, Ali and Schott-Verdugo, Stephan and Shajan, Akhil and Swails, Jason and Wang, Junmei and Wei, Haixin and Wu, Xiongwu and Wu, Yongxian and Zhang, Shi and Zhao, Shiji and Zhu, Qiang and Cheatham, Thomas E. III and Roe, Daniel R. and Roitberg, Adrian and Simmerling, Carlos and York, Darrin M. and Nagan, Maria C. and Merz, Kenneth M. Jr.},
+	title = {AmberTools},
+	journal = {Journal of Chemical Information and Modeling},
+	volume = {63},
+	number = {20},
+	pages = {6183-6191},
+	year = {2023},
+	doi = {10.1021/acs.jcim.3c01153},
+	note ={PMID: 37805934},
+	URL = {https://doi.org/10.1021/acs.jcim.3c01153},
+	eprint = {https://doi.org/10.1021/acs.jcim.3c01153}
+
 @article{Nguyen2016-spatial,
 	author = {Nguyen, Crystal N. and Kurtzman, Tom and Gilson, Michael K.},
 	title = {Spatial Decomposition of Translational Water–Water Correlation Entropy in Binding Pockets},
@@ -1277,6 +1304,7 @@ year = {2022}
   version      = {v2.1.0rc0},
   doi          = {10.5281/zenodo.8239932},
   url          = {https://doi.org/10.5281/zenodo.8239932}
+
 }
 
 @online{amber_tut_cpptraj,
