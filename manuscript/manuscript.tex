@@ -757,7 +757,7 @@ plt.show()
 \end{lstlisting}
 
 The expected output of this code is shown in Figure~\ref{fig_ewwref}.
-%TODO redo figure caption
+%TODO redo figure caption, yaxis label
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/Eww_convergence.eps}
@@ -937,8 +937,6 @@ bins, compl_rdf = compl.rdf( \
 
 Now, subtract the monomer histograms from the complex, and compute the sum of your property within some cutoff distance to the solute.
 If you also visualize the individual histograms, you will notice that the difference converges much better with increasing radius than the single contributions.
-This is because the cutoff contains regions that are close to the atom, since the integration region does not comprise the whole protein.
-%TODO this sentence doesn't make sense
 
 \begin{lstlisting}[style=python]
 difference = compl_rdf - biotin_rdf - strept_rdf
@@ -952,6 +950,7 @@ plt.ylabel('dG contribution [kcal/mol]')
 \end{lstlisting}
 
 You can also plot the difference between the complex and monomer contributions against the distance to biotin, using the complex coordinates for the holo structure:
+
 \begin{lstlisting}[style=python]
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
 cutoff = 12
