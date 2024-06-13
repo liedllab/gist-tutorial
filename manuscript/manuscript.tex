@@ -660,7 +660,8 @@ Make sure to choose a proper protonation state for all titratable moeties.
 You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics.
 A good criterion for validating the box size is to check whether the water on the outside of the box behaves bulk-like according to the GIST output.
 Note that, due to the restraints, some solvent sites might be inaccessible to the bulk solvent.
-To investigate such positions, make sure to explicitly place water solvent molecules there. %TODO add MC/MD or mupt and sources
+To investigate such positions, make sure to explicitly place water solvent molecules there. 
+For cases where the exact occupation of such sites is unknown, it may be helpful to include grand-canonical Monte Carlo (GCMC) or nonequilibrium candidate Monte Carlo (NCMC) sampling steps in the equilibration or production stage \cite{Ge-GCMC2022,Melling-NCMC2023}.
 
 It is good practice to check your restrained MD simulation or solvent populations obtained by GIST to confirm whether all relevant sites were properly solvated.
 
