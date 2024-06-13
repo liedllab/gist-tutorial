@@ -22,6 +22,7 @@
 \usepackage[version=4]{mhchem}
 \usepackage{siunitx}
 \usepackage{float}
+\usepackage{placeins}
 \DeclareSIUnit\Molar{M}
 \DeclareSIUnit\calorie{cal}
 \DeclareSIUnit\kcalPerMolASqr{\kilo\calorie\per\mole\per\angstrom\squared}
@@ -1384,7 +1385,7 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 	E_\text{lj} = E_\text{lj,\ short} +  E_\text{lj,\ corr}
 \end{equation}
 
-\section{Checklists}
+\section{Checklists and Cheat Sheats}
 %Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
 %Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
 %One example is shown here.
@@ -1445,9 +1446,6 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 	%\end{checklist}
 	
 \end{Checklists}
-
-
-
 %\section{Cheat sheet}
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
 %The checklist ``The CPPTRAJ GIST action'' provides a cheat sheet summarizing the important options to the GIST action and its output, as well as frequently used equations.
@@ -1459,7 +1457,7 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 %In addition, OpenMP and MPI parallelization are available if cpptraj was compiled the necessary options. 
 %
 %For detailed instructions on how to install \software{cpptraj}, we refer the reader to the AmberMD GitHub page \url{https://github.com/Amber-MD/cpptraj}.
-
+\FloatBarrier
 \begin{Checklists*}[h!]
 \begin{checklist}{The CPPTRAJ GIST action}\label{cheatsheet}
 
@@ -1468,63 +1466,45 @@ Various flags and options can be provided when running a GIST calculation in cpp
 A list of possible and required options is provided here:
 \medskip
 
-\begin{tabular}{@{}l p{.7\textwidth}@{}}
+\begin{tabularx}{\textwidth}{@{}l X @{} }
 \toprule
+\textbf{I/O Options} &\\
 name <dataset name> & Name for output datasets in cpptraj. \\
-doorder & Calculate the water order parameter [reference] for each voxel\\
-\qquad nopl & Do not use pair list for order calculation\\
-\qquad plcut <val> & Pair list cutoff for order calculation. Default is 10 Å\\
-doeij & Calculate the triangular matrix representing the water-water 
-interactions between pairs of voxels.\\
+prefix <prefix> & Output file name prefix. Default is “gist”.\\
+ext <extension> & Output grid file name extension. Default is  “.dx”. \\
+out <file> & Name of the main GIST output file. If not specified set to “<prefix>-output.dat“.\\
+info <file> & Name of main GIST info file. If not specified info is written to standard output. \\
+floatfmt <fmt> & Format for floating point values in GIST output file. Options are 'double','scientific' or 'general'. Default chooses 'fixed' or 'scientific' automatically. \\
+floatwidth <val>& Width of floating point values in GIST output file. Default is no width restriction. \\
+floatprec <val>& Precision of floating point values in GIST output file. Default is the system default. \\
+intwidth <val>& Width of integer point values in GIST output file. Default is no width restriction. \\
+doeij & Output the triangular matrix representing the water-water 
+interactions between pairs of voxels. Not supported with PME or GPU GIST.\\
+
+\textbf{Grid Options} &\\
+gridcntr <xval> <yval> <zval> & Coordinates in Å of the center of the grid. Default is 0.0, 0.0, 0.0. \\
+griddim <xval> <yval> <zval> & Grid dimensions in voxels along each coordinate axis. Default is 40, 40, 40.\\
+gridspacn <val> & Grid spacing (linear dimension of each voxel) in 
+Angstroms. Values greater than 0.75 Å are not recommended. Default is 0.5 Å.\\
+
+\textbf{GIST Calculation Options} &\\
+
 skipE & Skip all the energy calculations (cannot be specified with ’doeij’)\\
 skipS & Skip all the entropy calculations.\\
 refdens <val> & Reference density of bulk solvent, used in computing 
 $g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/Å3. \\
 temp <val> & Temperature of the input trajectory. \\
 noimage &  Disable distance imaging in energy calculation. \\
-gridcntr <xval> <yval> <zval> & Coordinates in Å of the center of the grid. Default is 0.0, 0.0, 0.0. \\
-griddim <xval> <yval> <zval> & Grid dimensions in voxels along each coordinate axis. Default is 40, 40, 40.\\
-gridspacn <val> & Grid spacing (linear dimension of each voxel) in 
-Angstroms. Values greater than 0.75 Å are not recommended. Default is 0.5 Å.\\
+
 neighborcut <val> & Cutoff in Å for determining solvent O-O neighbors. Default is 3.5 Å. \\
-prefix <prefix> & Output file name prefix. Default is “gist”.\\
-ext <extension> & Output grid file name extension. Default is  “.dx”. \\
-out <file> & Name of the main GIST output file. If not specified set to “<prefix>-output.dat“.\\
-info <file> & Name of main GIST info file. If not specified info is written to standard output. \\
-floatfmt <'double'|'scientific'|'general'> & Format for floating
-point values in GIST output file. Default chooses 'fixed' or 'scientific' automatically. \\
-floatwidth <val>& Width of floating point values in GIST output file. Default is no width restriction. \\
-floatprec <val>& Precision of floating point values in GIST output file. Default is the system default. \\
-intwidth <val>& Width of integer point values in GIST output file. Default is no width restriction. \\
+
 oldnnvolume & Use the old reference volume for the nearest neighbor entropy, instead of the more precise new implementation. \\
-nocom & Do not use the center of mass to define the molecular position. Instead, use the first atom in rigidatoms. Use this flag to restore the behavior of old GIST runs. \\
-nnsearchlayers <val> & Number of layers of neighboring voxels that should be used when searching for nearest neighbors. This has to be at least 1 to obtain the correct entropy. Higher values can help to obtain better convergence of the translational and 6D entropy with little sampling or fine grid spacings, but increase the calculation time (default 1). \\
-solute <mask> & Selection mask for the solute. All other molecules will be solvent. If this is omitted, the standard solute/solvent assignment will be used. \\
-solventmols <mols> &Comma-separated list of names of solvent molecules. Energies will be computed per solvent molecule. For the entropy, only the main solvent (the first one) will be used. Use, e.g., solventmols WAT,NA,CL for a GIST calculation including ions. This needs to be specified if there is more than one solvent species. \\
-rigidatoms <central> <atom1> <atom2> & Specifies how to define the molecular orientation for the entropy. 
-By default, a simple heuristic will be used. 
-This works for water, but not for all solvents. 
-The atoms should be representative of the molecular orientation and should not be collinear. 
-Note that the central atom goes first. 
-For water, the default is equivalent to rigidatoms O H1 H2, corresponding to H1-O-H2 as the rigid substructure. \\
-\bottomrule
-\end{tabular}  
-\end{checklist}
-\end{Checklists*}
 
+nnsearchlayers <val> & Layers of neighboring voxels considered in nearest neighbor search. Higher values may improve entropy convergence for little sampling or fine grid spacings, but increase the calculation time (default 1). \\
 
-\begin{Checklists*}[h!]
-\begin{checklist}{The CPPTRAJ GIST action}
-	
-	\textbf{Options}\\
-	Various flags and options can be provided when running a GIST calculation in cpptraj. 
-	A list of possible and required options is provided here:
-	\medskip
-
-\begin{tabular}{@{}l p{.7\textwidth}@{}}
-\toprule
-nopme & Do not use particle mesh Ewald for the non-bonded calculation. This is set on default. \\
-pme & Use particle mesh Ewald for the non-bonded electrostatics calculation. The van der Waals energy will be calculated using a long-range correction for periodicity. Does not support doeij.\\
+\textbf{PME Options} & \\
+nopme & Do not use particle mesh Ewald for the non-bonded calculation. This is set  on default. \\
+pme & Use particle mesh Ewald for the non-bonded electrostatics calculation. The van der Waals energy will be calculated using a long-range correction for periodicity.\\
 \qquad cut <val> & Direct space cutoff for pme. Default is 3.5 Å.\\
 \qquad dsumtol <val> & Direct sum tolerance used to determine Ewald coefficient. Default is 0.00001.\\
 \qquad ewcoeff <val> & Ewald coefficient in 1/Å. \\
@@ -1536,41 +1516,68 @@ pme & Use particle mesh Ewald for the non-bonded electrostatics calculation. The
 number of FFT grid points in each dimension.
 Will be determined automatically if not
 specified. \\
+
+\end{tabularx}  
+\end{checklist}
+\end{Checklists*}
+\begin{Checklists*}[h!]
+\begin{checklist}{The CPPTRAJ GIST action}
+	
+\textbf{Further Options}\\
+\begin{tabularx}{\textwidth}{@{} l X @{}}
+\toprule
+
+\textbf{Solvent Options} &\\
+solute <mask> & Selection mask for the solute. All other molecules will be solvent. If this is omitted, the standard solute/solvent assignment will be used. \\
+solventmols <mols> &Comma-separated list of solvent molecules residue names. Energies will be computed per solvent molecule. For the entropy, only the first solvent will be used. Use this for calulations with more than one solvent of interest, e.g. for  ions. \\
+rigidatoms <c> <a1> <a2> & Specifies the molecular orientation for the entropy calculation from a central atom and two additional atoms, e.g. O H1 H2 for water. By default, a simple heuristic will be used.  
+Use this option if the automatically chosen atoms are collinear or do not represent the orientation well. \\
+nocom & Do not use the center of mass to define the molecular position. Instead, use the first atom in rigidatoms. Use this flag to restore the behavior of old GIST runs. \\
+\textbf{Order Calculation Options} &\\
+doorder & Calculate the water order parameter [reference] for each voxel\\
+\qquad nopl & Do not use pair list for order calculation\\
+\qquad plcut <val> & Pair list cutoff for order calculation. Default is 10 Å\\
 \bottomrule
-\end{tabular}   
-\bigskip
+\end{tabularx}   
+\medskip
 
 
 \textbf{Output}\\
-GIST calculations put out a variety of data sorted by voxel into a file specified by the "out" keyword. 
-Some of the output data is also automatically written to "open data explorer" (.dx) files for convenient visualisation in software such as VMD or PyMOL.
+GIST calculations write a variety of data sorted by voxel into an outputfile specified by the "out" keyword. 
+Some of the output data is also automatically written to "open data explorer" (.dx) files for convenient visualisation in software such as VMD or PyMOL. Note that some columns will be written out both with '\_norm' and '\_dens' suffixes, refereing to normalization by solvent molecule or voxel volume respectively.
 The following columns can be found in the output file:
 \medskip
 
 
-\begin{tabular}{@{}l l p{.8\textwidth}@{}}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
 \toprule
 Name & Keyword & Description\\
 \midrule
-gX & X & For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. \\
-Esw & X &  Mean solute-solvent interaction energy density. \\
-Eww & X & Mean solvent-solvent interaction energy density. \\
-PME & [pme] & Solvent PME energy density. \\
-U\_PME & [pme] & Solvent PME energy density. \\
-dTStrans & X & First order translational entropy density. \\
-dTSorient & X & First order orientational entropy density . \\
-neighbor & X & Mean number of solvent molecules neighboring the solvent molecules found in this voxel multiplied by the voxel number density. \\
-dipole & X & Magnitude of mean dipole moment (polarization). \\
-order & X & (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter. \\
-dipolex & X & x-component of the mean solvent dipole moment density \\
-dipoley & X & y-component of the mean solvent dipole moment density \\
-dipolez & X & z-component of the mean solvent dipole moment density \\
-Eij & X & (if \inlinecode{doeij} was specified) solvent-solvent interaction matrix. \\
-\bottomrule
-\end{tabular}
+index & & Voxel indices \\
+x, y, z & & Coordinates of the voxel centers \\
+pop & & Population of solvent in voxel over entire simulation \\
+gX &  & For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. \\
+g\_mol\_Y & [solventmols]  & Density of every solvent species Y. Scaled by rho0. \\
+Esw &  &  Mean solute-solvent interaction energy. \\
+Eww &  & Mean solvent-solvent interaction energy. \\
+Esw\_mol\_Y & [solventmols]  &  Mean solute-solvent interaction energy for solvent species Y. \\
+Eww\_mol\_Y & [solventmols]  & Mean solvent-solvent interaction energy for solvent species Y. \\
+PME & [pme] & Solvent PME energy. \\
+U\_PME & [pme] & Solvent PME energy. \\
+dTStrans &  & First order translational entropy. \\
+dTSorient &  & First order orientational entropy. \\
+order &  & (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter. \\
+dipolex &  & x-component of the mean solvent dipole moment density \\
+dipoley &  & y-component of the mean solvent dipole moment density \\
+dipolez &  & z-component of the mean solvent dipole moment density \\
+dipole &  & Magnitude of mean dipole moment density (polarization). \\
+neighbor &  & Mean number of solvent molecules neighboring the solvent molecules found in this voxel. \\
+order & & Average tetrahedral order parameter \\
+
+\end{tabularx}
 \end{checklist}
 \end{Checklists*}
-
+\FloatBarrier
 \section*{Author Contributions}
 %%%%%%%%%%%%%%%%
 % This section mustt describe the actual contributions of
