@@ -665,9 +665,12 @@ For cases where the exact occupation of such sites is unknown, it may be helpful
 
 It is good practice to check your restrained MD simulation or solvent populations obtained by GIST to confirm whether all relevant sites were properly solvated.
 
-When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are generally two approaches for dealing with configurational diversity. In the first approach, the ensemble properties of each individual part and the complex are accounted for by running individual MD simulations for each. The second approach assumes sufficient overlap in the conformational space of the dissociated states and the complex. Then, only configurations of the complex are sampled in a single MD simulation of the complex. Calculations for the disassociated states are then run on the extracted structures from the complex configurations.
-%TODO source MMPBSA
-One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the conformations. 
+When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are generally two approaches for dealing with configurational diversity. 
+In the first approach, the ensemble properties of each individual part and the complex are accounted for by running individual MD simulations for each.
+The second approach assumes sufficient overlap in the conformational space of the dissociated states and the complex. 
+Then, only configurations of the complex are sampled in a single MD simulation of the complex. 
+Calculations for the disassociated states are then run on the extracted structures from the complex configurations.
+One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the conformations \cite{Genheden-EndState2012,Wang-MMPBSA2019}. 
 
 Here, we do not include any sampling of the conformational states.
 It is therefore important that the molecular conformations in the complex and dissociated states match exactly.
