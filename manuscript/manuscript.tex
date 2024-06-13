@@ -268,7 +268,7 @@ This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD
 
 The user should be able to run MD simulations and analyze the resulting trajectories. 
 The MD simulations presented in this tutorial are run with the Amber simulation engine and analyzed using AmberTools \software{cpptraj}. 
-For a conceptual overview of running MD simulations with Amber, we recommend reading the Amber manual (\url{https://ambermd.org/Manuals.php}) \cite{amber22} and the Amber tutorials (\url{https://ambermd.org/Manuals.php}). 
+For a conceptual overview of running MD simulations with Amber, we recommend reading the Amber manual (\url{https://ambermd.org/Manuals.php}) \cite{amber24} and the Amber tutorials (\url{https://ambermd.org/Manuals.php}). 
 Previous experience of GIST is not necessary, although we recommend reading the works referenced in section~\ref{sec:theory}.
 
 The presented analyses are run in Python.
@@ -321,9 +321,8 @@ GIST analysis can be divided in three steps: defining a region of interest, runn
 
 \paragraph{Identify and define the region of interest}
 In order to run a GIST analysis, one must define the region where solvent properties will be calculated.
-
-This region is occupied by a rectangular grid with given position, size, and voxel spacing.
-The default spacing of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
+This region is defined by a rectangular grid with given position, size, and voxel spacing.
+The default grid spacing of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
 While integrals of GIST quantities over the grid are independent of the voxel size, provided sufficient sampling, individual values converge slower at high resolutions.
 The grid is defined by parameters of the \inlinecode{gist} command in \software{cpptraj}.
 The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing (voxel side-length) in \AA{} by \inlinecode{gridspacn}:
@@ -333,7 +332,7 @@ gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 
-Additionally, the GIST calculation will usually be preceded by preprocessing steps, such as centering the trajectory or reimaging to account for periodic boundary conditions.
+Additionally, the GIST calculation should usually be preceded by preprocessing steps, such as centering the trajectory or reimaging to account for periodic boundary conditions.
 Often, the region of interest will be defined as the surrounding of a molecule, which might for example be a ligand in the binding pocket or the whole protein. 
 Using \inlinecode{cpptraj's } \inlinecode{bounds} command, the region of interest can be output to a file. For example, here is the command for a region of 10\AA{} around the ligand LIG:
 
@@ -342,7 +341,7 @@ bounds :LIG dx 0.5 offset 20 name Grid out bounds.dat
 \end{lstlisting}
 Note that the \inlinecode{bounds} command needs to be supplied with the exact same trajectory as used in the GIST calculation to generate correct boundaries. Therefore, any preprocessing steps need to match between the \inlinecode{bounds} command and the following \inlinecode{gist} calculation.
 
-Additionally, a helper script called \inlinecode{FindCentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
+In addition, a helper script called \inlinecode{FindCentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
 
 \begin{lstlisting}[style=bash]
 python FindCentroid.py -i structure.pdb
@@ -350,7 +349,7 @@ python FindCentroid.py -i structure.pdb
 
 \paragraph{Run GIST using cpptraj}
 GIST is implemented in \software{cpptraj} which requires the topology and the trajectory of the MD simulation to be analyzed.
-The command needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic command, assuming a grid centered at (10.5 20.1 30.1) and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, is:
+The command needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic command, assuming a grid centered at coordinates (x=\SI{10.5}{\angstrom}, y=\SI{20.1}{\angstrom}, z=\SI{30.1}{\angstrom}) and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, is:
 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 \
@@ -383,23 +382,24 @@ The most important options are summarized in the following table:
 \end{table}
 In GIST, the calculated properties are derived by referencing against the bulk solvent.
 It is therefore important to set the reference number density $\rho_0$ according to the solvent model used in your simulation.
-The solvent-solvent enthalpy $E_{ww}$ also needs to be referenced, but this can be done in the post-processing stage. The calculation of these properties and the need for referencing is discussed in-depth in section /ref{sec:theory}.
+The solvent-solvent enthalpy $E_{ww}$ also needs to be referenced, but this can be done in the post-processing stage. The calculation of these properties and the need for referencing is discussed in-depth in section \ref{sec:theory}.
 
 Densities and reference energies of typical water models can be found in the \software{cpptraj} manual.
 We also provide the densities for water models commonly used with AMBER force fields in table \ref{tab:ref_densities}.
 These densities were calculated from \SI{100}{\nano\second} MD simulations at \SI{1}{\bar} and \SI{300}{\kelvin} using the Berendsen barostat and the Langevin thermostat.
 The water boxes were prepared with \software{tleap} to a size of \SI{100}{\angstrom} x \SI{100}{\angstrom} x \SI{100}{\angstrom} before pressure equilibration.
 
-Due to the varying sizes of the boxes, the reference energies used in this context may not align with those specified in the Amber manual. 
-Generally, it is recommended that the size of the reference water box closely matches that of the production system. 
-Therefore, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small.
-While the impact on density is not as pronounced, deviations from the specified settings can lead to differences of up to 0.005 kcal/mol in the energy per water molecule ($E_{ww, norm}$) for water boxes. 
+Due to the different sizes of the boxes, the reference energies used in this tutorial may not align with those specified in the Amber manual. 
+Generally, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small. 
+The reference values can be calculated from MD trajectories of bulk solvent. From this, one then calculates the average energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$.  
+Generally, it is recommended that the size of the reference solvent box closely matches that of the production system.
+While the impact on the density is not as pronounced, deviations from the production settings can lead to differences of up to 0.005 kcal/mol in the energy per solvent molecule ($E_{ww, norm}$) for water boxes. 
 These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
 
 \begin{table}[h]
 
 	\label{tab:ref_values}
-	\caption{Reference number density $\rho_0$ and mean water-water energy $E_{ww, norm}$ for various water models from NPT simulations of N$_{WAT}$ water solvent molecules at \SI{300}{\kelvin} and 1bar.}\label{tab:ref_densities}
+	\caption{Reference number density $\rho_0$ and mean solvent-solvent energy $E_{ww, norm}$ for various water models from NPT simulations of N$_{WAT}$ water solvent molecules at \SI{300}{\kelvin} and 1bar.}\label{tab:ref_densities}
 	\small
 	\begin{tabularx}{\columnwidth}{@{}lrrr@{}}
 		\toprule
@@ -427,22 +427,18 @@ Here is a list of the most important quantities calculated by GIST:
 
 \begin{itemize}
 	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled such that that the expectation value for the bulk is unity. For water, gO and gH are produced.}
-
-	\item{[Esw] Mean solute-water interaction energy density.}
-	\item{[Eww] Mean water-water interaction energy density.}
-	\item{[PME] (only if PME was used) water PME energy density.}
-	\item{[dTStrans] First order translational entropy density.}
-	\item{[dTSorient] First order orientational entropy density .}
-	\item{[dTSsix] First order entropy density for the six-dimensional combined orientation and translation space.}
+	\item{[Esw] Mean solute-water interaction energy.}
+	\item{[Eww] Mean water-water interaction energy.}
+	\item{[PME] (only if PME was used) water PME energy.}
+	\item{[dTStrans] First order translational entropy.}
+	\item{[dTSorient] First order orientational entropy.}
+	\item{[dTSsix] First order entropy for the six-dimensional combined orientation and translation space.}
 	\item{[dipole] Magnitude of mean dipole moment (polarization).}
-	\item{[dipolex] x-component of the mean water dipole moment density}
-	\item{[dipoley] y-component of the mean water dipole moment density}
-	\item{[dipolez] z-component of the mean water dipole moment density}
 \end{itemize}
 
 Several dx files are written by default, such as the energy, entropy, and atomic number densities.
 All calculated quantities are written to the output file (default \inlinecode{gist-output.dat}) and can be used to generate DX files for other quantities.
-A full list of all properties in the output is provided at the end of the tutorial. 
+A full list of all properties in the output is provided at the end of the tutorial in section \ref{sec:checklists}. 
 The output file is organized by voxel and sorted according to their x, y, and z coordinates, describing the center point of the voxel.
 Energy and entropy quantities are reported in two different ways.
 The \inlinecode{\_dens} quantities are normalized by the voxel volume and can be used to compute integrals.
@@ -464,8 +460,8 @@ The tutorial is structured as follows:
 	\item Explore advantages and disadvantages of the GIST method when used to calculate  $\dgsolv$
 \end{enumerate}
 
-In the first part, we show how to run GIST calculations for small molecule solutes and interpret the output.
-Afterwards, we apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-states approach based on GIST. In addition, we discuss all steps in further detail at the end. 
+In the first part, we show how to run GIST calculations for small molecule solutes and interpret the output. This provides an example of a simple GIST workflow, without too much details.
+Afterwards, we apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-states approach based on GIST. In addition, we discuss all steps shown in the first example in further detail. 
 
 
 \subsection{Streptavidin/Biotin}
@@ -494,7 +490,7 @@ In this example, we will be running a simple GIST calculation of the biotin solu
 First, extract biotin from the crystal structure and generate a topology and coordinate file compatible with Amber or a simulation package of your choice.
 
 The solute molecule should be solvated with a sufficiently large solvent box. 
-For periodic boundary conditions, the size of the solvent box should be large enough for the solvent to behave bulk-like so as to reduce artifact from solvent-mediated interactions between the periodic images. 
+For periodic boundary conditions, the size of the solvent box should be large enough for the solvent to behave bulk-like so as to reduce artifacts from solvent-mediated interactions between the periodic images. 
 This corresponds to a distance between solute and box boundary of at least 12\AA{} for water, though we recommend 15\AA{} or higher.
 Carefully check the employed force field, protonation state and partial charges.
 %a PDB file containing only biotin. Prepare your structure by adding hydrogens, making sure to choose the correct protonation state. Parametrize biotin with the forcefield of your choice. Solvate the parametrized biotin, making sure to choose a water box of large enough size so that the water on the box edges behaves bulk-like (a wall distance of at least 15\AA is recommended).
@@ -655,13 +651,11 @@ The choice of initial structure is crucial to the GIST results.
 Crystal structures may not represent the dominant solution structure for a given target.
 In our example, we only use a single equilibrated structure.
 A more sophisticated approach would be to identify several dominant structures in the ensemble and run a separate MD simulation and GIST calculation for each structure. Such dominant structures could either be identified from experimental ensembles or by clustering an unrestrained MD simulation. 
-
 When starting from an experimental structure, care has to be taken during the preparation step.
 Make sure to choose a proper protonation state for all titratable moeties.
-
-You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics.
-A good criterion for validating the box size is to check whether the water on the outside of the box behaves bulk-like according to the GIST output.
-Note that, due to the restraints, some solvent sites might be inaccessible to the bulk solvent.
+You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics and avoid solvent-mediated interactions of periodic images.
+A good criterion for validating the box size is to check whether the solvent on the outside of the box behaves bulk-like according to the GIST output.
+Note that, due to the restraints and finite sampling time, some solvent sites might be inaccessible to the bulk solvent.
 To investigate such positions, make sure to explicitly place water solvent molecules there. 
 For cases where the exact occupation of such sites is unknown, it may be helpful to include grand-canonical Monte Carlo (GCMC) or nonequilibrium candidate Monte Carlo (NCMC) sampling steps in the equilibration or production stage \cite{Ge-GCMC2022,Melling-NCMC2023}.
 
@@ -697,23 +691,18 @@ By using restraints, we can ensure that the monomer conformations match the comp
 \subsubsection{GIST analysis of Streptavidin-Biotin}
 
 After running the MD simulations as described in section \ref{sec:md_simulation}, proceed with the GIST analysis.
-For easier post-processing, here we use grids that contain the whole solute molecule.
+For easier post-processing, here we use grids that contain the whole solute molecule and the surrounding solvent.
 
-Smaller grids encompassing only the binding site could be used for streptavidin and the complex, but this would complicate the analysis.
-Furthermore, we recommend that you center the solute molecule to the coordinate origin.
+If one is only interested in solvent in the binding site, smaller grids encompassing only the binding site could be used for streptavidin and the complex. While this saves calculation time for the GIST analysis, it complicates the post-processing. Since the GIST analysis is usually less time-demanding than the MD simulation, we recommend using larger grids.
+Furthermore, we recommend that you center the solute molecule to the coordinate origin to simplify the analysis.
 Calculate the GIST grid parameters as outlined in the biotin section for the complex and streptavidin and run the GIST analysis.
 
 For larger systems like whole proteins you can usually get away with a smaller buffer region for the GIST grid compared to small molecule solutes.
 To test whether your grid is large enough, look at solvent properties close to the grid edges, e.g. the solvent-solvent energies.
 If these correspond to the respective bulk properties, it can be assumed that your grid is large enough to capture all perturbations of the solute on the solvent.
-
 Note that a different box-size or number of solvent molecules can skew the bulk properties slightly compared to the reference values provided above.
 In that case, checking for convergence of the solvent properties near the grid borders is sufficient. You might want to modify your reference values according to your results, as described in the next section.
 
-If these correspond to the respective bulk properties, it can be assumed that your grid is large enough to fully capture the perturbation of the solvent by the solute molecule.
-
-Note that a different box-size or number of solvent molecules can skew the bulk properties slightly compared to the reference values provided above.
-In that case, checking for convergence of the solvent properties near the grid borders is sufficient but you might want to modify your reference values according to your results then as described in the next section.
 \subsubsection{Reference Values and Radial Convergence}
 All GIST quantities should be expressed relative to bulk as outlined in section \ref{sec:theory}.
 This is automatically done by \software{cpptraj} for the entropy, using the bulk density specified by \inlinecode{refdens}.
@@ -724,7 +713,6 @@ The Amber manual provides reference densities and energies for several solvents.
 Furthermore, a large variety of reference values calculated with GPU-GIST are listed in table \ref{tab:ref_values}.
 However, the exact energy values are different when using PME-GIST, and also depend on the box size.
 For quantitative analyses, it is recommended to compute an exact reference energy.
-
 The most accurate method to compute a reference energy is to run a GIST calculation of the pure solvent using the same energy method (PME/GPU), a similar box size, at the same temperature and pressure and then compute the average solvent-solvent energy per solvent molecule.
 
 \begin{equation}
@@ -736,7 +724,7 @@ E_{ww}^\textit{ref} = \frac{\int{E_{ww}} \mathrm{d}x}{\left<N_\textit{solvent}\r
 
 Alternatively, the solvent-solvent energy in a large GIST grid converges to the bulk value at sufficient distance to the solute molecule. 
 Therefore, the reference energy can be obtained by binning the voxels by their distance to the solute molecule, and evaluate Equation~\ref{eq_ewwref} within each bin.
-If this value converges with increasing distance from the solute, this can be used as $E_{ww}^\textit{ref}$.
+If this value converges with increasing distance from the solute, it can be used as $E_{ww}^\textit{ref}$.
 
 \software{gisttools} contains functions to facilitate this analysis.
 There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value.
@@ -1385,7 +1373,7 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 	E_\text{lj} = E_\text{lj,\ short} +  E_\text{lj,\ corr}
 \end{equation}
 
-\section{Checklists and Cheat Sheats}
+\section{Checklists and Cheat Sheats} \label{sec:checklists}
 %Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
 %Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
 %One example is shown here.
@@ -1485,8 +1473,8 @@ interactions between pairs of voxels. Not supported with PME or GPU GIST.\\
 gridcntr <xval> <yval> <zval> & Coordinates in Å of the center of the grid. Default is 0.0, 0.0, 0.0. \\
 griddim <xval> <yval> <zval> & Grid dimensions in voxels along each coordinate axis. Default is 40, 40, 40.\\
 gridspacn <val> & Grid spacing (linear dimension of each voxel) in 
-Angstroms. Values greater than 0.75 Å are not recommended. Default is 0.5 Å.\\
-
+Angstroms. Default is 0.5 Å.\\
+rmsfit <mask> & If specified, grid will be rotated and translated to follow the atoms selected by mask. \\
 \textbf{GIST Calculation Options} &\\
 
 skipE & Skip all the energy calculations (cannot be specified with ’doeij’)\\
@@ -1498,7 +1486,7 @@ noimage &  Disable distance imaging in energy calculation. \\
 
 neighborcut <val> & Cutoff in Å for determining solvent O-O neighbors. Default is 3.5 Å. \\
 
-oldnnvolume & Use the old reference volume for the nearest neighbor entropy, instead of the more precise new implementation. \\
+oldnnvolume & Use the old reference volume for the nearest neighbor entropy. \\
 
 nnsearchlayers <val> & Layers of neighboring voxels considered in nearest neighbor search. Higher values may improve entropy convergence for little sampling or fine grid spacings, but increase the calculation time (default 1). \\
 
