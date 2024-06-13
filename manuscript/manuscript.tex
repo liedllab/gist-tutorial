@@ -21,6 +21,7 @@
 \usepackage{lipsum} % Required to insert dummy text
 \usepackage[version=4]{mhchem}
 \usepackage{siunitx}
+\usepackage{float}
 \DeclareSIUnit\Molar{M}
 \DeclareSIUnit\calorie{cal}
 \DeclareSIUnit\kcalPerMolASqr{\kilo\calorie\per\mole\per\angstrom\squared}
@@ -1383,9 +1384,73 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 	E_\text{lj} = E_\text{lj,\ short} +  E_\text{lj,\ corr}
 \end{equation}
 
-\section{Cheat sheet}
+\section{Checklists}
+%Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
+%Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
+%One example is shown here.
+
+% Here is a single-column checklist that consists of multiple sub-checklists
+\begin{Checklists}[H]
+	
+	\begin{checklist}{Simulation settings}
+		\textbf{Each number denotes the minimum setting, with the optimum in brackets.}
+		\begin{itemize}
+			\item Simulation time: \SIrange{10}{20}{\nano\second} (\SI{100}{\nano\second})
+			\item Number of analyzed frames: \num{10000} (\num{100000})
+			\item Restraints: typically \SI{100}{\kcalPerMolASqr} on solute heavy atoms.
+		\end{itemize}
+	\end{checklist}
+	
+	\begin{checklist}{Choosing an energy method}
+		\begin{itemize}
+			\item GPU, direct space: generally the fastest
+			\item CPU, PME: highly consistent with Amber MD, fast
+			\item CPU: slow, most general (can write out $E_{ij}$ matrices)
+		\end{itemize}
+	\end{checklist}
+	
+	\begin{checklist}{Obtaining absolute $\Delta G_\textup{solv}$}
+		\begin{itemize}
+			\item Check the radial convergence (see Fig.~\ref{fig_radial_convergence})
+			\item Choose a sufficient distance cutoff
+			\item Choose an optimal $E_{ww}$ reference value
+			\item Tweak simulation length and number of frames to obtain smooth free energy contributions and unbiased (i.e., zero) bulk entropy.
+			\item If necessary, subtract an entropy reference
+		\end{itemize}
+	\end{checklist}
+	
+	\begin{checklist}{Handling convergence problems}
+		\begin{itemize}
+			\item Insufficient sampling leads to high noise in the results. Use higher numbers of frames.
+			\item Autocorrelation between frames leads to negative entropy in bulk. Increase simulation time and/or reduce the number of frames.
+		\end{itemize}
+	\end{checklist}
+	
+	%\begin{checklist}{A list}
+	%\textbf{Single-column checklists are also straightforward by removing the asterisk}
+	%\begin{itemize}
+	%\item First thing let's do an item which breaks across lines to see how that looks
+	%\item Also remember
+	%\item And finally
+	%\end{itemize}
+	%\end{checklist}
+	%
+	%\begin{checklist}{Another list}
+	%\textbf{This is some further description.}
+	%\begin{itemize}
+	%\item First thing
+	%\item Also remember
+	%\item And finally
+	%\end{itemize}
+	%\end{checklist}
+	
+\end{Checklists}
+
+
+
+%\section{Cheat sheet}
 %This will be a cheatsheet containing all options for cpptrajs GIST implementation
-The checklist ``The CPPTRAJ GIST action'' provides a cheat sheet summarizing the important options to the GIST action and its output, as well as frequently used equations.
+%The checklist ``The CPPTRAJ GIST action'' provides a cheat sheet summarizing the important options to the GIST action and its output, as well as frequently used equations.
 
 %\subsection{Installation}
 %GIST calculations in cpptraj can be sped up through various levels of 
@@ -1395,138 +1460,116 @@ The checklist ``The CPPTRAJ GIST action'' provides a cheat sheet summarizing the
 %
 %For detailed instructions on how to install \software{cpptraj}, we refer the reader to the AmberMD GitHub page \url{https://github.com/Amber-MD/cpptraj}.
 
-\begin{Checklists*}
-
+\begin{Checklists*}[h!]
 \begin{checklist}{The CPPTRAJ GIST action}\label{cheatsheet}
 
 \textbf{Options}\\
-Various flags and options can be provided when running a GIST calculation in 
-cpptraj. A list of possible and required options is provided here:
+Various flags and options can be provided when running a GIST calculation in cpptraj. 
+A list of possible and required options is provided here:
+\medskip
 
 \begin{tabular}{@{}l p{.7\textwidth}@{}}
 \toprule
+name <dataset name> & Name for output datasets in cpptraj. \\
 doorder & Calculate the water order parameter [reference] for each voxel\\
+\qquad nopl & Do not use pair list for order calculation\\
+\qquad plcut <val> & Pair list cutoff for order calculation. Default is 10 Å\\
 doeij & Calculate the triangular matrix representing the water-water 
 interactions between pairs of voxels.\\
-skipE & Skip all energy calculations (cannot be specified with ’doeij’)\\
+skipE & Skip all the energy calculations (cannot be specified with ’doeij’)\\
 skipS & Skip all the entropy calculations.\\
-refdens <rdval> & Reference density of bulk water, used in computing 
+refdens <val> & Reference density of bulk solvent, used in computing 
 $g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/Å3. \\
-temp <tval> & Temperature of the input trajectory. \\
+temp <val> & Temperature of the input trajectory. \\
 noimage &  Disable distance imaging in energy calculation. \\
-gridcntr <xval> <yval> <zval> & Coordinates (Å) of the center of the grid 
-(default 0.0, 0.0, 0.0). \\
-griddim <xval> <yval> <zval> & Grid dimensions along each coordinate axis 
-(default 40, 40, 40).\\
-gridspacn <spaceval> & Grid spacing (linear dimension of each voxel) in 
-Angstroms. Values greater than 0.75 Å are not recommended (default 0.5 Å).\\
-prefix <filename prefix> & Output file name prefix (default “gist”).\\
-ext <grid extension> & Output grid file name extension (default “.dx”). \\
-out <output> & Name of the main GIST output file. If not specified set to 
-’<prefix>-output.dat’.\\
-info <info> & Name of main GIST info file. If not specified info is 
-written to standard output. \\
+gridcntr <xval> <yval> <zval> & Coordinates in Å of the center of the grid. Default is 0.0, 0.0, 0.0. \\
+griddim <xval> <yval> <zval> & Grid dimensions in voxels along each coordinate axis. Default is 40, 40, 40.\\
+gridspacn <val> & Grid spacing (linear dimension of each voxel) in 
+Angstroms. Values greater than 0.75 Å are not recommended. Default is 0.5 Å.\\
+neighborcut <val> & Cutoff in Å for determining solvent O-O neighbors. Default is 3.5 Å. \\
+prefix <prefix> & Output file name prefix. Default is “gist”.\\
+ext <extension> & Output grid file name extension. Default is  “.dx”. \\
+out <file> & Name of the main GIST output file. If not specified set to “<prefix>-output.dat“.\\
+info <file> & Name of main GIST info file. If not specified info is written to standard output. \\
+floatfmt <'double'|'scientific'|'general'> & Format for floating
+point values in GIST output file. Default chooses 'fixed' or 'scientific' automatically. \\
+floatwidth <val>& Width of floating point values in GIST output file. Default is no width restriction. \\
+floatprec <val>& Precision of floating point values in GIST output file. Default is the system default. \\
+intwidth <val>& Width of integer point values in GIST output file. Default is no width restriction. \\
+oldnnvolume & Use the old reference volume for the nearest neighbor entropy, instead of the more precise new implementation. \\
+nocom & Do not use the center of mass to define the molecular position. Instead, use the first atom in rigidatoms. Use this flag to restore the behavior of old GIST runs. \\
+nnsearchlayers <val> & Number of layers of neighboring voxels that should be used when searching for nearest neighbors. This has to be at least 1 to obtain the correct entropy. Higher values can help to obtain better convergence of the translational and 6D entropy with little sampling or fine grid spacings, but increase the calculation time (default 1). \\
+solute <mask> & Selection mask for the solute. All other molecules will be solvent. If this is omitted, the standard solute/solvent assignment will be used. \\
+solventmols <mols> &Comma-separated list of names of solvent molecules. Energies will be computed per solvent molecule. For the entropy, only the main solvent (the first one) will be used. Use, e.g., solventmols WAT,NA,CL for a GIST calculation including ions. This needs to be specified if there is more than one solvent species. \\
+rigidatoms <central> <atom1> <atom2> & Specifies how to define the molecular orientation for the entropy. 
+By default, a simple heuristic will be used. 
+This works for water, but not for all solvents. 
+The atoms should be representative of the molecular orientation and should not be collinear. 
+Note that the central atom goes first. 
+For water, the default is equivalent to rigidatoms O H1 H2, corresponding to H1-O-H2 as the rigid substructure. \\
+\bottomrule
+\end{tabular}  
+\end{checklist}
+\end{Checklists*}
+
+
+\begin{Checklists*}[h!]
+\begin{checklist}{The CPPTRAJ GIST action}
+	
+	\textbf{Options}\\
+	Various flags and options can be provided when running a GIST calculation in cpptraj. 
+	A list of possible and required options is provided here:
+	\medskip
+
+\begin{tabular}{@{}l p{.7\textwidth}@{}}
+\toprule
+nopme & Do not use particle mesh Ewald for the non-bonded calculation. This is set on default. \\
+pme & Use particle mesh Ewald for the non-bonded electrostatics calculation. The van der Waals energy will be calculated using a long-range correction for periodicity. Does not support doeij.\\
+\qquad cut <val> & Direct space cutoff for pme. Default is 3.5 Å.\\
+\qquad dsumtol <val> & Direct sum tolerance used to determine Ewald coefficient. Default is 0.00001.\\
+\qquad ewcoeff <val> & Ewald coefficient in 1/Å. \\
+\qquad erfcdx <val> & Spacing to use for the ERFC splines. Default is 0.0002 Å. \\
+\qquad skinnb & Used to determine pairlist atoms (added to cut, so pairlist cutoff is cut + skinnb); included in order to maintain consistency with results from sander. \\
+\qquad ljswidth <val> & If specified, use a force-switching form for the Lennard-Jones calculation from <cutoff>-<val> to <cutoff> \\
+\qquad order <val> & Spline order for charges. \\
+\qquad nfft <nfft1>,<nfft2>,<nfft3> & Explicitly set the
+number of FFT grid points in each dimension.
+Will be determined automatically if not
+specified. \\
 \bottomrule
 \end{tabular}   
-
 \bigskip
+
+
 \textbf{Output}\\
-GIST calculations put out a variety of data sorted by voxel into a file 
-specified by the "out" keyword. Some of the output data is also automatically 
-written to "open data explorer" (.dx) files for convenient visualisation in 
-software such as VMD or PyMOL. The following columns can be found in the output 
-file:
+GIST calculations put out a variety of data sorted by voxel into a file specified by the "out" keyword. 
+Some of the output data is also automatically written to "open data explorer" (.dx) files for convenient visualisation in software such as VMD or PyMOL.
+The following columns can be found in the output file:
+\medskip
+
+
 \begin{tabular}{@{}l l p{.8\textwidth}@{}}
 \toprule
 Name & Keyword & Description\\
 \midrule
 gX & X & For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled accordingly. \\
-Esw & X &  Mean solute-water interaction energy density. \\
-Eww & X & Mean water-water interaction energy density. \\
-PME & [pme] & Water PME energy density. \\
-U\_PME & [pme] & Water PME energy density. \\
+Esw & X &  Mean solute-solvent interaction energy density. \\
+Eww & X & Mean solvent-solvent interaction energy density. \\
+PME & [pme] & Solvent PME energy density. \\
+U\_PME & [pme] & Solvent PME energy density. \\
 dTStrans & X & First order translational entropy density. \\
 dTSorient & X & First order orientational entropy density . \\
-neighbor & X & Mean number of waters neighboring the water solvent molecules found in this voxel multiplied by the voxel number density. \\
+neighbor & X & Mean number of solvent molecules neighboring the solvent molecules found in this voxel multiplied by the voxel number density. \\
 dipole & X & Magnitude of mean dipole moment (polarization). \\
 order & X & (if \inlinecode{doorder} was specified) Average Tetrahedral Order Parameter. \\
-dipolex & X & x-component of the mean water dipole moment density \\
-dipoley & X & y-component of the mean water dipole moment density \\
-dipolez & X & z-component of the mean water dipole moment density \\
-Eij & X & (if \inlinecode{doeij} was specified) Water-water interaction matrix. \\
+dipolex & X & x-component of the mean solvent dipole moment density \\
+dipoley & X & y-component of the mean solvent dipole moment density \\
+dipolez & X & z-component of the mean solvent dipole moment density \\
+Eij & X & (if \inlinecode{doeij} was specified) solvent-solvent interaction matrix. \\
 \bottomrule
 \end{tabular}
 \end{checklist}
 \end{Checklists*}
-
-\section{Checklists}
-%Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
-%Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
-%One example is shown here.
-
-% Here is a single-column checklist that consists of multiple sub-checklists
-\begin{Checklists}[H]
-
-\begin{checklist}{Simulation settings}
-\textbf{Each number denotes the minimum setting, with the optimum in brackets.}
-\begin{itemize}
-	\item Simulation time: \SIrange{10}{20}{\nano\second} (\SI{100}{\nano\second})
-	\item Number of analyzed frames: \num{10000} (\num{100000})
-	\item Restraints: typically \SI{100}{\kcalPerMolASqr} on solute heavy atoms.
-\end{itemize}
-\end{checklist}
-
-\begin{checklist}{Choosing an energy method}
-\begin{itemize}
-	\item GPU, direct space: generally the fastest
-	\item CPU, PME: highly consistent with Amber MD, fast
-	\item CPU: slow, most general (can write out $E_{ij}$ matrices)
-\end{itemize}
-\end{checklist}
-
-\begin{checklist}{Obtaining absolute $\Delta G_\textup{solv}$}
-\begin{itemize}
-	\item Check the radial convergence (see Fig.~\ref{fig_radial_convergence})
-	\item Choose a sufficient distance cutoff
-	\item Choose an optimal $E_{ww}$ reference value
-	\item Tweak simulation length and number of frames to obtain smooth free energy contributions and unbiased (i.e., zero) bulk entropy.
-	\item If necessary, subtract an entropy reference
-\end{itemize}
-\end{checklist}
-
-\begin{checklist}{Handling convergence problems}
-\begin{itemize}
-	\item Insufficient sampling leads to high noise in the results. Use higher numbers of frames.
-	\item Autocorrelation between frames leads to negative entropy in bulk. Increase simulation time and/or reduce the number of frames.
-\end{itemize}
-\end{checklist}
-
-%\begin{checklist}{A list}
-%\textbf{Single-column checklists are also straightforward by removing the asterisk}
-%\begin{itemize}
-%\item First thing let's do an item which breaks across lines to see how that looks
-%\item Also remember
-%\item And finally
-%\end{itemize}
-%\end{checklist}
-%
-%\begin{checklist}{Another list}
-%\textbf{This is some further description.}
-%\begin{itemize}
-%\item First thing
-%\item Also remember
-%\item And finally
-%\end{itemize}
-%\end{checklist}
-
-\end{Checklists}
-
-
-
-
-
-
-
 
 \section*{Author Contributions}
 %%%%%%%%%%%%%%%%
