@@ -398,7 +398,6 @@ These discrepancies, when summing over large grid regions, have the potential to
 
 \begin{table}[h]
 
-	\label{tab:ref_values}
 	\caption{Reference number density $\rho_0$ and mean solvent-solvent energy $E_{ww, norm}$ for various water models from NPT simulations of N$_{WAT}$ water solvent molecules at \SI{300}{\kelvin} and 1bar.}\label{tab:ref_densities}
 	\small
 	\begin{tabularx}{\columnwidth}{@{}lrrr@{}}
@@ -710,7 +709,7 @@ The solute-solvent energy $E_{sw}$ naturally tends towards zero in bulk.
 However, the solvent-solvent energy $E_{ww}$ needs to be referenced.
 
 The Amber manual provides reference densities and energies for several solvents.
-Furthermore, a large variety of reference values calculated with GPU-GIST are listed in table \ref{tab:ref_values}.
+Furthermore, a large variety of reference values calculated with GPU-GIST are listed in table \ref{tab:ref_densities}. 
 However, the exact energy values are different when using PME-GIST, and also depend on the box size.
 For quantitative analyses, it is recommended to compute an exact reference energy.
 The most accurate method to compute a reference energy is to run a GIST calculation of the pure solvent using the same energy method (PME/GPU), a similar box size, at the same temperature and pressure and then compute the average solvent-solvent energy per solvent molecule.
