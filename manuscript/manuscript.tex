@@ -103,6 +103,7 @@
 %%% Shortcuts and macros
 \newcommand{\dgsolv}{\Delta G_\textup{solv}}
 \newcommand{\software}{\texttt}
+\newcommand{\code}{\texttt}
 \newcommand{\todo}{\textcolor{red}}
 \newcommand\inlinecode{\texttt}
 
@@ -384,16 +385,16 @@ The most important options are summarized in the following table:
 \end{table}
 In GIST, the calculated properties are derived by referencing against the bulk solvent.
 It is therefore important to set the reference number density $\rho_0$ according to the solvent model used in your simulation.
-The solvent-solvent enthalpy $E_{ww}$ also needs to be referenced, but this can be done in the post-processing stage. The calculation of these properties and the need for referencing is discussed in-depth in section \ref{sec:theory}.
+The solvent-solvent enthalpy $E_{ww}$ also needs to be referenced, but this is done in the post-processing stage. The calculation of these properties and the need for referencing is discussed in-depth in section \ref{sec:theory}.
 
 Densities and reference energies of typical water models can be found in the \software{cpptraj} manual.
-We also provide the densities for water models commonly used with AMBER force fields in table \ref{tab:ref_densities}.
+We also provide the densities for water models commonly used with AMBER force fields in Table~\ref{tab:ref_densities}.
 These densities were calculated from \SI{100}{\nano\second} MD simulations at \SI{1}{\bar} and \SI{300}{\kelvin} using the Berendsen barostat and the Langevin thermostat.
 The water boxes were prepared with \software{tleap} to a size of \SI{100}{\angstrom} x \SI{100}{\angstrom} x \SI{100}{\angstrom} before pressure equilibration.
 
 Due to the different sizes of the boxes, the reference energies used in this tutorial may not align with those specified in the Amber manual. 
 Generally, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small. 
-The reference values can be calculated from MD trajectories of bulk solvent. From this, one then calculates the average energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$.  
+The reference values can be calculated from MD trajectories of bulk solvent. From this, one then calculates the density-weighted average energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$.  
 Generally, it is recommended that the size of the reference solvent box closely matches that of the production system.
 While the impact on the density is not as pronounced, deviations from the production settings can lead to differences of up to 0.005 kcal/mol in the energy per solvent molecule ($E_{ww, norm}$) for water boxes. 
 These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
@@ -427,7 +428,7 @@ Aside from thermodynamic quantities, GIST also calculates the number density of 
 Here is a list of the most important quantities calculated by GIST:
 
 \begin{itemize}
-	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled such that that the expectation value for the bulk is unity. For water, gO and gH are produced.}
+	\item{[gX] For every element in the main solvent, the number density of atoms found in the voxel, in units of the bulk density. If the same element occurs multiple times, the bulk density is scaled such that that the expectation value for the bulk is unity. For water, \code{gO} and \code{gH} are produced.}
 	\item{[Esw] Mean solute-water interaction energy.}
 	\item{[Eww] Mean water-water interaction energy.}
 	\item{[PME] (only if PME was used) water PME energy.}
@@ -583,10 +584,9 @@ In the above snippet, we calculate the bounds around the whole protein for a gri
 Now, you can run the actual GIST analysis.
 Reimage and center the solute molecule as above, to verify that its position matches the grid parameters you decided on.
 
-We recommend using either the GPU or MPI-accelerated PME implementation of GIST.
+We recommend using either the GPU implementation or MPI-accelerated PME implementation of GIST.
 While the GPU version is faster when limited CPU resources are available, the PME implementation matches the energy of the Amber MD engine more closely.
-More recently, MPI support was added for both the energy and entropy calculation\cite{Roe2023-mpi-gist}. 
-The MPI implementation scales well over multiple CPU cores and can be combined with either the GPU or PME implementations for maximum efficiency. 
+The MPI implementation \cite{Roe2023-mpi-gist} scales well over multiple CPU cores and can be combined with either the GPU or PME implementations for maximum efficiency. 
 A speed comparison of the various parallelization implementations is shown in \cite{Roe2023-mpi-gist}.
 
 \begin{lstlisting}[style=cpptraj]
@@ -616,9 +616,9 @@ If the number of frames of the simulation (n\_frames) and the reference density 
 We will discuss a way to similarly detect the reference energy of the solvent-solvent energy Eww in the advanced section.
 
 The GIST data can be accessed and modified from the gist object in various ways.
-Gisttools provides access to single or multiple voxels through a .loc property similiar to the pandas library. 
+Gisttools provides access to single or multiple voxels through a \code{.loc} property similiar to the pandas library. 
 GIST quantity data for all voxels can be accessed by directly indexing the gist object, either by providing a single name or a list of names.
-Indexing with .loc works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
+Indexing with \code{.loc} works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
 \begin{lstlisting}[style=python]
 gist.loc[0, 'population'] # single value
 gist.loc[0] # Series
@@ -712,7 +712,7 @@ The solute-solvent energy $E_{sw}$ naturally tends towards zero in bulk.
 However, the solvent-solvent energy $E_{ww}$ needs to be referenced.
 
 The Amber manual provides reference densities and energies for several solvents.
-Furthermore, a large variety of reference values calculated with GPU-GIST are listed in table \ref{tab:ref_densities}. 
+Furthermore, a large variety of reference values calculated with GPU-GIST are listed in Table~\ref{tab:ref_densities}. 
 However, the exact energy values are different when using PME-GIST, and also depend on the box size.
 For quantitative analyses, it is recommended to compute an exact reference energy.
 The most accurate method to compute a reference energy is to run a GIST calculation of the pure solvent using the same energy method (PME/GPU), a similar box size, at the same temperature and pressure and then compute the average solvent-solvent energy per solvent molecule.
@@ -805,7 +805,7 @@ While this is not true for $E_{ww}$, we will see below that the energy differenc
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/A_E_S_convergence.eps}
-	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute molecule. All quantities cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}\label{fig_radial_convergence}
+	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute molecule. All quantities are cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}\label{fig_radial_convergence}
 \end{figure}
 
 \subsubsection{Visualizing $\dgsolv$}
@@ -989,8 +989,8 @@ results = {
 	cols, rmax, centers[name])
 	for name, gist in gist_objs.items()}
 print(pd.DataFrame(results))
-	
 \end{lstlisting}
+%TODO: This has a higher indent than the other python snippets in the pdf, somehow. Unsure why...
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST to be in line with the different ways the energy is calculated in the two GIST methods.
@@ -1052,6 +1052,7 @@ To include the effect of lid closing in the binding process, free energy calcula
 
 To speed up the calculation, smaller GIST grids could be used by focusing on the binding pocket, or by rotating the solute molecule by its principal axes to fit the cuboid grid more exactly.
 However, this should be done \emph{before} the MD, since rotating the trajectory damages the periodic box information.
+%TODO: Ask Dan if this is still the case
 
 \section{Recent developments}
 In recent years, several updates to the original GIST implementation have been published.
@@ -1109,7 +1110,7 @@ Everything else will be treated as solvent.
 If the solvent contains more than one molecular species, a list of solvent molecule names (i.e., ``\inlinecode{solventmols WAT,NA,CL}'') must be specified.
 For each solvent molecule in this list, densities (e.g., \inlinecode{g\_mol\_NA}) and energies (e.g., \inlinecode{Eww\_mol\_NA}) will be computed and written to .dx files.
 Note that, e.g., \inlinecode{Esw\_mol\_NA} contains the interactions of every ``\inlinecode{NA}'' solvent molecule with the solute molecule, and \inlinecode{Esw\_mol\_NA} contains the interactions among ``\inlinecode{NA}'' solvent molecules as well as their interactions with all other solvents, divided by 2 to account for double counting.
-Furthermore, the first solvent molecule in this list will be treated as the main solvent, for which first-order entropy values will be computed.
+The entropy will be computed using only the density of the first solvent molecule. 
 
 For instance, a GIST calculation in salt water, including the first-order water entropy, can be run as follows:
 
@@ -1123,7 +1124,7 @@ The current implementation of the entropy calculation in \software{cpptraj} requ
 Note that the calculation of the reference value is complicated by the introduction of additional solvents.
 For an overview of how to correctly handle such calculations, refer to reference \cite{Waibl2021-gist-salt}.
 Additionally, to compute the first-order entropy of the ions, as well as an approximate second order entropy, Python code is available on \url{https://github.com/liedllab/second-disorder}.
-
+%TODO: Add recommendations how to handle charges/counterions to text (not necessarily here)
 \section{Visualization}
 \label{sec:visualization}
 \subsection{Visualizing DX files}
@@ -1155,10 +1156,10 @@ A more sophisticated visualization, including the energy, entropy, and free ener
 	\caption{Oxygen density around streptavidin at an isolevel of twice the reference density}\label{fig-streptavidin_gO}
 \end{figure}
 
-\subsection{Solvent Accessible Surface Area (SASA)}
+\subsection{Solvent Accessible Surface (SAS)}
 
-The solvent accessible surface (SASA) represents the interface between regions that are occupied by the solute molecule, and those which can be accessed by the solvent.
-GIST provides a very natural way of creating a SASA using an isosurface of the oxygen density gO.
+The solvent accessible surface (SAS) represents the interface between regions that are occupied by the solute molecule, and those which can be accessed by the solvent.
+GIST provides a very natural way of creating a SAS using an isosurface of the oxygen density \code{gO}.
 It can be visualized in PyMOL.
 The expected output is shown in Figure~\ref{fig-streptavidin_sasa}.
 
@@ -1171,10 +1172,10 @@ isomesh sas, gist-gO, 0.1
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\linewidth]{figures/sasa-simple.png}
-	\caption{SASA for streptavidin focused on the binding pocket}\label{fig-streptavidin_sasa}
+	\caption{SAS for streptavidin focused on the binding pocket}\label{fig-streptavidin_sasa}
 \end{figure}
 
-Here, the SASA was generated from a simulation of water around streptavidin without biotin, leaving the binding site solvent-accessible.
+Here, the SAS was generated from a simulation of water around streptavidin without biotin, leaving the binding site solvent-accessible.
 
 \subsection{Defining the binding pocket}
 Specific regions in a protein can be defined to calculate the thermodynamic quantities for that region.
@@ -1187,7 +1188,9 @@ In section~\ref{sec:binding_contributions} we show how to integrate over regions
 \begin{lstlisting}[style=python]
 import gisttools as gt
 def select(traj, sel):
-	# Slice a Trajectory by selection mask.
+	""" 
+	Slice a Trajectory by selection mask. 
+	"""
 	return traj.atom_slice(traj.top.select(sel))
 ### Load GIST data
 compl = gt.gist.load_gist_file(
@@ -1199,7 +1202,7 @@ biotin_mask = 'resname BTN and not element H'
 btn = select(compl.struct, biotin_mask).xyz[0] * 10.
 ind, _, _ = compl.distance_to_spheres(btn, rmax)
 
-### Set voxels within 3.5A to 1, write out dx file
+### Set voxels within 3.5A of biotin to 1, write out dx file
 compl.loc[ind, 'BP'] = 1
 compl.save_dx('BP', 'binding_pocket.dx')
 \end{lstlisting}
@@ -1209,13 +1212,13 @@ compl.save_dx('BP', 'binding_pocket.dx')
 	\includegraphics[width=1.0\linewidth]{streptavidin_bp_close.png}
 	\caption{Volume of streptavidin defined around \SI{3.5}{\angstrom} of biotin. }\label{streptavidin_volume}
 \end{figure}
-
+%TODO: Hide capping group
 \section{Theory}
 \label{sec:theory}
 GIST is an implementation of inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998} that discretizes the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
 It was first devised by Nguyen et al.\ \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described by Ramsey et al.\ \cite{Ramsey2016}.
 Here, we only provide a short overview of the theory behind GIST.
-For more detailed information, we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021}.
+For more technical information (such as implementation details), we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021,Roe2023-mpi-gist}.
 
 \subsection{Solvation Entropy}
 
@@ -1394,10 +1397,13 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 	
 	\begin{checklist}{Choosing an energy method}
 		\begin{itemize}
-			\item GPU, direct space: generally the fastest
-			\item CPU, PME: highly consistent with Amber MD, fast
 			\item CPU: slow, most general (can write out $E_{ij}$ matrices)
+			\item CPU, PME: highly consistent with Amber MD, fast
+			\item GPU, direct space: fastest for a single CPU core
 		\end{itemize}
+	   
+	All methods profit from MPI-parallelization.   
+	PME with multiple CPU cores (>4) is usually the fastest method.
 	\end{checklist}
 	
 	\begin{checklist}{Obtaining absolute $\Delta G_\textup{solv}$}
@@ -1413,7 +1419,7 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 	\begin{checklist}{Handling convergence problems}
 		\begin{itemize}
 			\item Insufficient sampling leads to high noise in the results. Use higher numbers of frames.
-			\item Autocorrelation between frames leads to negative entropy in bulk. Increase simulation time and/or reduce the number of frames.
+			\item Correlation between frames leads to negative entropy in bulk. Increase simulation time and/or reduce the number of frames.
 		\end{itemize}
 	\end{checklist}
 	
@@ -1460,11 +1466,11 @@ A list of possible and required options is provided here:
 \toprule
 \textbf{I/O Options} &\\
 name <dataset name> & Name for output datasets in cpptraj. \\
-prefix <prefix> & Output file name prefix. Default is “gist”.\\
-ext <extension> & Output grid file name extension. Default is  “.dx”. \\
-out <file> & Name of the main GIST output file. If not specified set to “<prefix>-output.dat“.\\
+prefix <prefix> & Output file name prefix. Default is 'gist'.\\
+ext <extension> & Output grid file name extension. Default is  '.dx'. \\
+out <file> & Name of the main GIST output file. If not specified set to '<prefix>-output.dat'.\\
 info <file> & Name of main GIST info file. If not specified info is written to standard output. \\
-floatfmt <fmt> & Format for floating point values in GIST output file. Options are 'double','scientific' or 'general'. Default chooses 'fixed' or 'scientific' automatically. \\
+floatfmt <fmt> & Format for floating point values in GIST output file. Options are 'double', 'scientific' or 'general'. Default chooses 'fixed' or 'scientific' automatically. \\
 floatwidth <val>& Width of floating point values in GIST output file. Default is no width restriction. \\
 floatprec <val>& Precision of floating point values in GIST output file. Default is the system default. \\
 intwidth <val>& Width of integer point values in GIST output file. Default is no width restriction. \\
@@ -1490,7 +1496,7 @@ neighborcut <val> & Cutoff in \si{\angstrom} for determining solvent O-O neighbo
 
 oldnnvolume & Use the old reference volume for the nearest neighbor entropy. \\
 
-nnsearchlayers <val> & Layers of neighboring voxels considered in nearest neighbor search. Higher values may improve entropy convergence for little sampling or fine grid spacings, but increase the calculation time (default 1). \\
+nnsearchlayers <val> & Layers of neighboring voxels considered in nearest neighbor search. Higher values may improve entropy convergence for little sampling or fine grid spacings, but increase the calculation time. Default is 1. \\
 
 \textbf{PME Options} & \\
 nopme & Do not use particle mesh Ewald for the non-bonded calculation. This is set  on default. \\
@@ -1533,8 +1539,8 @@ doorder & Calculate the water order parameter [reference] for each voxel\\
 
 
 \textbf{Output}\\
-GIST calculations write a variety of data sorted by voxel into an outputfile specified by the "out" keyword. 
-Some of the output data is also automatically written to "open data explorer" (.dx) files for convenient visualisation in software such as VMD or PyMOL. Note that some columns will be written out both with '\_norm' and '\_dens' suffixes, refereing to normalization by solvent molecule or voxel volume respectively.
+GIST calculations write a variety of data sorted by voxel into an outputfile specified by the 'out' keyword. 
+Some of the output data is also automatically written to 'open data explorer' (.dx) files for convenient visualisation in software such as VMD or PyMOL. Note that some columns will be written out both with '\_norm' and '\_dens' suffixes, refereing to normalization by solvent molecule or voxel volume respectively.
 The following columns can be found in the output file:
 \medskip
 
@@ -1569,6 +1575,7 @@ order & & Average tetrahedral order parameter \\
 \end{Checklists*}
 \FloatBarrier
 \section*{Author Contributions}
+
 %%%%%%%%%%%%%%%%
 % This section mustt describe the actual contributions of
 % author. Since this is an electronic-only journal, there is
@@ -1586,21 +1593,6 @@ order & & Average tetrahedral order parameter \\
 % We suggest you preserve this comment:
 For a more detailed description of author contributions,
 see the GitHub issue tracking and changelog at \githubrepository.
-
-\section*{Other Contributions}
-%%%%%%%%%%%%%%%
-% You should include all people who have filed issues that were
-% accepted into the paper, or that upon discussion altered what was in the paper.
-% Multiple significant contributions might mean that the contributor
-% should be moved to authorship at the discretion of the a
-%
-% See the policies ``Policies on Authorship'' section of https://livecoms.github.io for
-% more information on deciding on authorship and author order.
-%%%%%%%%%%%%%%%
-
-(Explain the contributions of any non-author contributors here)
-% We suggest you preserve this comment:
-For a more detailed description of contributions from the community and others, see the GitHub issue tracking and changelog at \githubrepository.
 
 \section*{Potentially Conflicting Interests}
 %%%%%%%j
