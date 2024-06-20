@@ -334,19 +334,19 @@ gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 
-Additionally, the GIST calculation should usually be preceded by preprocessing steps, such as centering the trajectory or reimaging to account for periodic boundary conditions.
+Additionally, the GIST calculation should usually be preceded by preprocessing steps, such as centering the solute molecule in the unit cell or reimaging to account for periodic boundary conditions.
 Often, the region of interest will be defined as the surrounding of a molecule, which might for example be a ligand in the binding pocket or the whole protein. 
-Using \inlinecode{cpptraj's } \inlinecode{bounds} command, the region of interest can be output to a file. For example, here is the command for a region of 10\AA{} around the ligand LIG:
+Using \inlinecode{cpptraj's } \inlinecode{bounds} command, the region of interest can be output to a file. For example, here is the command for a region of \SI{10}{\angstrom} around the ligand LIG:
 
 \begin{lstlisting}[style=cpptraj]
 bounds :LIG dx 0.5 offset 20 name Grid out bounds.dat
 \end{lstlisting}
 Note that the \inlinecode{bounds} command needs to be supplied with the exact same trajectory as used in the GIST calculation to generate correct boundaries. Therefore, any preprocessing steps need to match between the \inlinecode{bounds} command and the following \inlinecode{gist} calculation.
 
-In addition, a helper script called \inlinecode{FindCentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
+In addition, a helper script called \inlinecode{findcentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
 
 \begin{lstlisting}[style=bash]
-python FindCentroid.py -i structure.pdb
+python findcentroid.py -i structure.pdb
 \end{lstlisting}
 
 \paragraph{Run GIST using cpptraj}
@@ -374,10 +374,10 @@ The most important options are summarized in the following table:
 		\toprule
 		Command       & Options & Explanation & Default  \\
 		\midrule
-		gridcntr    & <y> <y> <z> & Coordinates of the grid center in \AA & 0 0 0  \\
+		gridcntr    & <y> <y> <z> & Coordinates of the grid center in \AA{} & 0 0 0  \\
 		griddim     & <nx> <ny> <nz> & Number of voxels per axis & 40 40 40\\
-		gridspacn & <dval> &Grid spacing / voxel dimensions in  \AA & 0.5    \\
-		refdens         & <rdval> & Reference density of the bulk water in molecules/\AA$^3$ . & 0.0334    \\
+		gridspacn & <dval> &Grid spacing / voxel dimensions in  \AA{} & 0.5    \\
+		refdens         & <rdval> & Reference density of the bulk water in molecules/\AA{}$^3$ . & 0.0334    \\
 		temp & <tval> & System temperature in Kelvin & 300 \\
 		\bottomrule
 	\end{tabularx}
@@ -405,7 +405,7 @@ These discrepancies, when summing over large grid regions, have the potential to
 	\begin{tabularx}{\columnwidth}{@{}lrrr@{}}
 		\toprule
 		Water Model       & $\rho_0$ & $E_{ww, norm}$ & $N_\text{WAT}$ \\
-        & $/\text{\AA}^{-3}$ & $/\text{kcal}\cdot \text{mol}^{-1}$ & \\
+        & $/\text{\AA{}}^{-3}$ & $/\text{kcal}\cdot \text{mol}^{-1}$ & \\
 		\midrule
 		TIP3P \cite{Jorgensen1983-tip3p}    & 0.03287 & -9.5398   & 31795 \\
 		TIP3PFB \cite{Wang2014-tip3p-force-balance}  & 0.03321 & -11.7214  & 32502 \\
@@ -492,7 +492,8 @@ First, extract biotin from the crystal structure and generate a topology and coo
 
 The solute molecule should be solvated with a sufficiently large solvent box. 
 For periodic boundary conditions, the size of the solvent box should be large enough for the solvent to behave bulk-like so as to reduce artifacts from solvent-mediated interactions between the periodic images. 
-This corresponds to a distance between solute and box boundary of at least 12\AA{} for water, though we recommend 15\AA{} or higher.
+This corresponds to a distance between solute and box boundary of at least \SI{12}{\angstrom} for water, though we recommend \SI{15}{\angstrom} or higher.
+%TODO add reference for 12AA, maybe Hannes paper?
 Carefully check the employed force field, protonation state and partial charges.
 %a PDB file containing only biotin. Prepare your structure by adding hydrogens, making sure to choose the correct protonation state. Parametrize biotin with the forcefield of your choice. Solvate the parametrized biotin, making sure to choose a water box of large enough size so that the water on the box edges behaves bulk-like (a wall distance of at least 15\AA is recommended).
 A good starting point for the parametrization and solvation of small molecules is the Amber tutorial 4b (\url{http://ambermd.org/tutorials/basic/tutorial4b/}).
@@ -577,7 +578,7 @@ autoimage !(:WAT) origin
 bounds !(:WAT) dx 0.5 offset 30 name MyGrid out bounds.dat
 run
 \end{lstlisting}
-In the above snippet, we calculate the bounds around the whole protein for a grid with \SI{0.5}{\angstrom} side-length voxels and a buffer zone of \SI{15.0}{\angstrom}. Note that the offset is given in terms of number of additional voxels, not length dimension. By varying the atom mask in the \inlinecode{bound} command, it is possible to center the grid on a region of interest, similar to the \software{FindCentroid.py} script.
+In the above snippet, we calculate the bounds around the whole protein for a grid with \SI{0.5}{\angstrom} side-length voxels and a buffer zone of \SI{15.0}{\angstrom}. Note that the offset is given in terms of number of additional voxels, not length dimension. By varying the atom mask in the \inlinecode{bound} command, it is possible to center the grid on a region of interest, similar to the \software{findcentroid.py} script.
 
 Now, you can run the actual GIST analysis.
 Reimage and center the solute molecule as above, to verify that its position matches the grid parameters you decided on.
@@ -791,7 +792,7 @@ plt.plot(bins, np.cumsum(esw), label='Esw')
 plt.plot(bins, np.cumsum(dg), label='dG')
 plt.plot(bins, np.cumsum(s), label='dS')
 plt.legend()
-plt.xlabel("distance cutoff [Å]")
+plt.xlabel("distance cutoff []")
 plt.ylabel("free energy contribution [kcal/mol]")
 \end{lstlisting}
 
@@ -968,7 +969,7 @@ The expected result is shown in Figure~\ref{fig-dg-sums}.
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\linewidth]{figures/deltaG-difference.png}
-	\caption{Left: $\dgsolv$ contributions around the location of biotin in the binding pocket, evaluated in the biotin, streptavidin, and complex systems. Each line represents a cumulative sum plotted against the distance to biotin. Right: The hydration contribution to binding, evaluated as the difference between the lines in the left panel. The vertical dashed line is at 12 \AA\ and represents the chosen integration cutoff.}\label{fig-dg-sums}
+	\caption{Left: $\dgsolv$ contributions around the location of biotin in the binding pocket, evaluated in the biotin, streptavidin, and complex systems. Each line represents a cumulative sum plotted against the distance to biotin. Right: The hydration contribution to binding, evaluated as the difference between the lines in the left panel. The vertical dashed line is at \SI{12}{\angstrom} and represents the chosen integration cutoff.}\label{fig-dg-sums}
 \end{figure}
 
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
@@ -1471,21 +1472,21 @@ doeij & Output the triangular matrix representing the water-water
 interactions between pairs of voxels. Not supported with PME or GPU GIST.\\
 
 \textbf{Grid Options} &\\
-gridcntr <xval> <yval> <zval> & Coordinates in Å of the center of the grid. Default is 0.0, 0.0, 0.0. \\
+gridcntr <xval> <yval> <zval> & Coordinates in \AA{} of the center of the grid. Default is 0.0, 0.0, 0.0. \\
 griddim <xval> <yval> <zval> & Grid dimensions in voxels along each coordinate axis. Default is 40, 40, 40.\\
 gridspacn <val> & Grid spacing (linear dimension of each voxel) in 
-Angstroms. Default is 0.5 Å.\\
+Angstroms. Default is \SI{0.5}{\angstrom}.\\
 rmsfit <mask> & If specified, grid will be rotated and translated to follow the atoms selected by mask. \\
 \textbf{GIST Calculation Options} &\\
 
 skipE & Skip all the energy calculations (cannot be specified with ’doeij’)\\
 skipS & Skip all the entropy calculations.\\
 refdens <val> & Reference density of bulk solvent, used in computing 
-$g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/Å3. \\
+$g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/\si{\cubic\angstrom}. \\
 temp <val> & Temperature of the input trajectory. \\
 noimage &  Disable distance imaging in energy calculation. \\
 
-neighborcut <val> & Cutoff in Å for determining solvent O-O neighbors. Default is 3.5 Å. \\
+neighborcut <val> & Cutoff in \si{\angstrom} for determining solvent O-O neighbors. Default is \SI{3.5}{\angstrom}. \\
 
 oldnnvolume & Use the old reference volume for the nearest neighbor entropy. \\
 
@@ -1494,10 +1495,10 @@ nnsearchlayers <val> & Layers of neighboring voxels considered in nearest neighb
 \textbf{PME Options} & \\
 nopme & Do not use particle mesh Ewald for the non-bonded calculation. This is set  on default. \\
 pme & Use particle mesh Ewald for the non-bonded electrostatics calculation. The van der Waals energy will be calculated using a long-range correction for periodicity.\\
-\qquad cut <val> & Direct space cutoff for pme. Default is 3.5 Å.\\
+\qquad cut <val> & Direct space cutoff for pme. Default is \SI{3.5}{\angstrom}.\\
 \qquad dsumtol <val> & Direct sum tolerance used to determine Ewald coefficient. Default is 0.00001.\\
 \qquad ewcoeff <val> & Ewald coefficient in 1/Å. \\
-\qquad erfcdx <val> & Spacing to use for the ERFC splines. Default is 0.0002 Å. \\
+\qquad erfcdx <val> & Spacing to use for the ERFC splines. Default is \SI{0.0002}{\angstrom}. \\
 \qquad skinnb & Used to determine pairlist atoms (added to cut, so pairlist cutoff is cut + skinnb); included in order to maintain consistency with results from sander. \\
 \qquad ljswidth <val> & If specified, use a force-switching form for the Lennard-Jones calculation from <cutoff>-<val> to <cutoff> \\
 \qquad order <val> & Spline order for charges. \\
@@ -1525,7 +1526,7 @@ nocom & Do not use the center of mass to define the molecular position. Instead,
 \textbf{Order Calculation Options} &\\
 doorder & Calculate the water order parameter [reference] for each voxel\\
 \qquad nopl & Do not use pair list for order calculation\\
-\qquad plcut <val> & Pair list cutoff for order calculation. Default is 10 Å\\
+\qquad plcut <val> & Pair list cutoff for order calculation. Default is \SI{10}{\angstrom}\\
 \bottomrule
 \end{tabularx}   
 \medskip
