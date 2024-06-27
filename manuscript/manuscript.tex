@@ -222,8 +222,11 @@ Those methods compute the atomic solvent distributions by self-consistently solv
 On the other hand, methods based on IST generally use a molecular solvent distribution obtained from an MD simulation to compute the free energy of hydration from its enthalpic and entropic contributions, providing easier interpretability of the resulting distributions.
 Examples include grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012,Ramsey2016}, WaterMap \cite{Young2007-watermap,Abel2008-watermap}, SSTMap \cite{Haider2018-sstmap}, STOW \cite{Li2012-stow} and Solvaware \cite{Huggins2016-solvaware}.
 The main limitation of those methods is that the entropy is approximated through an infinite expansion in terms of the density distribution. 
+Within GIST and other more recent methods, these entropy contributions are calulated via a k-nearest-neighbor (kNN) approach.  
 Due to the high computational effort required to converge the higher order terms, the entropy expansion is usually truncated after the first or, sometimes, the second \cite{Nguyen2016-gist-second-order,Waibl2022-gist-solvents} term, thereby introducing an error.
-%TODO add MIE citation and context
+While there are approximations available to deal with those problems, most noteworthy the mutual information expansion (MIE) and Maximum Information Spanning Tree (MIST) approaches, they are not currently implemented in GIST. 
+Recent kNN implementations to calculate solvation entropy further improve phase space sampling by relabeling the solvent molecules in the simulation, treating the solvent molecules as distinguishable \cite{reinhard2007estimation,heinz2019computing,heinz2021permut,fogolari2021optimal}.For a recent review of kNN methods to calculate entropy in a molecular context, see \cite{fogolari2024k}.
+
 Furthermore, IST does not consider the internal degrees of freedom of the solvent.
 Therefore, IST-based approaches can only be used with sufficiently rigid solvents.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems as solute molecules.
@@ -500,7 +503,6 @@ Equilibrate your solvated biotin in an NVT or NPT ensemble.
 Even when running the simulation in NVT, it is advisable to include an NPT equilibration step to adjust the box size beforehand.
 Use enough equilibration time to allow the solvent to relax. 
 For water, \SI{0.5}{\nano\second} is usually sufficient to equilibrate the density, but narrow binding pockets can take longer.
-
 A well-tested equilibration protocol can be found in the literature \cite{Roe2020-equilibration}.
 
 \subsubsection{MD simulation}
