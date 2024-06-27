@@ -480,8 +480,7 @@ First, extract biotin from the crystal structure and generate a topology and coo
 
 The solute molecule should be solvated with a sufficiently large solvent box. 
 For periodic boundary conditions, the size of the solvent box should be large enough for the solvent to behave bulk-like so as to reduce artifacts from solvent-mediated interactions between the periodic images. 
-This corresponds to a distance between solute and box boundary of at least \SI{12}{\angstrom} for water, though we recommend \SI{15}{\angstrom} or higher.
-%TODO add reference for 12AA, maybe Hannes paper?
+This corresponds to a distance between solute and box boundary of at least \SI{12}{\angstrom} for water\cite{Chen2021,Waibl2022-gist-solvents} though we recommend \SI{15}{\angstrom} or higher.
 Carefully check the employed force field, protonation state and partial charges.
 %a PDB file containing only biotin. Prepare your structure by adding hydrogens, making sure to choose the correct protonation state. Parametrize biotin with the forcefield of your choice. Solvate the parametrized biotin, making sure to choose a water box of large enough size so that the water on the box edges behaves bulk-like (a wall distance of at least 15\AA is recommended).
 A good starting point for the parametrization and solvation of small molecules is the Amber tutorial 4b (\url{http://ambermd.org/tutorials/basic/tutorial4b/}).
