@@ -159,11 +159,6 @@ We assume familiarity with molecular dynamics simulations as well as the AmberTo
 
 
 \section{Introduction}
-\todo{ (vah) Sources and better description of all these methods, more literature research, QSAR based methods? better flow }
-
-\todo{IMO, our article looks too dry. We should have something nice (e.g., an illustration of the GIST method) on the 1st or 2nd page -fwa.}
-\todo{Potentially relevant: 10.1021/acs.jcim.7b00520 }
-
 Solvation thermodynamics govern many biological and chemical processes involving, e.g., aqueous solutions, hydrophobic effects, or partitioning between different environments.
 Interaction with water are of special importance as many biological processes occur in aqueous environment \cite{Privalov2017-water-review}.
 The free energy of solvation is defined as the reversible work needed to insert a solute into the solvent \cite{ben-naim-book}.
@@ -175,7 +170,7 @@ The entropy is computed from the density distribution of the solvent around the 
 
 \begin{figure}
     \centering
-    \includegraphics[width=\linewidth]{manuscript/figures/carbazole-figure.png}
+    \includegraphics[width=\linewidth]{figures/carbazole-figure.png}
     \caption{Schematic showing regions of high water density around a carbazole molecule. The energy is computed from the intermolecular interactions of a force field, while the entropy is approximated from the 3-dimensional solvent distribution around the solute.}
     \label{fig:carbazole}
 \end{figure}
@@ -199,7 +194,7 @@ Polarizable continuum models (PCMs) \cite{Miertus1981-pcm,Klamt1993-cosmo} treat
 %Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
 %This allows for the treatment of large biological systems such as proteins in aqueous solution.
 Methods such as MM/PBSA or MM/GBSA \cite{Sitkoff1994-pbsa,Kollman2000-mmpbsa} combine an implicit treatment of solvent electrostatics with structural sampling of the solute.
-They can quickly provide results for a large number of structures \cite{Genheden2015-mmpbsa-review}.\pdfcomment{Is there a rule of thumb when (not) to use implicit solvent methods?}
+They can quickly provide results for a large number of structures \cite{Genheden2015-mmpbsa-review}.
 
 On the other hand, explicit solvation methods model the solvent using individual molecules.
 They are generally more accurate than implicit methods, but require a statistical sampling of the solvent conformations \cite{Liu2016-md-solubility,Swails2014-cphmd}.
@@ -643,7 +638,6 @@ strip ^2 parmout streptavidin/solvated.parm7
 trajout streptavidin/pre-equil.ncrst
 \end{lstlisting}
 (Adapt for biotin as necessary.)
-%We provide a script called \software{cpptraj\_remove\_mol.sh} that removes a single molecule from a topology and structure using \software{cpptraj} without altering the rest of the system. \todo{Explain cpptraj rather than our script. The script is for the automated workflow only.}
 
 Use the \software{equilibration.py} script (or your own procedure) to perform short NVT and NpT equilibration runs on the complex structure.
 Note that the equilibration script contains unrestrained NpT steps, because restraining two molecules at the same time might interfere with the pressure equilibration.
@@ -726,23 +720,6 @@ The expected output of this code is shown in Figure~\ref{fig_ewwref}.
 After choosing an appropriate reference value, we need to subtract this value from $E_{ww}$.
 Make sure to subtract the reference from the normalized (\_norm) data.
 In \software{gisttools}, this is done simply by setting \inlinecode{gist.eww\_ref}.
-%In \software{gistpp}, this can be done as follows: 
-%\todo{Is there some official documentation for gistpp? We should probably link that somewhere, I feel that the code presented here is not really helpful/legible without further documentation. -vah}
-%\todo{This might become invalid with future GIST versions, depending on whether we adopt the COM as molecular center.} 
-%\todo{Better use the population.}
-
-%\begin{lstlisting}[style=bash]
-%rho0=0.03287465
-%neg_eww_ref=9.533
-%gistpp -op multconst -i gist-gO.dx -opt const $rho0 \
-%    -o gist-gO-abs.dx 
-%gistpp -op div -i gist-Eww-dens.dx -i2 gist-gO-abs.dx \
-%    -o gist-Eww-norm.dx
-%gistpp -op addconst -i gist-Eww-norm.dx \
-%    -opt const $neg_eww_ref -o gist-Eww-ref-norm.dx
-%gistpp -op mult -i gist-Eww-ref-norm.dx \
-%    -i2 gist-gO-abs.dx -o gist-Eww-ref-dens.dx
-%\end{lstlisting}
 
 Now, sum all free energy contributions to obtain the spatially resolved $\dgsolv$.
 In \software{gisttools}, this is done automatically and can be accessed using the \inlinecode{A\_dens} and \inlinecode{A\_norm} data rows.
@@ -779,7 +756,6 @@ Especially the solvent-solvent energy is not perfectly flat, indicating that the
 %but is also complicated because the solute is charged.
 Both the entropy and $E_{sw}$ can be considered converged around \SI{10}{\angstrom}.
 While this is not true for $E_{ww}$, we will see below that the energy difference upon binding converges more readily than its individual contributions.
-\todo{vah: Is that shown somewhere yet -> fwa?}
 
 \begin{figure}
 	\centering
@@ -862,7 +838,6 @@ print("Complex:", compl.eww_ref)
 \end{lstlisting}
 
 Subtract a reference entropy from the \inlinecode{dTSsix} columns.
-\todo{Update with newest gisttools -> fwa}
 \begin{lstlisting}[style=python]
 def reference_entropy(gf):
     if 'dTSsix_unref_norm' not in gf.data.columns:
@@ -986,7 +961,7 @@ avg(diff)
 It has been shown \cite{Chen2021,Waibl2022-gist-solvents} that the solvation entropy in water is best approximated by 0.6 times the first order entropy.
 Also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
-%\todo{Table 1 is placed quite akwardly at the moment for me, maybe enforce its position? -vah. Ok? -fwa}
+
 
 \begin{table}[h]
 	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``Diff'' is calculated as $E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$.}\label{tab_dg_monomers_dimer}
@@ -1020,7 +995,7 @@ To investigate the effect of different conformations on the binding affinity, yo
 To include the effect of lid closing in the binding process, free energy calculation methods such as umbrella sampling can be used.
 
 To speed up the calculation, smaller GIST grids could be used by focusing on the binding pocket, or by rotating the molecule by its principal axes to fit the cuboid grid more exactly.
-However, this should be done \emph{before} the MD, since rotating the trajectory damages the periodic box information \todo{@Dan: is this still the case?}.
+However, this should be done \emph{before} the MD, since rotating the trajectory damages the periodic box information.
 
 \section{Recent developments}
 In recent years, several updates to the original GIST implementation have been published.
@@ -1094,8 +1069,7 @@ A minimal PyMOL input to visualize a dx file is shown here.
 For reference, an input structure is loaded from a file named \inlinecode{streptavidin.pdb}.
 The oxygen density is visualized at an isolevel of 2 (i.e., twice the reference density).
 The expected output is shown in Figure~\ref{fig-streptavidin_gO}.
-\todo{vah -> include the PyMOL settings somewhere, this is not the default output}
-% The current font makes the O look like a tofu / placeholder
+
 \begin{lstlisting}[style=pymol]
 load output/streptavidin/gist.pdb, streptavidin
 as surface
@@ -1145,13 +1119,9 @@ Specific regions in a protein can be defined to calculate the thermodynamic quan
 This is significant specially when calculating the properties of water that will be expelled when a ligand binds to the protein.
 
 For example, voxels that are part of the binding pocket can be defined using a ligand molecule and a distance criteria. 
-%In \software{gistpp}, voxels that are within the distance criteria from any ligand heavy atom is considered as part of the region. The resulting file is a binary file and can be visualized using \software{pymol}. \todo{Not GISTPP}
+
 In section~\ref{sec:binding_contributions} we show how to integrate over regions such as the binding pocket. To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. Here, we show what this would look like for a radius of \SI{3.5}{\angstrom} around the heavy atoms of biotin. 
-%\begin{lstlisting}[style=bash]
-%gistpp -op defbp -i gO.dx -i2 ligand.pdb 
-%
-%-opt const 3.5 -o gO_3.5.dx
-%\end{lstlisting}
+
 \begin{lstlisting}[style=python]
 def select(traj, sel):
 	"Slice a Trajectory by selection mask."
