@@ -37,6 +37,8 @@
 \usepackage[italic,LGRgreek]{mathastext}
 \graphicspath{{figures/}}
 
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{listings}
 \usepackage{upquote}
 \usepackage{tabularx}
@@ -1091,22 +1093,33 @@ load output/streptavidin/gist-gO.dx, gO
 isomesh gO_high, gO, 2
 color slate, gO_high
 \end{lstlisting}
-A more sophisticated visualization, including the energy, entropy, and free energy of removing a single water solvent molecule, is found in Figure~\ref{fig-binding-pocket.png}
+A more sophisticated visualization, including the energy, entropy, and free energy of removing a single water solvent 
+molecule, is found in Figure~\ref{fig-binding-pocket}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=\linewidth]{figures/binding-pocket-energy-levels.png}
+	\begin{subfigure}[b]{0.45\textwidth}
+	\includegraphics[width=\linewidth]{figures/binding-pocket-E.png}
+	\caption{Green: negative energy (based on $E_{sw} + 2E_{ww}$). Red: positive energy.}
+	\label{fig-binding-pocket-energy}
+    \end{subfigure}
+	\hfill
+	\begin{subfigure}[b]{0.3\textwidth}
+		\includegraphics[width=\linewidth]{figures/binding-pocket-S.png}
+		\caption{Blue: negative entropy}
+		\label{fig-binding-pocket-entropy}
+	\end{subfigure}
 	\caption{Biotin in the streptavidin binding pocket, with isosurfaces based on the GIST calculation on the holo structure. 
-	Blue: negative entropy ($T\Delta S$). Green: negative energy (based on $E_{sw} + 2E_{ww}$). Red: positive energy. 
-	Isolevels are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kcal\per\mole\per\angstrom\squared}, except for the 
-	positive energy, where they are divided by 
-	two.}\label{fig-binding-pocket.png}
+	Isolevels shown are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kcal\per\mole\per\angstrom\square}, except for 
+	the positive energy, where they are divided by two.}
+	\label{fig-binding-pocket}
 \end{figure}
 
 \begin{figure}
 	\centering
 	\includegraphics[width=1.0\linewidth]{figures/streptavidin_gO_high_surf.png}
-	\caption{Oxygen density around streptavidin at an isolevel of twice the reference density}\label{fig-streptavidin_gO}
+	\caption{Oxygen density around streptavidin at an isolevel of twice the reference density}
+	\label{fig-streptavidin_gO}
 \end{figure}
 
 \subsection{Solvent Accessible Surface (SAS)}
