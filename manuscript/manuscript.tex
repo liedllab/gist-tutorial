@@ -803,8 +803,10 @@ A visualization of entropy and energy contributions to the free energy of solvat
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\linewidth]{figures/binding_pocket_S_-2_E_-2_E_3.png}
-	\caption{Free energy contributions in the streptavidin binding pocket. Red: high solvent energy (at +3 kcal/mol). Blue: low solvent energy (at -2 kcal/mol). Green: low solvent entropy $T\Delta S^{six}$ (at -2 kcal/mol).}\label{fig_binding_pocket_pymol}
+	\includegraphics[width=0.8\linewidth]{figures/binding_pocket_norm_quants.png}
+	\caption{Free energy contributions in the streptavidin binding pocket. Red: high solvent energy (at +2.5 
+	kcal/mol/molecule). Green: low solvent energy (at -2.5 kcal/mol/molecule). Blue: low solvent entropy $T\Delta S^{six}$ 
+	(at -2.5 kcal/mol/molecule).}\label{fig_binding_pocket_pymol}
 \end{figure}
 
 %You should find that there are several regions in the binding pocket that feature a high solvent energy and/or low entropy.
@@ -975,7 +977,9 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 
 
 \begin{table}[h]
-	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``Diff'' is calculated as $E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$.}\label{tab_dg_monomers_dimer}
+	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``Diff'' is calculated as 
+	$E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$. ``total'' is calculated as 
+	``complex''-``streptavidin'' - ``biotin''.}\label{tab_dg_monomers_dimer}
 	\small
 	\begin{tabular}{@{}lrrrrr@{}}
 		\toprule
@@ -984,7 +988,8 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 		complex      & -1303.4 & -361.2 & -233.1 & -139.9 & -1524.7 \\
 		streptavidin & -1180.7 & -360.8 & -242.4 & -145.4 & -1396.1 \\
 		biotin       & -24.0   &  -98.1 &  -35.1 &  -21.1 &  -101.0 \\
-		Diff         & -98.7   &   97.7 &   44.4 &   26.6 &   -27.6 \\
+		\midrule
+		total         & -98.7   &   97.7 &   44.4 &   26.6 &   -27.6 \\
 		\bottomrule
 	\end{tabular}
 \end{table}
@@ -1091,7 +1096,11 @@ A more sophisticated visualization, including the energy, entropy, and free ener
 \begin{figure}
 	\centering
 	\includegraphics[width=\linewidth]{figures/binding-pocket-energy-levels.png}
-	\caption{Biotin in the streptavidin binding pocket, with isosurfaces based on the GIST calculation on the holo structure. Green: negative entropy ($T\Delta S$). Blue: negative energy (based on $E_{sw} + 2E_{ww}$). Red: positive energy. Isolevels are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0, except for the positive energy, where they are divided by two.}\label{fig-binding-pocket.png}
+	\caption{Biotin in the streptavidin binding pocket, with isosurfaces based on the GIST calculation on the holo structure. 
+	Blue: negative entropy ($T\Delta S$). Green: negative energy (based on $E_{sw} + 2E_{ww}$). Red: positive energy. 
+	Isolevels are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kcal\per\mole\per\angstrom\squared}, except for the 
+	positive energy, where they are divided by 
+	two.}\label{fig-binding-pocket.png}
 \end{figure}
 
 \begin{figure}
@@ -1532,7 +1541,8 @@ see the GitHub issue tracking and changelog at \githubrepository.
 %Declare any potentially competing interests, financial or otherwise
 %%%%%%%
 
-MKG has an equity interest in and is a cofounder and scientiﬁc advisor of VeraChem LLC.
+MKG has an equity interest in and is a cofounder and scientific advisor of 
+VeraChem LLC.
 
 \section*{Funding Information}
 %%%%%%%
