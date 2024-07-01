@@ -612,7 +612,10 @@ Gisttools provides access to all quantities listed in the GIST output file.
 Additionally, it calculates the total enthalpy per voxel (Eall) as a sum of Eww and Esw, and the free energy of solvation (A) by subtracting $\Delta$TSsix from Eall.
 
 Information about the grid is stored in the grid property of the gist object, structural data is stored as an \software{mdtraj} trajectory in the struct property:
-%TODO we are missing some code here
+\begin{lstlisting}[style=python]
+gist.grid # Grid object
+gist.struct # mdtraj.Trajectory object
+\end{lstlisting}
 Gisttools also provides OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities (X\_dens):
 
 \begin{lstlisting}[style=python]
@@ -940,20 +943,19 @@ Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contrib
 \begin{lstlisting}[style=python]
 import pandas as pd
 centers = {'biotin': biotin_x, 
-	'strept': strept_x, 
-	'compl': compl_x}
+    'strept': strept_x, 
+    'compl': compl_x}
 gist_objs = {'biotin': biotin, 
-	'strept': strept, 
-	'compl': compl}
+    'strept': strept, 
+    'compl': compl}
 cols = ['Eall_dens','dTSsix_dens']
 rmax = 12
 results = {
-	name: gist.integrate_around(
-	cols, rmax, centers[name])
-	for name, gist in gist_objs.items()}
+    name: gist.integrate_around(
+    cols, rmax, centers[name])
+    for name, gist in gist_objs.items()}
 print(pd.DataFrame(results))
 \end{lstlisting}
-%TODO: This has a higher indent than the other python snippets in the pdf, somehow. Unsure why...
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST to be in line with the different ways the energy is calculated in the two GIST methods.
