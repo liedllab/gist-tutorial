@@ -145,7 +145,8 @@
 
 \begin{abstract}
 Grid inhomogeneous solvation theory (GIST) is a method to compute the free energy of solvation of a solute molecule on a 3-dimensional grid based on sampling from molecular dynamics (MD) simulations.
-The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses of solvation around both proteins and small molecules contexts. However, this versatility also comes with a significant entry barrier for new users.
+The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses of solvation around both proteins and small molecules contexts. 
+However, this versatility also comes with a significant entry barrier for new users.
 
 In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis using the streptavidin-biotin complex as an demonstrative system. Towards this, Jupyter notebooks and Python packages are provided to simplify the analysis.
 Furthermore, we discuss the theory of GIST with a focus on practical aspects.
@@ -181,7 +182,7 @@ It has been found that solvation free energies of small molecule solutes can be 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{figures/carbazole-figure.png}
-    \caption{Schematic showing regions of high water density around a carbazole solute molecule. The energy is computed from the intermolecular interactions of a force field, while the entropy is approximated from the 3-dimensional solvent distribution around the solute molecule. Note that while this depiction focuses of regions of high solvent density, regions with lower density can also contain meaningful contributions to the energy and entropy.}
+    \caption{Schematic showing regions of high water density around a carbazole solute molecule. Based on an MD simulation of solvent around the solute molecule, the energy is computed from the intermolecular interactions of a force field, while the entropy is approximated from the 3-dimensional solvent distribution around the solute molecule. Note that while this depiction focuses on regions of high solvent density, regions with lower density can also contain meaningful contributions to the overall energy and entropy.}
     \label{fig:carbazole}
 \end{figure}
 
@@ -299,6 +300,8 @@ For the visualization of three-dimensional contributions we require molecular vi
 Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
 Its usage and some examples were shown in a previous tutorial on GIST \cite{Ramsey2016}.
 
+\pagebreak %TODO: maybe remove this by better formatting
+
 \section{Running GIST}
 \label{sec:running_GIST}
 %\subsection{Running the GIST analysis}
@@ -325,21 +328,20 @@ The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, a
 gist gridcntr <x> <y> <z> \
 griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
-Additionally, the GIST calculation should usually be preceded by preprocessing steps, such as centering the solute molecule in the unit cell or reimaging to account for periodic boundary conditions.
-Often, the region of interest will be defined as the surrounding of a molecule, which might for example be a ligand in the binding pocket or the whole protein. 
-Using \inlinecode{cpptraj's } \inlinecode{bounds} command, the region of interest can be output to a file. For example, here is the command for a region of \SI{10}{\angstrom} around the ligand LIG:
+Additionally, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and reimaging to account for periodic boundary conditions.
+Often, the region of interest will be defined as the surrounding of a molecule, for example a ligand in the binding pocket or a whole protein. 
+Using \inlinecode{cpptraj's } \inlinecode{bounds} command, boundaries can be output to a file. For example, here is the command for a boundary of \SI{10}{\angstrom} around the ligand LIG:
 
 \begin{lstlisting}[style=cpptraj]
 bounds :LIG dx 0.5 offset 20 name Grid out bounds.dat
 \end{lstlisting}
-Note that the \inlinecode{bounds} command needs to be supplied with the exact same trajectory as used in the GIST calculation to generate correct boundaries. Therefore, any preprocessing steps need to match between the \inlinecode{bounds} command and the following \inlinecode{gist} calculation.
-
-In addition, a helper script called \inlinecode{findcentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
-
+\begin{minipage}{\linewidth} %TODO: maybe find a better way to keep listing on same page?
+Make sure that the \inlinecode{bounds} command is supplied with the exact same trajectory as in the GIST calculation. Any preprocessing steps need to match between the \inlinecode{bounds} command and the \inlinecode{gist} calculation. A helper script called \inlinecode{findcentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
+~
 \begin{lstlisting}[style=bash]
 python findcentroid.py -i structure.pdb
 \end{lstlisting}
-
+\end{minipage}
 \paragraph{Run GIST using cpptraj}
 GIST is implemented in \software{cpptraj} which requires the topology and the trajectory of the MD simulation to be analyzed.
 The command needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic command, assuming a grid centered at coordinates (x=\SI{10.5}{\angstrom}, y=\SI{20.1}{\angstrom}, z=\SI{30.1}{\angstrom}) and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, is:
@@ -1099,25 +1101,25 @@ molecule, is found in Figure~\ref{fig-binding-pocket}
 \begin{figure}
 	\centering
 	\begin{subfigure}[b]{0.45\textwidth}
-	\includegraphics[width=\linewidth]{figures/binding-pocket-E.png}
+	\includegraphics[width=\linewidth]{figures/binding_pocket_E.png}
 	\caption{Green: negative energy (based on $E_{sw} + 2E_{ww}$). Red: positive energy.}
 	\label{fig-binding-pocket-energy}
     \end{subfigure}
 	\hfill
-	\begin{subfigure}[b]{0.3\textwidth}
-		\includegraphics[width=\linewidth]{figures/binding-pocket-S.png}
+	\begin{subfigure}[b]{0.45\textwidth}
+		\includegraphics[width=\linewidth]{figures/binding_pocket_S.png}
 		\caption{Blue: negative entropy}
 		\label{fig-binding-pocket-entropy}
 	\end{subfigure}
 	\caption{Biotin in the streptavidin binding pocket, with isosurfaces based on the GIST calculation on the holo structure. 
-	Isolevels shown are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kcal\per\mole\per\angstrom\square}, except for 
-	the positive energy, where they are divided by two.}
+	Isolevels shown are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kilo\calorie\per\mole\per\square\angstrom}, except for 
+	the positive energy, where they are divided by two to visually account for its overall lower density.}
 	\label{fig-binding-pocket}
 \end{figure}
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1.0\linewidth]{figures/streptavidin_gO_high_surf.png}
+	\includegraphics[width=1\linewidth]{figures/streptavidin_gO_high_surf.png}
 	\caption{Oxygen density around streptavidin at an isolevel of twice the reference density}
 	\label{fig-streptavidin_gO}
 \end{figure}
@@ -1137,7 +1139,7 @@ isomesh sas, gist-gO, 0.1
 
 \begin{figure}
 	\centering
-	\includegraphics[width=1.0\linewidth]{figures/sasa-simple.png}
+	\includegraphics[width=1\linewidth]{figures/sasa-simple.png}
 	\caption{SAS for streptavidin focused on the binding pocket}\label{fig-streptavidin_sasa}
 \end{figure}
 
