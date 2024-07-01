@@ -481,10 +481,9 @@ This will download the tutorial files, including both the manuscript and the exa
 In this example, we will be running a simple GIST calculation of the biotin solute molecule to get familiar with the usage of GIST in \software{cpptraj}.
 \subsubsection{System preparation}
 First, extract biotin from the crystal structure and generate a topology and coordinate file compatible with Amber or a simulation package of your choice.
-
 The solute molecule should be solvated with a sufficiently large solvent box. 
 For periodic boundary conditions, the size of the solvent box should be large enough for the solvent to behave bulk-like so as to reduce artifacts from solvent-mediated interactions between the periodic images. 
-This corresponds to a distance between solute and box boundary of at least \SI{12}{\angstrom} for water\cite{Chen2021,Waibl2022-gist-solvents} though we recommend \SI{15}{\angstrom} or higher.
+This corresponds to a distance between solute and box boundary of at least \SI{12}{\angstrom} for water \cite{Chen2021,Waibl2022-gist-solvents} though we recommend \SI{15}{\angstrom} or higher.
 Carefully check the employed force field, protonation state and partial charges.
 %a PDB file containing only biotin. Prepare your structure by adding hydrogens, making sure to choose the correct protonation state. Parametrize biotin with the forcefield of your choice. Solvate the parametrized biotin, making sure to choose a water box of large enough size so that the water on the box edges behaves bulk-like (a wall distance of at least 15\AA is recommended).
 A good starting point for the parametrization and solvation of small molecules is the Amber tutorial 4b (\url{http://ambermd.org/tutorials/basic/tutorial4b/}).
@@ -493,7 +492,6 @@ A good starting point for the parametrization and solvation of small molecules i
 Equilibrate your solvated biotin in an NVT or NPT ensemble.
 Even when running the simulation in NVT, it is advisable to include an NPT equilibration step to adjust the box size beforehand.
 Use enough equilibration time to allow the solvent to relax. 
-For water, \SI{0.5}{\nano\second} is usually sufficient to equilibrate the density, but narrow binding pockets can take longer.
 A well-tested equilibration protocol can be found in the literature \cite{Roe2020-equilibration}.
 
 \subsubsection{MD simulation}
@@ -779,7 +777,7 @@ While this is not true for $E_{ww}$, we will see below that the energy differenc
 	\includegraphics[width=0.8\linewidth]{figures/A_E_S_convergence.eps}
 	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute molecule. All quantities are cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}\label{fig_radial_convergence}
 \end{figure}
-
+\pagebreak %TODO pagebreak
 \subsubsection{Visualizing $\dgsolv$}
 Next, we want to visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
 You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST\@.
@@ -827,7 +825,6 @@ Although we kept the systems rigid, the center of mass might have been shifted d
 Therefore, we align the complex structure to streptavidin and use the shifted biotin coordinates to define the integration region.
 
 We recommend using a \software{Jupyter Notebook} for the following analyses.
-The code is not explained in detail here, but should be clear after reading the previous sections.
 Load the files and double check the frame numbers and reference density.
 \begin{lstlisting}[style=python]
 import numpy as np
@@ -854,6 +851,7 @@ print('Streptavidin:', strept.eww_ref)
 compl.eww_ref = compl.detect_reference_value()
 print('Complex:', compl.eww_ref)
 \end{lstlisting}
+\pagebreak %TODO pagebreak
 Subtract a reference entropy from the \inlinecode{dTSsix} columns.
 
 \begin{lstlisting}[style=python]
@@ -1113,7 +1111,7 @@ molecule, is found in Figure~\ref{fig-binding-pocket}
 	\end{subfigure}
 	\caption{Biotin in the streptavidin binding pocket, with isosurfaces based on the GIST calculation on the holo structure. 
 	Isolevels shown are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kilo\calorie\per\mole\per\square\angstrom}, except for 
-	the positive energy, where they are divided by two to visually account for its overall lower density.}
+	the positive energy, where they are divided by two to visually account for its overall lower density. Only voxels within \SI{4}{\angstrom} of biotin are shown.}
 	\label{fig-binding-pocket}
 \end{figure}
 
@@ -1178,6 +1176,7 @@ compl.save_dx('BP', 'binding_pocket.dx')
 	\caption{Volume of streptavidin defined around \SI{3.5}{\angstrom} of biotin. }\label{streptavidin_volume}
 \end{figure}
 %TODO: Hide capping group
+\pagebreak %TODO pagebreak
 \section{Theory}
 \label{sec:theory}
 GIST is an implementation of inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998} that discretizes the free energy of solvation $\dgsolv$ on a three-dimensional grid. 
@@ -1227,7 +1226,7 @@ In the first method, the solvation entropy is broken down into translational and
 \begin{equation}
 \Delta S_\textit{solv} = \Delta S_\textit{trans} + \Delta S_\textit{orient}
 \end{equation}
-This is exact assuming that the distribution of the orientation $\omega$ is constant within a voxel $k$, but might converge slower than computing the entropy from the combined space (see below).\\
+This is exact assuming that the distribution of the orientation $\omega$ is constant within a voxel $k$, but might converge slower than computing the entropy from the combined space (see below).
 The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation).
 
 \begin{equation}
@@ -1544,7 +1543,7 @@ VJH and FW conceptualized the research and co-wrote the initial draft.\\
 VM contributed the original drafts of sections \ref{sec:theory} and \ref{sec:visualization}.\\
 HC helped with code curation and validation.\\
 MLFQ helped with conceptualization and gave writing input for the initial draft. \\
-SR and DR programmed cpptraj's GIST implementation and provided technical input.\\  
+SR and DR contributed technical input.\\  
 KRL, MKG and TK were involved with conceptualization, funding acquisition, project management and supervision.\\
 
 % We suggest you preserve this comment:
@@ -1563,7 +1562,6 @@ VeraChem LLC.
 %%%%%%%
 % Authors should acknowledge funding sources here. Reference specific grants.
 %%%%%%%
-FMS acknowledges the support of NSF grant CHE-1111111.
 
 \section*{Author Information}
 \makeorcid
