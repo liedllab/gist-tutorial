@@ -377,7 +377,6 @@ The most important options are summarized in the following table:
 In GIST, the calculated properties are derived by referencing against the bulk solvent.
 It is therefore important to set the reference number density $\rho_0$ according to the solvent model used in your simulation.
 The solvent-solvent enthalpy $E_{ww}$ also needs to be referenced, but this is done in the post-processing stage. The calculation of these properties and the need for referencing is discussed in-depth in section \ref{sec:theory}.
-
 Densities and reference energies of typical water models can be found in the \software{cpptraj} manual.
 We also provide the densities for water models commonly used with AMBER force fields in Table~\ref{tab:ref_densities}.
 These densities were calculated from \SI{100}{\nano\second} MD simulations at \SI{1}{\bar} and \SI{300}{\kelvin} using the Berendsen barostat and the Langevin thermostat.
@@ -385,7 +384,7 @@ The water boxes were prepared with \software{tleap} to a size of \SI{100}{\angst
 
 Due to the different sizes of the boxes, the reference energies used in this tutorial may not align with those specified in the Amber manual. 
 Generally, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small. 
-The reference values can be calculated from MD trajectories of bulk solvent. From this, one then calculates the density-weighted average energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$.  
+The reference values can be extracted from MD trajectories of bulk solvent by calculating the density-weighted average energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$.  
 Generally, it is recommended that the size of the reference solvent box closely matches that of the production system.
 While the impact on the density is not as pronounced, deviations from the production settings can lead to differences of up to 0.005 kcal/mol in the energy per solvent molecule ($E_{ww, norm}$) for water boxes. 
 These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
@@ -412,7 +411,7 @@ These discrepancies, when summing over large grid regions, have the potential to
 		\bottomrule
 	\end{tabularx}
 \end{table}
- 
+\pagebreak %TODO: pagebreak
 \paragraph{Postprocessing and Analyzing GIST results}
 Cpptraj outputs quantities in OpenDX (.dx) file format which can be visualized in Pymol or VMD.
 Aside from thermodynamic quantities, GIST also calculates the number density of each atomic element in the solvent.
@@ -442,24 +441,25 @@ To convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \i
 \end{equation}
 with $V^k$, the volume of voxel $k$, $N^k_{solvent}$, the number of solvent molecules in $k$ over all simulation frames, and $N_{frames}$, the number of frames.
 
+\pagebreak
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
 The tutorial is structured as follows:
 \begin{enumerate}
 	\item Set up and run GIST calculations for a small molecule solute (biotin) and a protein (streptavidin) binding pocket.
-	\item Compute the free energy of solvation for biotin using GIST.
+	\item Compute biotin's free energy of solvation using GIST.
 	\item Visualize local contributions to $\dgsolv$ in the streptavidin binding pocket and around biotin.
 	\item Compute the hydration contribution to the binding. Combined with the biotin--streptavidin interaction energy, the binding free energy can be estimated.
 	\item Explore advantages and disadvantages of the GIST method when used to calculate  $\dgsolv$
 \end{enumerate}
 
 In the first part, we show how to run GIST calculations for small molecule solutes and interpret the output. This provides an example of a simple GIST workflow, without too much details.
-Afterwards, we apply this knowledge to a protein binding pocket, visualize $\dgsolv$ hotspots and estimate a free energy of ligand binding using an end-states approach based on GIST. In addition, we discuss all steps shown in the first example in further detail. 
+Afterwards, we apply this to a protein binding pocket and estimate a free energy of ligand binding using an end-states approach based on GIST. In addition, we discuss all steps shown in the first example in further detail. 
 
 
 \subsection{Streptavidin/Biotin}
 The streptavidin-biotin complex binding is one of the strongest known non-covalent interactions involving a small molecule.
-Therefore, the combination of streptavidin and biotin is used routinely in biotechnology \cite{Dundas2013-streptavidin-review}, and the interaction between them has been investigated in detail \cite{McConnell2021-biotin}.
+Therefore, the combination of streptavidin and biotin is used routinely as a validation case \cite{Dundas2013-streptavidin-review}, and the interaction between them has been investigated in detail \cite{McConnell2021-biotin}.
 
 \newcommand{\appr}{{\mathord{\sim}}}
 In nature, streptavidin occurs as a tetramer, and binds biotin with a binding constant of \SI{\sim e-14}{\per\Molar} \cite{Dundas2013-streptavidin-review}.
