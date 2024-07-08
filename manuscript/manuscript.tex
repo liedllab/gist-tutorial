@@ -1120,7 +1120,7 @@ molecule, is found in Figure~\ref{fig-binding-pocket}.
 \subsection{Solvent Accessible Surface (SAS)}
 The solvent accessible surface (SAS) represents the interface between regions that are occupied by the solute molecule, and those which can be accessed by the solvent.
 GIST provides a very natural way of creating a SAS using an isosurface of the oxygen density \code{gO}.
-It can be visualized in PyMOL. 
+At a very low isovalue, an isosurface of the water's oxygen or hydrogen shows areas the water can reach, essentially creating a SAS. 
 Here, the SAS was generated from a simulation of water around streptavidin without biotin, leaving the binding site solvent-accessible.
 The expected output is shown in Figure~\ref{fig-streptavidin_sasa}.
 
@@ -1222,11 +1222,11 @@ In the first method, the solvation entropy is broken down into translational and
 This is exact assuming that the distribution of the orientation $\omega$ is constant within a voxel $k$, but might converge slower than computing the entropy from the combined space (see below).
 The second method directly calculates the solvation entropy by evaluating the six-dimensional integral (3 for position and 3 for orientation).
 
-\begin{equation}
-g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox}(\textbf{r}) g_\textit{vox}(\omega)
-\end{equation}
-A first nearest neighbor (NN) approach is used to evaluate the density.
-The densities are computed relative to a homogeneous distribution of solvent molecules, given a bulk density $\rho^0$.
+%\begin{equation}
+%g_\textit{vox} \left( \textbf{r}, \omega \right) \approx g_\textit{vox}(\textbf{r}) g_\textit{vox}(\omega)
+%\end{equation}
+A first nearest neighbor (NN) approach is used to evaluate the entropy based on the orientational and translational distributions.
+The distributions are computed relative to a homogeneous distribution of solvent molecules, given a bulk density $\rho^0$.
 The average entropy contributions per solvent molecule in voxel $k$ are calculated as
 
 \begin{equation}
@@ -1248,7 +1248,7 @@ The solvation energy is calculated from the water-water and water-solute interac
 	\Delta E_\textit{solv} = \Delta E_\textit{sw} + \Delta E_\textit{ww}
 \end{equation}
 The solute-solvent energy $E_{sw}$ can be expressed in terms of the solvent density and the potential $U_{sw}(\textbf{r},\omega)$ induced by the solute molecule.
-In practice, it is evaluated as the expectation value $\langle\cdot\rangle$ of the pairwise force field energy $U_{ij}$ between all solvent molecules in voxel $k$ and all solute atoms.
+In practice, $E_{sw}$ is computed as the expectation value $\langle\cdot\rangle$ of the pairwise force field energy $U_{ij}$ between all solvent molecules in voxel $k$ and all solute atoms.
 
 \begin{equation}
 	\begin{aligned}
@@ -1302,7 +1302,6 @@ This depends on the local environment and on \emph{what} the solvent would be re
 Therefore, the effect of reorganization must be judged for each case individually.
 One way to treat reorganization is an end-state approach as shown in the tutorial: all states before and after solvent reorganization are considered. In the tutorial, this corresponds to the solvation of biotin and streptavidin seperated (initial states) and in complex (end-state). Note that all solvent contributions need to be considered to get thermodynamically accurate results in such a case. In practice this therefore requires the integration over the whole grid or at least all voxels with solvent properties different from bulk (i.e. setting a large cutoff).
 \subsubsection{PME energy}
-
 In the original version of GIST, the energies are calculated based on the the minimum image convention.
 In PME-GIST, the electrostatic energy $E_\text{elec}$ is calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the Amber MD engine \cite{Chen2021}.
 The Lennard-Jones part $E_\text{lj}$ is computed separately in direct space.
