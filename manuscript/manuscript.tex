@@ -941,7 +941,7 @@ print(pd.DataFrame(results))
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST to be in line with the different ways the energy is calculated in the two GIST methods.
-An example \software{cpptraj} input might look like:
+An example \software{cpptraj} is then:
 \begin{lstlisting}[style=cpptraj]
 parm solvated.parm7
 trajin md-01.nc 1 last 100
@@ -980,7 +980,7 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 	\end{tabular}
 \end{table}
 Even though streptavidin-biotin is known to be a very stable complex, the free solvation energy ($\Delta E^{GIST}-T\Delta S^{scaled}$) favors the dissociation.
-This is expected: the binding of biotin to streptavidin is faciliated over a large number of H-bonds and over polar interactions. 
+This is expected: the binding of biotin to streptavidin is facilitated over a large number of H-bonds and over polar interactions. 
 As such, water favourably solvates both biotin and streptavidin and an energetic penalty is paid when displacing the water during the binding process. 
 In this case, we find that the changes in the energy of solvation and of the internal energy $\Delta E^{internal}$ more or less cancel out, indicating that binding is largely entropy-driven in this case.
 At first, this is surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows strong enthalpic binding contributions \cite{mpye2020-biotin-itc,hyre2006-biotin-itc}.
@@ -995,7 +995,7 @@ In this tutorial, we obtained a value for the binding of biotin into the closed 
 To investigate the effect of different conformations on the binding affinity, you can perform molecular dynamics simulations of the complex and/or monomers and perform GIST on multiple cluster representatives.
 To include the effect of lid closing in the binding process, free energy calculation methods such as umbrella sampling can be used.
 To speed up the calculation, smaller GIST grids could be used by focusing on the binding pocket, or by rotating the solute molecule by its principal axes to fit the cuboid grid more exactly.
-However, this should be done \emph{before} the MD, since rotating the trajectory damages the periodic box information.
+However, this should be done \emph{before} the MD simulation, since rotating the trajectory damages the periodic box information.
 %TODO: Ask Dan if this is still the case
 
 \section{Recent developments}
@@ -1018,7 +1018,7 @@ Furthermore, the \inlinecode{Eww} and \inlinecode{Esw} columns are also computed
 For typical use cases, we recommend using \inlinecode{Eww} and \inlinecode{Esw} over the \inlinecode{PME} column.
 
 \subsection{MPI parallelization}
-The most recent addition to GIST is the MPI parallelization of both energy and entropy calculations\cite{Roe2023-mpi-gist}.
+The most recent addition to GIST is the MPI parallelization of both energy and entropy calculations \cite{Roe2023-mpi-gist}.
 Since the MPI parallelization is orthogonal to the other improvements, it can be used with both PME or GPU accelerated GIST.
 \subsection{GIST with non-water solvents}
 In references~\cite{Kraml2020,Kamenik2020-gist-macrocycles,Waibl2022-gist-solvents}, an extension of GIST towards solvents other than water is described.
@@ -1029,7 +1029,7 @@ The code will automatically choose three atoms per solvent species to define the
 Sometimes, however, the automatic selection is not optimal.
 For instance, in methanol one can either incorporate the C--H bonds or the O--H bond in the selection.
 The latter is probably more relevant since it can incorporate hydrogen bonding effects.
-Assuming that the alcohol hydrogen is called H1, this could be specified as follows:
+Assuming that the alcohol hydrogen atom is called H1, this could be specified as follows:
 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr <x> <y> <z> \
