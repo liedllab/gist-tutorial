@@ -74,10 +74,17 @@
 \corr{klaus.liedl@uibk.ac.at}{KRL}
 \corr{mgilson@health.ucsd.edu}{MKG}
 \corr{thomas.kurtzman@lehman.cuny.edu}{TK}
-
-%TODO Add ORCIDS
-\orcid{Author 1 name}{AAAA-BBBB-CCCC-DDDD}
-\orcid{Author 2 name}{EEEE-FFFF-GGGG-HHHH}
+%TODO Vjays ORCID is missing
+\orcid{Valentin J Hoerschinger}{0000-0002-4469-3238}
+\orcid{Franz Waibl}{0000-0003-0527-0803}
+\orcid{Vjay Molino}{}
+\orcid{Helmut Carter}{0000-0003-0273-4107}
+\orcid{Monica L Fern{\'a}ndez-Quintero}{0000-0002-6811-6283}
+\orcid{Steven Ramsey}{0000-0001-7441-3228}
+\orcid{Daniel R Roe}{0000-0002-5834-2447}
+\orcid{Klaus R Liedl}{0000-0002-0985-2299}
+\orcid{Michael K Gilson}{0000-0002-3375-1738}
+\orcid{Tom Kurtzman}{0000-0003-0900-772X}
 
 \contrib[\authfn{1}]{These authors contributed equally to this work}
 
@@ -164,28 +171,25 @@ For this tutorial, familiarity with molecular dynamics simulations as well as th
 
 \end{frontmatter}
 
-
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\linewidth]{figures/carbazole-figure.png}
+	\caption{Schematic showing regions of high water density around a carbazole solute molecule. Based on an MD simulation of solvent around the solute molecule, the energy is computed from the intermolecular interactions of a force field, while the entropy is approximated from the 6-dimensional orientational and solvational solvent distribution $\rho$ around the solute molecule. Note that while this depiction focuses on regions of high solvent density, regions with lower density can also contain meaningful contributions to the overall energy and entropy.}
+	\label{fig:carbazole}
+\end{figure}
 \section{Introduction}
 Solvation thermodynamics govern many biological and chemical processes involving, e.g., aqueous solutions, hydrophobic effects, or partitioning between different environments.
-
 Interactions with water are of special importance as many biological processes occur in an aqueous environment \cite{Privalov2017-water-review}.
 The free energy of solvation is defined as the reversible work needed to insert a solute molecule into the solvent from gas phase \cite{ben-naim-book}.
 It is directly linked to the solubility of gases and drives many real-world effects such as hydrophobicity, ligand binding, and protein folding.
 
 Grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012} is a method to compute the free energy of solvation, with applications in the context of drug design and biophysical property description.
 It computes the solvent density from an MD trajectory and estimates localized entropic and enthalpic contributions on a grid around the solute molecule.
-Since these contributions are spatially resolved, GIST improves interpretability and offers more detailed insights into the solvation of the investigated solute. 
-The entropy is computed from orientational and translational distributions of the solvent around the solute molecule, in a first-order approximation. A schematic of this is shown in Figure~\ref{fig:carbazole}. 
+Since these contributions are spatially resolved, GIST improves interpretability and offers more detailed insights into the solvation of the investigated solute.
+A schematic of this is shown in Figure~\ref{fig:carbazole}.  
+The entropy is computed from orientational and translational distributions of the solvent around the solute molecule, in a first-order approximation. 
 The calculation of higher-order entropy terms is computationally demanding but was realized in recent works \cite{Nguyen2016-gist-second-order, Waibl2021-gist-salt}.
 It has been found that solvation free energies of small molecule solutes can be computed at high accuracy using linear scaling factors for the higher-order terms, such as $\Delta S = 0.6\, \Delta S^\text{1st-order}$ for water \cite{Chen2021,Waibl2022-gist-solvents}.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\linewidth]{figures/carbazole-figure.png}
-    \caption{Schematic showing regions of high water density around a carbazole solute molecule. Based on an MD simulation of solvent around the solute molecule, the energy is computed from the intermolecular interactions of a force field, while the entropy is approximated from the 6-dimensional orientational and solvational solvent distribution $\rho$ around the solute molecule. Note that while this depiction focuses on regions of high solvent density, regions with lower density can also contain meaningful contributions to the overall energy and entropy.}
-    \label{fig:carbazole}
-\end{figure}
-
 Since its initial development, GIST has been used to describe the thermodynamics of water displacement in protein binding pockets \cite{Nguyen2016-gist-second-order,Ramsey2016,Balius2017-gist-ligand-discovery,Hufner-Wulsdorf2020-gist-drug-design}.
 It has been used for a large-scale investigation of the hydration properties of proteins found in SARS-CoV-2 \cite{Olson2020-covid-gist}.
 Furthermore, recent works used GIST to describe biophysical properties of serine proteases \cite{Kraml2019-gigist}, macrocycles \cite{Kamenik2020-gist-macrocycles}, or antibody fragements \cite{Waibl2021-gist-antibodies}.
@@ -205,18 +209,14 @@ Polarizable continuum models (PCMs) \cite{Miertus1981-pcm,Klamt1993-cosmo} treat
 %Molecular mechanics based approaches describe the underlying PES through empirically fit force-fields, which reduce the computational demand of these calculations tremendously.
 %This allows for the treatment of large biological systems such as proteins in aqueous solution.
 Methods such as MM/PBSA or MM/GBSA \cite{Sitkoff1994-pbsa,Kollman2000-mmpbsa} combine an implicit treatment of solvent electrostatics with structural sampling of the solute molecule.
-They can quickly provide results for a large number of structures \cite{Genheden2015-mmpbsa-review}.
-
+They can quickly provide results for a large number of structures \cite{Genheden2015-mmpbsa-review}.\\
 On the other hand, explicit solvation methods model the solvent using individual molecules.
 They are generally more accurate than implicit methods, but require a statistical sampling of the solvent conformations \cite{Liu2016-md-solubility,Swails2014-cphmd}.
 Molecular dynamics (MD) simulations provide an accurate way of modeling solvent packing in confined areas \cite{Haider2016-water-on-surfaces} and general hydrophobic effects \cite{Pratt2016-hydrophobicity}.
 
 The free energy of solvation can be calculated in a statistically rigorous way using alchemical methods \cite{Liu2016-md-solubility,Mobley2009-dgsolv,Mobley2014-freesolv} such as free energy perturbation (FEP) \cite{Zwanzig1954-reweighting} or thermodynamic integration (TI) \cite{Kirkwood1935-ti}.
 However, those methods are unable to provide a spatial interpretation of the results.
-Furthermore, splitting the free energy into enthalpy and entropy contributions is challenging \cite{Peter2004-alchemical-entropy}.
-%Assuming sufficient sampling, they can accurately predict the free energy of solvation in the boundaries of the assumptions underlying their forcefield. 
-%However, the seperation of enthalpic and entropic contributions to the free energy of solvation is difficult with these methods and localizing these contributions not easily possible.
-
+Furthermore, splitting the free energy into enthalpy and entropy contributions is challenging \cite{Peter2004-alchemical-entropy}.\\
 Methods derived from statistical mechanics bridge this gap by providing three-dimensional resolution.
 These methods most commonly are based on either the Ornstein–Zernike (OZ) equation, or \cite{Hansen2013-simple-liquids} inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998}.
 The most important example of OZ-based methods is the reference interaction site model (RISM) \cite{Chandler1972-rism} as well as its extension to three dimensions (3D-RISM) \cite{Kovalenko1998-3drism}.
@@ -228,16 +228,16 @@ The main limitation of those methods is that the entropy is approximated through
 Within GIST and other more recent methods, these entropy contributions are calulated via a k-nearest-neighbor (kNN) approach.  
 Due to the high computational effort required to converge the higher order terms, the entropy expansion is usually truncated after the first or, sometimes, the second \cite{Nguyen2016-gist-second-order,Waibl2022-gist-solvents} term, thereby introducing an error.
 While there are approximations available to deal with those problems, most noteworthy the mutual information expansion (MIE) and Maximum Information Spanning Tree (MIST) approaches, they are not currently implemented in GIST. 
-Recent kNN implementations to calculate solvation entropy further improve phase space sampling by relabeling the solvent molecules in the simulation, treating the solvent molecules as distinguishable \cite{reinhard2007estimation,heinz2019computing,heinz2021permut,fogolari2021optimal}.For a recent review of kNN methods to calculate entropy in a molecular context, see \cite{fogolari2024k}.\\
+Recent kNN implementations to calculate solvation entropy further improve phase space sampling by relabeling the solvent molecules in the simulation, treating the solvent molecules as distinguishable \cite{reinhard2007estimation,heinz2019computing,heinz2021permut,fogolari2021optimal}. For a recent review of kNN methods to calculate entropy in a molecular context, see \cite{fogolari2024k}.
 Furthermore, IST does not consider the internal degrees of freedom of the solvent.
-Therefore, IST-based approaches currently can only be used with sufficiently rigid solvents, although a recent paper provides the theory needed to generalize to flexible solvent molecules \cite{gilson-freeenergy-2024}.
+Therefore, IST-based approaches currently can only be used with sufficiently rigid solvents, although a recent paper provides the theory needed to generalize to flexible solvent molecules \cite{gilson2024freeenergy}.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems as solute molecules.\\
 GIST is an implementation of IST on a three-dimensional grid. Unlike the related method WaterMap \cite{Abel2008-watermap,Young2007-watermap}, it provides solvation thermodynamics on an entire grid, rather than only high-density clusters in a binding pocket.
 This implies a higher versatility, but also puts more responsibility on the user in terms of correct post-processing.
 Since the density is computed from an explicit solvent MD simulation, GIST provides an accurate picture of solvation at an atomistic level, even for demanding systems such as drug binding sites in proteins.
 While the need for MD simulations comes at a large computational cost, GIST is still more efficient than end-state approaches such as TI \cite{Kirkwood1935-ti} or FEP \cite{Zwanzig1954-reweighting}, with applications to large systems such as serine proteases \cite{Kraml2019-gigist} or antibody fragments \cite{Waibl2021-gist-antibodies}.
 On the other hand, the first-order approximation means that the solvation entropy is less accurately described than in TI or FEP \cite{Chen2021,Waibl2021-gist-salt}. 
-Similar to the self-consistent integral theories, however, GIST only considers a single solute conformation and  multiple computations of representative structures are necessary to describe ensemble properties. 
+Similar to the self-consistent integral theories, GIST only considers a single solute conformation and  multiple computations of representative structures are necessary to describe ensemble properties. 
 
 \subsection{Scope}
 The purpose of this tutorial is to help users run GIST calculations and interpret the results.
@@ -382,7 +382,7 @@ The water boxes were prepared with \software{tleap} to a size of \SI{100}{\angst
 Due to the different sizes of the boxes, the reference energies used in this tutorial may not align with those specified in the Amber manual. 
 Generally, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small. 
 The reference values can be extracted from MD trajectories of bulk solvent by calculating the density-weighted average energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$.  
-Generally, it is recommended that the size of the reference solvent box closely matches that of the production system.
+It is recommended that the size of the reference solvent box closely matches that of the production system.
 While the impact on the density is not as pronounced, deviations from the production settings can lead to differences of up to 0.005 kcal/mol in the energy per solvent molecule ($E_{ww, norm}$) for water boxes. 
 These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
 
