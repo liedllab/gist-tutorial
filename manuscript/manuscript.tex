@@ -199,7 +199,8 @@ Furthermore, an implementation based on the particle mesh Ewald (PME) \cite{Dard
 Yet further changes allow the inclusion of other rigid solvents than water \cite{Kraml2020,Waibl2022-gist-solvents} or the use of salt-water mixtures as solvents \cite{Waibl2021-gist-salt}.
 
 In this tutorial, we aim to give the reader an introduction to GIST and its application to calculate solution thermodynamics properties of interest. 
-While previous publications \cite{Ramsey2016} and tutorials \cite{amber_tut_gist} treated how to setup and run GIST calculations in detail, the post-processing was often treated in less detail. While building on these tutorials, we provide an updated guide to calculating solvation properties using GIST to address recent improvements.
+While previous publications \cite{Ramsey2016} and tutorials \cite{amber_tut_gist} treated how to setup and run GIST calculations in detail, the post-processing was often treated in less detail. 
+While building on these tutorials, we provide an updated guide to calculating solvation properties using GIST to address recent improvements.
 Furthermore, we aim to establish best practices for the analysis and interpretation of GIST calculations.
 
 \subsection{Comparison to other methods}
@@ -232,7 +233,8 @@ Recent kNN implementations to calculate solvation entropy further improve phase 
 Furthermore, IST does not consider the internal degrees of freedom of the solvent.
 Therefore, IST-based approaches currently can only be used with sufficiently rigid solvents, although a recent paper provides the theory needed to generalize to flexible solvent molecules \cite{gilson2024freeenergy}.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems as solute molecules.\\
-GIST is an implementation of IST on a three-dimensional grid. Unlike the related method WaterMap \cite{Abel2008-watermap,Young2007-watermap}, it provides solvation thermodynamics on an entire grid, rather than only high-density clusters in a binding pocket.
+GIST is an implementation of IST on a three-dimensional grid. 
+Unlike the related method WaterMap \cite{Abel2008-watermap,Young2007-watermap}, it provides solvation thermodynamics on an entire grid, rather than only high-density clusters in a binding pocket.
 This implies a higher versatility, but also puts more responsibility on the user in terms of correct post-processing.
 Since the density is computed from an explicit solvent MD simulation, GIST provides an accurate picture of solvation at an atomistic level, even for demanding systems such as drug binding sites in proteins.
 While the need for MD simulations comes at a large computational cost, GIST is still more efficient than end-state approaches such as TI \cite{Kirkwood1935-ti} or FEP \cite{Zwanzig1954-reweighting}, with applications to large systems such as serine proteases \cite{Kraml2019-gigist} or antibody fragments \cite{Waibl2021-gist-antibodies}.
@@ -263,14 +265,12 @@ After completing this tutorial, we expect the reader to be able to run their own
 This tutorial is aimed at users with a solid knowledge of molecular dynamics (MD) simulations.\\
 The user should be able to run MD simulations and analyze the resulting trajectories. 
 The MD simulations presented in this tutorial are run with the Amber simulation engine and analyzed using AmberTools \software{cpptraj}. 
-For a conceptual overview of running MD simulations with Amber, we recommend reading the Amber manual (\url{https://ambermd.org/Manuals.php}) \cite{amber24} and the Amber tutorials (\url{https://ambermd.org/Manuals.php}). 
-Previous experience of GIST is not necessary, although we recommend reading the works referenced in section~\ref{sec:theory}.
-
+For a conceptual overview of running MD simulations with Amber, we recommend reading the Amber manual (\url{https://ambermd.org/Manuals.php}) \cite{amber24} and the Amber tutorials (\url{https://ambermd.org/tutorials}). 
+Previous experience of GIST is not necessary, although we recommend reading the works referenced in section~\ref{sec:theory}.\\
 The presented analyses are run in Python.
 While no programming experience is necessary to follow the tutorial, a basic understanding of Python is advantageous to adjust the code towards different requirements and use-cases.
 
 \subsection{Software/system requirements}
-%Tutorials should clearly define what system and/or software requirements the researcher will need to complete the tutorial (e.g., VMD version 1.9 or newer, AMBER, etc.). Tutorials requiring specific software packages must provide instructions and files for the referenced version of the software.
 The main implementation of GIST is part of the MD analysis software \software{cpptraj} released with AmberTools \cite{amber24, Case2023-ambertools}.
 A recent version of \software{cpptraj} should be used. We recommend using at least version 6.24, which was released with AmberTools24 \cite{Case2023-ambertools}.
 
@@ -278,7 +278,6 @@ The Amber simulation engine is used in this tutorial to run the MD simulations.
 While Amber is free for non-commercial use, it might not always be available in industrial settings.
 In that case, other MD engines can be used as long as topologies and trajectories can be produced in a format supported by \software{cpptraj}.
 If using GROMACS \cite{Abraham2015-gromacs,Pronk2013-gromacs}, we propose to prepare the topology with AmberTools \cite{Case2023-ambertools} and convert it using \software{acpype.py} \cite{Sousa_da_Silva2012-acpype}.
-%We should actually test that!
 Also note that compressed trajectory formats such as \inlinecode{xtc} might bias the entropy calculation due to the loss of precision for the atom positions. For further reference, the influence of compression on energy calculations was discussed in a recent publication \cite{Roe2022-compression}.
 
 Furthermore, a recent Python version (3.6 or newer) should be available with the following packages installed:
@@ -291,8 +290,6 @@ Furthermore, a recent Python version (3.6 or newer) should be available with the
 \end{itemize}
 If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
 We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
-%We recommend JupyterLab to work with the notebook. Jupyter is available at \url{https://jupyter.org/}.
-
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
 Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
 Its usage and some examples were shown in a previous tutorial on GIST \cite{Ramsey2016}.
@@ -301,7 +298,6 @@ Its usage and some examples were shown in a previous tutorial on GIST \cite{Rams
 
 \section{Running GIST}
 \label{sec:running_GIST}
-%\subsection{Running the GIST analysis}
 To run a GIST analysis, the following is required:
 \begin{itemize}
 	\item \software{cpptraj}.
@@ -319,11 +315,10 @@ This region is defined by a rectangular grid with given position, size, and voxe
 The default grid spacing of \SI{0.5}{\angstrom} provides reasonable discretization for many use-cases.
 While integrals of GIST quantities over the grid are independent of the voxel size, provided sufficient sampling, individual values converge slower at high resolutions.
 The grid is defined by parameters of the \inlinecode{gist} command in \software{cpptraj}.
-The grid center is defined by \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing (voxel side-length) in \AA{} by \inlinecode{gridspacn}:
+The grid center is defined by its center coordinates \inlinecode{gridcntr}, the voxel number in x, y, and z direction by \inlinecode{griddim}, and the spacing (voxel side-length) in \AA{} by \inlinecode{gridspacn}:
 
 \begin{lstlisting}[style=cpptraj]
-gist gridcntr <x> <y> <z> \
-griddim <Nx> <Ny> <Nz> gridspacn <val>
+gist gridcntr <x> <y> <z> griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 Additionally, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and reimaging to account for periodic boundary conditions.
 Often, the region of interest will be defined as the surrounding of a molecule, for example a ligand in the binding pocket or a whole protein. 
