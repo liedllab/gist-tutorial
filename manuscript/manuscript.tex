@@ -405,7 +405,7 @@ These discrepancies, when summing over large grid regions, have the potential to
 \end{table}
 \pagebreak %TODO: pagebreak
 \paragraph{Postprocessing and Analyzing GIST results}
-Cpptraj outputs quantities in OpenDX (.dx) file format which can be visualized in Pymol or VMD.
+Cpptraj outputs grid quantities in OpenDX (.dx) file format which can be visualized in Pymol or VMD.
 Aside from thermodynamic quantities, GIST also calculates the number density of each atomic element in the solvent.
 Here is a list of the most important quantities calculated by GIST:
 
@@ -444,7 +444,6 @@ The tutorial is structured as follows:
 	\item Compute the hydration contribution of the biotin, streptavidin and complex to the binding. Combined with the biotin--streptavidin interaction energy, the binding free energy can be estimated.
 	\item Explore advantages and disadvantages of the GIST method when used to calculate  $\dgsolv$
 \end{enumerate}
-
 In the first part, we show how to run GIST calculations for small molecule solutes and interpret the output. This provides an example of a simple GIST workflow, without too much details.
 Afterwards, we apply this to a protein binding pocket and estimate a free energy of ligand binding using an end-states approach based on GIST. In addition, we discuss all steps shown in the first example in further detail. 
 
@@ -544,8 +543,7 @@ Then, we strip all water solvent molecules in the fourth line and write out a pd
 Finally, we start the analysis with the "run" command.
 
 To decide on a grid size, find the extent (minimum and maximum) of the x-, \mbox{y-,} and z-coordinates of the molecule.
-
-To get bulk-like water properties at the grid border, a buffer distance of \SI{15.0}{\angstrom} is reasonable for biotin.
+To get bulk-like water properties at the grid border, a buffer distance of \SI{15}{\angstrom} is reasonable for biotin.
 The grid parameters can be directly calculated using \software{cpptraj's} \inlinecode{bound} command:
 \begin{lstlisting}[style=cpptraj]
 parm solvated.parm7
@@ -600,8 +598,7 @@ gist.loc[[0,1], ['x', 'y', 'z']] # DataFrame
 gist['dTSsix_norm'].head() # Series
 gist[['Eww_norm', 'Esw_norm']].head() # DataFrame
 \end{lstlisting}
-Gisttools also calculates the total enthalpy per voxel (Eall) as a sum of Eww and Esw, and the free energy of solvation (A) by subtracting $\Delta$TSsix from Eall.
-
+Gisttools also calculates the total enthalpy per voxel (Eall) as a sum of Eww and Esw, and the free energy of solvation (A) by subtracting $\Delta$TSsix from Eall.\\
 Information about the grid is stored in the grid property of the gist object and structural data (supplied as a pdb of the solute molecule) is stored as an \software{mdtraj} trajectory in the struct property:
 \begin{lstlisting}[style=python]
 gist.grid # Grid object
@@ -663,11 +660,16 @@ systems.
 By using restraints, we can ensure that the monomer conformations match the complex.
 
 \subsubsection{GIST analysis of Streptavidin-Biotin}
-
+To create input \code{bash} scripts for the MD simulations and GIST analysis, run the following commands in the \code{code} folder:
+\begin{lstlisting}[style=bash]
+	make gist-md-inputs
+	make gist-inputs
+\end{lstlisting}
 After running the MD simulations as described in section \ref{sec:md_simulation}, proceed with the GIST analysis.
 For easier post-processing, here we use grids that contain the whole solute molecule and the surrounding solvent.
-
-If one is only interested in solvent in the binding site, smaller grids encompassing only the binding site could be used for streptavidin and the complex. While this saves calculation time for the GIST analysis, it complicates the post-processing. Since the GIST analysis is usually less time-demanding than the MD simulation, we recommend using larger grids.
+If one is only interested in solvent in the binding site, smaller grids encompassing only the binding site could be used for streptavidin and the complex.
+While this saves calculation time for the GIST analysis, it complicates the post-processing.
+Since the GIST analysis is usually less time-demanding than the MD simulation, we recommend using larger grids.
 Furthermore, we recommend that you center the solute molecule to the coordinate origin to simplify the analysis.
 Calculate the GIST grid parameters as outlined in the biotin section for the complex and streptavidin and run the GIST analysis.
 
@@ -681,8 +683,7 @@ In that case, checking for convergence of the solvent properties near the grid b
 All GIST quantities should be expressed relative to bulk as outlined in section \ref{sec:theory}.
 This is automatically done by \software{cpptraj} for the entropy, using the bulk density specified by \inlinecode{refdens}.
 The solute-solvent energy $E_{sw}$ naturally tends towards zero in bulk.
-However, the solvent-solvent energy $E_{ww}$ needs to be referenced.
-
+However, the solvent-solvent energy $E_{ww}$ needs to be referenced.\\
 The Amber manual provides reference densities and energies for several solvents.
 Furthermore, a large variety of reference values calculated with GPU-GIST are listed in Table~\ref{tab:ref_densities}. 
 However, the exact energy values are different when using PME-GIST, and also depend on the box size.
@@ -724,7 +725,6 @@ The expected output of this code is shown in Figure~\ref{fig_ewwref}.
 	\includegraphics[width=0.8\linewidth]{figures/Eww_convergence.eps}
 	\caption{Convergence of $E_{ww}$ in the complex calculation with increasing distance to the solute molecule (streptavidin-biotin). The horizontal line shows the automatically computed reference energy.}\label{fig_ewwref}
 \end{figure}
-
 After choosing an appropriate reference value, we need to subtract this value from $E_{ww}$.
 Make sure to subtract the reference from the normalized (\_norm) data.
 In \software{gisttools}, this is done simply by setting \inlinecode{gist.eww\_ref}.
@@ -771,11 +771,10 @@ While this is not true for $E_{ww}$, we will see below that the energy differenc
 	\includegraphics[width=0.8\linewidth]{figures/A_E_S_convergence.eps}
 	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute molecule. All quantities are cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}\label{fig_radial_convergence}
 \end{figure}
-\pagebreak %TODO pagebreak
+
 \subsubsection{Visualizing $\dgsolv$}
-Next, we want to visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
+Next, we visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
 You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST\@.
-%With \software{gistpp}, you can use the file from the convergence check. Additional OpenDX files can be produced using \inlinecode{gistpp -op makedx}.
 With \software{gisttools}, you can create one using e.g., \inlinecode{gist.save\_dx('A\_dens', 'A\_dens.dx')}.
 It might also be interesting to visualize the average energy of a water solvent molecule at each grid voxel.
 This quantity is given by $2E_{ww} + E_{sw}$.
@@ -791,11 +790,9 @@ gist['E_norm'] = gist['Eww_norm'] * 2 + gist['Esw_norm']
 gist.loc[gist['population'] == 0, 'E_norm'] = 0
 gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 \end{lstlisting}
-
 The OpenDX files can then be imported into your molecular viewer of choice.
-%TODO we are missing a pymol script here
-%Adapt the above PyMOL script to visualize the average energy per solvent at a positive and a negative isolevel, as well as regions of negative entropy per solvent.
-A visualization of entropy and energy contributions to the free energy of solvation of the streptavidin binding pocket is shown in Figure~\ref{fig_binding_pocket_pymol}. PyMOL input scripts to generate such visualizations are available in the GitHub repository for this tutorial.
+A visualization of entropy and energy contributions to the free energy of solvation of the streptavidin binding pocket is shown in Figure~\ref{fig_binding_pocket_pymol}. 
+PyMOL input scripts to generate such visualizations are available in the GitHub repository for this tutorial.
 
 \begin{figure}
 	\centering
@@ -805,10 +802,6 @@ A visualization of entropy and energy contributions to the free energy of solvat
 	(at -2.5 kcal/mol/molecule).}\label{fig_binding_pocket_pymol}
 \end{figure}
 
-%You should find that there are several regions in the binding pocket that feature a high solvent energy and/or low entropy.
-%However, such regions also exist outside of the binding pocket, and there are also low-energy regions within the binding pocket.
-%Therefore, the strong affinity to biotin cannot be explained only by hydration, and the direct interaction energy also needs to be taken into account.
-
 \subsubsection{Contribution of Hydration to Binding}
 \label{sec:binding_contributions}
 In the next step, calculate the $\dgsolv$ contributions around biotin in each system (biotin, streptavidin, and complex).
@@ -817,7 +810,6 @@ Therefore, our results for each system will depend on the exact position of the 
 To avoid inconsistencies, it is important to choose exactly the same integration region for each system.
 Although we kept the systems rigid, the center of mass might have been shifted during pressure equilibration.
 Therefore, we align the complex structure to streptavidin and use the shifted biotin coordinates to define the integration region.
-
 We recommend using a \software{Jupyter Notebook} for the following analyses.
 Load the files and double check the frame numbers and reference density.
 \begin{lstlisting}[style=python]
@@ -845,7 +837,6 @@ print('Streptavidin:', strept.eww_ref)
 compl.eww_ref = compl.detect_reference_value()
 print('Complex:', compl.eww_ref)
 \end{lstlisting}
-\pagebreak %TODO pagebreak
 Subtract a reference entropy from the \inlinecode{dTSsix} columns.
 
 \begin{lstlisting}[style=python]
