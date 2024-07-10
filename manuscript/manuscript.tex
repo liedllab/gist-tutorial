@@ -489,7 +489,7 @@ A well-tested equilibration protocol can be found in the literature \cite{Roe202
 \label{sec:md_simulation}
 Now, you can run a restrained MD simulation based on the equilibrated structure of biotin for the subsequent GIST analysis.
 Restraints should be used during the MD because IST theory is not well-defined for moving solute molecules.
-We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place.
+We apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place. Note that this is a rather strong restraint. While lower values are possible, make sure that the solute molecule is kept rigid during the simulation. As a minimum value, we recommend \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} restraints.
 We run \SI{100}{\nano\second} of simulation and store the conformations every \SI{100}{\pico\second}.
 A simulation length of at least \SI{20}{\nano\second} is recommended to obtain statistically independent snapshots of the water solvent molecules. 
 An example Amber input file for GIST might look like this:
@@ -1088,18 +1088,18 @@ molecule, is found in Figure~\ref{fig-binding-pocket}.
 	\centering
 	\begin{subfigure}[b]{0.45\textwidth}
 	\includegraphics[width=\linewidth]{figures/binding_pocket_E.png}
-	\caption{Green: negative energy (based on $E_{sw} + 2E_{ww}$). Red: positive energy.}
+	\caption{GIST solvent energy (based on $E_{sw} + 2E_{ww}$).}
 	\label{fig-binding-pocket-energy}
     \end{subfigure}
 	\hfill
 	\begin{subfigure}[b]{0.45\textwidth}
 		\includegraphics[width=\linewidth]{figures/binding_pocket_S.png}
-		\caption{Blue: negative entropy}
+		\caption{GIST solvent entropy}
 		\label{fig-binding-pocket-entropy}
 	\end{subfigure}
 	\caption{Biotin in the streptavidin binding pocket, with isosurfaces based on the GIST calculation on the holo structure. 
-	Isolevels shown are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kilo\calorie\per\mole\per\square\angstrom}, except for 
-	the positive energy, where they are divided by two to visually account for its overall lower density. Only voxels within \SI{4}{\angstrom} of biotin are shown.}
+	Isolevels shown are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kilo\calorie\per\mole\per\cubic\angstrom}, except for 
+	the positive energy, where they are divided by two to visually account for its overall lower density. The negative solvent energgy is shown in green, positive solvent energy in red and negative entropy in blue. Only voxels within \SI{4}{\angstrom} of biotin are shown.}
 	\label{fig-binding-pocket}
 \end{figure}
 
@@ -1320,7 +1320,7 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 		\begin{itemize}
 			\item Simulation time: \SIrange{10}{20}{\nano\second} (\SI{100}{\nano\second})
 			\item Number of analyzed frames: \num{10000} (\num{100000})
-			\item Restraints: typically \SI{100}{\kcalPerMolASqr} on solute heavy atoms.
+			\item Restraints: typically \SI{100}{\kcalPerMolASqr} on solute heavy atoms. Minimum: \SI{10}{\kcalPerMolASqr}
 		\end{itemize}
 	\end{checklist}
 	
