@@ -74,10 +74,9 @@
 \corr{klaus.liedl@uibk.ac.at}{KRL}
 \corr{mgilson@health.ucsd.edu}{MKG}
 \corr{thomas.kurtzman@lehman.cuny.edu}{TK}
-%TODO Vjays ORCID is missing
 \orcid{Valentin J Hoerschinger}{0000-0002-4469-3238}
 \orcid{Franz Waibl}{0000-0003-0527-0803}
-\orcid{Vjay Molino}{}
+\orcid{Vjay Molino}{0009-0005-2055-9295}
 \orcid{Helmut Carter}{0000-0003-0273-4107}
 \orcid{Monica L Fern{\'a}ndez-Quintero}{0000-0002-6811-6283}
 \orcid{Steven Ramsey}{0000-0001-7441-3228}
@@ -137,10 +136,6 @@
 }
 \lstset{style=code}
 
-
-% TODO: delete for final build
-\usepackage{pdfcomment}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% ARTICLE START
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -155,18 +150,11 @@ Grid inhomogeneous solvation theory (GIST) is a method to compute the free energ
 The high spatial resolution of the GIST output, as well as the decomposition into energy and entropy contributions, allow for highly detailed analyses of solvation around both proteins and small molecules contexts. 
 However, this versatility also comes with a significant entry barrier for new users.
 
-In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis using the streptavidin-biotin complex as an demonstrative system. Towards this, Jupyter notebooks and Python packages are provided to simplify the analysis.
+In this tutorial, we aim to guide the reader through the most common steps involved in a GIST analysis using the streptavidin-biotin complex as a demonstrative system. Towards this, Jupyter notebooks and Python packages are provided to simplify the analysis.
 Furthermore, we discuss the theory of GIST with a focus on practical aspects.
-We highlight potential pitfalls and show how to avoid technical difficulties.
-For this tutorial, familiarity with molecular dynamics simulations as well as the AmberTools package \cite{Case2023-ambertools} is assumed. 
+We highlight potential pitfalls and provide strategies to avoid technical difficulties.
+This tutorial assumes familiarity with molecular dynamics simulations and the AmberTools package.
 
-%This particular document provides a skeleton illustrating key sections for a Tutorial document.
-%Please see the sample \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates} for additional information on and examples of using the LiveCoMS LaTeX class.
-%Here we also assume familiarity with LaTeX and knowledge of how to include figures, tables, etc.; if you want examples, see the sample just referenced.
-%
-%In your work, in this particular slot, please provide an abstract of no more than 250 words.
-%Your abstract should explain the main contributions of your article, and should not contain any material that is not included in the main text.
-%Please note that your abstract, plus the authorship material following it, must not extend beyond the title page or modifications to the LaTeX class will likely be needed.
 \end{abstract}
 
 \end{frontmatter}
@@ -252,11 +240,6 @@ Furthermore, we discuss several technical aspects of GIST studies, such as the n
 Additionally, we provide a Python library (\software{gisttools}) to unify the analysis of GIST data produced by various versions of GIST and make the post-processing of GIST results more accessible.
 After completing this tutorial, we expect the reader to be able to run their own GIST study. 
 
-%Tutorials should endeavor to cover the specific task at hand, and also highlight how the steps might need to be modified (or additional care might need to be taken at particular points) to handle more general cases.
-%
-%The scope of the tutorial, as well as the expected proficiencies / outcomes for researchers who complete the tutorial, should be clearly defined.
-%This will often happen in a specific section or subsection in the article itself.
-
 \section{Prerequisites}
 
 %Here you would identify prerequisites/background knowledge that are assumed by your work, as well as any software/license requirements.
@@ -294,7 +277,7 @@ For the visualization of three-dimensional contributions we require molecular vi
 Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
 Its usage and some examples were shown in a previous tutorial on GIST \cite{Ramsey2016}.
 
-\pagebreak %TODO: maybe remove this by better formatting
+\pagebreak %TODO: pagebreak, maybe remove these by better formatting
 
 \section{Running GIST}
 \label{sec:running_GIST}
@@ -996,7 +979,6 @@ To investigate the effect of different conformations on the binding affinity, yo
 To include the effect of lid closing in the binding process, free energy calculation methods such as umbrella sampling can be used.
 To speed up the calculation, smaller GIST grids could be used by focusing on the binding pocket, or by rotating the solute molecule by its principal axes to fit the cuboid grid more exactly.
 However, this should be done \emph{before} the MD simulation, since rotating the trajectory damages the periodic box information.
-%TODO: Ask Dan if this is still the case
 
 \section{Recent developments}
 In recent years, several updates to the original GIST implementation have been published.
@@ -1154,7 +1136,7 @@ compl.save_dx('BP', 'binding_pocket.dx')
 	\includegraphics[width=1.0\linewidth]{streptavidin_bp_close.png}
 	\caption{Volume of streptavidin defined around \SI{3.5}{\angstrom} of biotin. }\label{streptavidin_volume}
 \end{figure}
-%TODO: Hide capping group
+
 \pagebreak %TODO pagebreak
 \section{Theory}
 \label{sec:theory}
@@ -1288,7 +1270,7 @@ This depends on the local environment and on \emph{what} the solvent would be re
 Therefore, the effect of reorganization must be judged for each case individually.
 One way to treat reorganization is an end-state approach as shown in the tutorial: all states before and after solvent reorganization are considered. In the tutorial, this corresponds to the solvation of biotin and streptavidin seperated (initial states) and in complex (end-state). Note that all solvent contributions need to be considered to get thermodynamically accurate results in such a case. In practice this therefore requires the integration over the whole grid or at least all voxels with solvent properties different from bulk (i.e. setting a large cutoff).
 \subsubsection{PME energy}
-In the original version of GIST, the energies are calculated based on the the minimum image convention.
+In the original version of GIST, the energies are calculated based on the minimum image convention.
 In PME-GIST, the electrostatic energy $E_\text{elec}$ is calculated using the particle mesh Ewald (PME) method, which yields energies that are highly consistent with the Amber MD engine \cite{Chen2021}.
 The Lennard-Jones part $E_\text{lj}$ is computed separately in direct space.
 
