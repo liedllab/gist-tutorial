@@ -1032,7 +1032,7 @@ In the \software{cpptraj} implementation of GIST, the \inlinecode{solute} keywor
 Everything else will be treated as solvent.
 If the solvent contains more than one molecular species, a list of solvent molecule names (i.e., ``\inlinecode{solventmols WAT,NA,CL}'') must be specified.
 For each solvent molecule in this list, densities (e.g., \inlinecode{g\_mol\_NA}) and energies (e.g., \inlinecode{Eww\_mol\_NA}) will be computed and written to .dx files.
-Note that, e.g., \inlinecode{Esw\_mol\_NA} contains the interactions of every ``\inlinecode{NA}'' solvent molecule with the solute molecule, and \inlinecode{Esw\_mol\_NA} contains the interactions among ``\inlinecode{NA}'' solvent molecules as well as their interactions with all other solvents, divided by 2 to account for double counting.
+Note that, e.g., \inlinecode{Esw\_mol\_NA} contains the interactions of every ``\inlinecode{NA}'' solvent molecule with the solute molecule, and \inlinecode{Eww\_mol\_NA} contains the interactions among ``\inlinecode{NA}'' solvent molecules as well as their interactions with all other solvents, divided by 2 to account for double counting.
 The entropy will be computed using only the density of the first solvent molecule. \\
 For instance, a GIST calculation in salt water, including the first-order water entropy, can be run as follows:
 
