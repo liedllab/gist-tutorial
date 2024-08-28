@@ -522,7 +522,7 @@ run
 \end{lstlisting}
 In this code snippet, the first two lines load the topology and coordinates of the first frame of our MD simulation. 
 In the third line, we reimage the coordinates to the first box and center the biotin at the origin. 
-Then, we strip all water solvent molecules in the fourth line and write out a pdb file in the fith line. 
+Then, we strip all water solvent molecules in the fourth line and write out a pdb file in the fifth line. 
 Finally, we start the analysis with the "run" command.
 
 To decide on a grid size, find the extent (minimum and maximum) of the x-, \mbox{y-,} and z-coordinates of the molecule.
@@ -635,7 +635,7 @@ trajin complex/equil/EQUIL-DONE.rst
 strip ^2 parmout streptavidin/solvated.parm7
 trajout streptavidin/pre-equil.ncrst
 \end{lstlisting}
-Adapt the above input file for biotin by striping molecule 1 instead of 2 and replacing the path names in the \inlinecode{strip} and  \inlinecode{trajout} commands.
+Adapt the above input file for biotin by stripping the molecule 1 instead of 2 and replacing the path names in the \inlinecode{strip} and  \inlinecode{trajout} commands.
 Alternatively, we provide a small script named \software{cpptraj\_remove\_mol.sh} for this procedure.
 After that, use \software{equilibration.py -R} to run short restrained 
 equilibrations (where only the water is allowed to move) on the individual 
@@ -947,7 +947,7 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 
 \begin{table}[h]
 	\caption{Free energy contributions for the monomers and the dimer in kcal$\cdot$mol$^{-1}$. ``Diff'' is calculated as 
-	$E^\text{internal} + \Delta E^\text{GIST} - \Delta S^\text{scaled}$. ``total'' is calculated as 
+	$E^\text{internal} + \Delta E^\text{GIST} - T\Delta S^\text{scaled}$. ``total'' is calculated as 
 	``complex''-``streptavidin'' - ``biotin''.}\label{tab_dg_monomers_dimer}
 	\small
 	\begin{tabular}{@{}lrrrrr@{}}
@@ -1081,7 +1081,7 @@ molecule, is found in Figure~\ref{fig-binding-pocket}.
 	\end{subfigure}
 	\caption{Biotin in the streptavidin binding pocket, with isosurfaces based on the GIST calculation on the holo structure. 
 	Isolevels shown are ($\pm$) 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, and 3.0 \si{\kilo\calorie\per\mole\per\cubic\angstrom}, except for 
-	the positive energy, where they are divided by two to visually account for its overall lower density. The negative solvent energgy is shown in green, positive solvent energy in red and negative entropy in blue. Only voxels within \SI{4}{\angstrom} of biotin are shown.}
+	the positive energy, where they are divided by two to visually account for its overall lower density. The negative solvent energy is shown in green, positive solvent energy in red and negative entropy in blue. Only voxels within \SI{4}{\angstrom} of biotin are shown.}
 	\label{fig-binding-pocket}
 \end{figure}
 
@@ -1105,7 +1105,7 @@ isomesh sas, gist-gO, 0.1
 \end{figure}
 \subsection{Defining the binding pocket}
 Specific regions in a protein can be defined to calculate the thermodynamic quantities for that region.
-This is significant specially when calculating the properties of water that will be expelled when a ligand binds to the protein.\\
+This is significant especially when calculating the properties of water that will be expelled when a ligand binds to the protein.\\
 For example, voxels that are located within the binding pocket can be defined using a ligand solute molecule and a distance criteria. 
 In section~\ref{sec:binding_contributions}, we show how to integrate over regions such as the binding pocket. To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. Here, we show what this would look like for a radius of \SI{3.5}{\angstrom} around the heavy atoms of biotin. 
 
