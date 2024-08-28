@@ -444,8 +444,8 @@ The binding to the closed conformation of the tetramer has been estimated to hav
 
 \subsection{Tutorial data}
 We will use the crystal structure of streptavidin (PDB code: 1STP \cite{Weber1989-streptavidin-structure}) to start our calculations.
-For the beginners section, we will use the biotin ligand extracted from the crystal structure.
-For the second part, we will use the whole crystal structure.
+For section \ref{subsec:gist_biotin}, we will use the biotin ligand extracted from the crystal structure.
+For the second part in section \ref{subsec:gist_complex}, we will use the whole crystal structure.
 For the sake of simplicity, you can download prepared and solvated Amber topologies and structures based on 1STP by running
 \begin{lstlisting}[style=bash]
 git clone git@github.com:liedllab/gist-tutorial.git
@@ -453,6 +453,7 @@ git clone git@github.com:liedllab/gist-tutorial.git
 This will download the tutorial files, including both the manuscript and the examples in the \inlinecode{code} folder.
 
 \subsection{Running GIST for Biotin}
+\label{subsec:gist_biotin}
 In this example, we will be running a simple GIST calculation of the biotin solute molecule to get familiar with the usage of GIST in \software{cpptraj}.
 \subsubsection{System preparation}
 First, extract biotin from the crystal structure and generate a topology and coordinate file compatible with Amber or a simulation package of your choice.
@@ -596,6 +597,7 @@ gist.save_dx('A_dens','A.dx')
 Section~\ref{sec:visualization} discusses the visualization of OpenDX files.
 
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
+\label{subsec:gist_complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline potential pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation and Equilibration}
 If you want to skip this section, run 
