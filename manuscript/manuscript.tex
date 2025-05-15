@@ -308,13 +308,25 @@ gist gridcntr <x> <y> <z> griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 Additionally, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and reimaging to account for periodic boundary conditions.
 Often, the region of interest will be defined as the surrounding of a molecule, for example a ligand in the binding pocket or a whole protein. 
-Using \inlinecode{cpptraj's } \inlinecode{bounds} command, boundaries can be output to a file. For example, here is the command for a boundary of \SI{10}{\angstrom} around the ligand LIG:
+We recommend to use grids with a similiar size to the simulation box, as the GIST calculation will usually not be the time limiting step and a region of interest can then be chosen freely.
+However, if computation resources and disk space are limited, it might be beneficial to reduce the grid size.
+The minimum recommended grid size depends on the solvent and its interactions with the solute.
+Generally, a grid encompassing 2 to 3 solvent layers around the solute is sufficient. 
+For TIP3P water, this corresponds to a buffer zone of around \SI{10}{\angstrom} around the solute. 
+However, larger grids might be necessary for example for strongly charged solutes.
+
+
+
+Using \inlinecode{cpptraj's } \inlinecode{bounds} command, boundaries can be output to a file. 
+For example, here is the command for a boundary of \SI{10}{\angstrom} around the ligand LIG:
 
 \begin{lstlisting}[style=cpptraj]
 bounds :LIG dx 0.5 offset 20 name Grid out bounds.dat
 \end{lstlisting}
 \begin{minipage}{\linewidth} %TODO: maybe find a better way to keep listing on same page?
-Make sure that the \inlinecode{bounds} command is supplied with the exact same trajectory as in the GIST calculation. Any preprocessing steps need to match between the \inlinecode{bounds} command and the \inlinecode{gist} calculation. A helper script called \inlinecode{findcentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
+Make sure that the \inlinecode{bounds} command is supplied with the exact same trajectory as in the GIST calculation. 
+Any preprocessing steps need to match between the \inlinecode{bounds} command and the \inlinecode{gist} calculation. 
+A helper script called \inlinecode{findcentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
 ~
 \begin{lstlisting}[style=bash]
 python findcentroid.py -i structure.pdb
@@ -322,7 +334,8 @@ python findcentroid.py -i structure.pdb
 \end{minipage}
 \paragraph{Run GIST using cpptraj}
 GIST is implemented in \software{cpptraj} which requires the topology and the trajectory of the MD simulation to be analyzed.
-The command needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience. The basic command, assuming a grid centered at coordinates (x=\SI{10.5}{\angstrom}, y=\SI{20.1}{\angstrom}, z=\SI{30.1}{\angstrom}) and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, is:
+The command needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience.
+The basic command, assuming a grid centered at coordinates (x=\SI{10.5}{\angstrom}, y=\SI{20.1}{\angstrom}, z=\SI{30.1}{\angstrom}) and a grid size of $30\times30\times30$ voxels with \SI{0.5}{\angstrom} spacing, is:
 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr 10.5 20.1 30.1 griddim 30 30 30 \
@@ -477,7 +490,7 @@ A well-tested equilibration protocol can be found in the literature \cite{Roe202
 Now, you can run a restrained MD simulation based on the equilibrated structure of biotin for the subsequent GIST analysis.
 Restraints should be used during the MD because IST theory is defined for rigid solute molecules.
 In practice, this means that the solute molecule should not move significantly during the MD simulation.
-This is tipically achieved with harmonic positional restraints applied to the heavy atoms of the solute, tethering them to their initial or reference coordinates (e.g., from a crystal structure or an equilibrated structure). 
+This is typically achieved with harmonic positional restraints applied to the heavy atoms of the solute, tethering them to their initial or reference coordinates (e.g., from a crystal structure or an equilibrated structure). 
 In AMBER,  the harmonic restraint potential takes the form $U = k_r * (r - r_0)^2$ for each cartesian coordinate of each restrained atom, where $r_0$ is its reference position. 
 The force constant $k_r$ should be chosen strong enough to prevent significant deviation.
 Here, we apply a harmonic restraint of \SI{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms to keep the system in place. 
@@ -612,7 +625,7 @@ Section~\ref{sec:visualization} discusses the visualization of OpenDX files.
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 \label{subsec:gist_complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline potential pitfalls. We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
-\subsubsection{System Preparation and Equilibration}
+\subsubsection{System Preparation}
 If you want to skip this section, run 
 \begin{lstlisting}[style=bash]
 make equilibration-targets
@@ -620,10 +633,6 @@ make equilibration-targets
 in the code folder. This assumes that you have Python and Amber set up properly and that \software{pmemd.cuda} is in the PATH.
 
 The choice of initial structure is crucial to the GIST results.
-Crystal structures may not represent the dominant solution structure for a given target.
-In our example, we only use a single equilibrated structure.
-A more sophisticated approach would be to identify several dominant structures in the ensemble and run a separate MD simulation and GIST calculation for each structure. 
-Such dominant structures could either be identified from experimental ensembles or by clustering an unrestrained MD simulation. 
 When starting from an experimental structure, care has to be taken during the preparation step.
 Make sure to choose a proper protonation state for all titratable moieties.
 You will need to solvate your structure in a solvent box, which should be large enough to obtain unbiased long-range electrostatics and avoid solvent-mediated interactions of periodic images.
@@ -633,15 +642,42 @@ To investigate such positions, make sure that the number of explicitly placed so
 For cases where the exact occupation of such sites is unknown, it may be helpful to include grand-canonical Monte Carlo (GCMC) or nonequilibrium candidate Monte Carlo (NCMC) sampling steps in the equilibration or production stage \cite{Ge-GCMC2022,Melling-NCMC2023}.
 It is good practice to check your restrained MD simulation or solvent populations obtained by GIST to confirm whether all relevant sites were properly solvated.
 
+\subsubsection{Dealing with Conformational Heterogeneity}
+Crystal structures may not represent the dominant solution structure for a given target.
+In our example, we only use a single equilibrated structure.
+However, in practice the target may be flexible and a single structure may not be representative of the conformational ensemble.
+A more sophisticated approach would identify several dominant structures in the ensemble and run a separate MD simulation and GIST calculation for each structure. 
+Such dominant structures could either be identified from experimental ensembles or by clustering an unrestrained MD simulation. 
+When the probabilities of the different conformations are known, one can then use a weighted average of the GIST results to obtain a free energy of solvation for the ensemble \cite{Waibl2021-gist-antibodies}:
+\begin{equation}
+	\Delta G_{solv} = k_BT \cdot ln \int p(q_u) \cdot e^{ \frac{-\Delta G_solv(q_u)}{k_BT}} dq_u
+\end{equation}
+While averaging over multiple conformations has been shown to improve agreement with experimental observables \cite{Kamenik2020-gist-macrocycles,Waibl2021-gist-antibodies}, there are some caveats to this approach. 
+First, running GIST analyses for each conformation is computationally expensive and time-consuming, since each conformation needs their own MD simulation.
+In cases where the conformational ensemble is large, it may be difficult to sample all relevant conformations. 
+If accurate solvation thermodynamics are desired for such cases, other methods which inherently include the solute confromational ensemble may be more appropriate.
+Second, this approach suffers from the curse of exponential averaging, where the free energy of solvation is dominated by very few conformations due to the exponential reweighting \cite{Ekberg2021-exponential}.
+For cases where the number of sampled conformations is small and the samples are badly chosen, this can lead to large errors in the free energy of solvation.
+Often a simple weighted average is then a better estimator:
+\begin{equation}
+	\Delta G_{solv} = \frac{\sum_i p(q_u) \cdot \Delta G_solv(q_u)}{\sum_i p(q_u)}
+\end{equation}
+While dealing with conformational heterogeneity is therefore definitely possible with GIST, it is not trivial and remains challenging.
+However, GIST is at its best when the solute conformational ensemble is small and well-defined, such as in the case of small molecules or rigid protein-ligand complexes.
+It remains unmatched when one is interested in the local solvation properties of a single dominant conformation, e.g. to elucidate the solvation thermodynamics of crystal waters in a x-ray structure.
+
+
+Concerning the end-state approach shown in this tutorial, we of course don't need to only worry about the conformational heterogeneity of a single solute molecule, but about multiple similar conformational ensembles.
 When calculating solvation free energy differences between a complex and the corresponding monomers (the dissociated state), there are generally two approaches for dealing with configurational diversity. 
 In the first approach, the ensemble properties of each individual part and the complex are accounted for by running individual MD simulations for each.
 The second approach assumes sufficient overlap in the conformational space of the dissociated states and the complex. 
 Then, only configurations of the complex are sampled in a single MD simulation of the complex. 
 Calculations for the disassociated states are then run on the extracted structures from the complex configurations.
-One can choose to sample the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the conformations \cite{Genheden-EndState2012,Wang-MMPBSA2019}. 
+One can choose to sample the ensembles of the complex and dissociated states individually, or to sample only one of them and assume that there is sufficient overlap in the conformations \cite{Genheden-EndState2012,Wang-MMPBSA2019}. 
 
 Here, we do not include any sampling of the conformational states.
-It is therefore important that the molecular conformations in the complex and dissociated states match exactly.
+It is therefore important that the molecular conformations as well as the GIST grids in the complex and dissociated states match exactly.
+\subsubsection{Equilibration}
 Use the \software{equilibration.py} script (or your own procedure) to perform short NVT and NPT equilibration runs on the complex structure.
 Note that the equilibration script contains unrestrained NPT steps, because restraining two molecules at the same time might interfere with the pressure equilibration.
 Then, use \software{cpptraj} to produce biotin and streptavidin structures based on the complex by stripping the respective other molecule like this:
