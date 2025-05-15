@@ -308,13 +308,12 @@ gist gridcntr <x> <y> <z> griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 Additionally, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and reimaging to account for periodic boundary conditions.
 Often, the region of interest will be defined as the surrounding of a molecule, for example a ligand in the binding pocket or a whole protein. 
-We recommend to use grids with a similiar size to the simulation box, as the GIST calculation will usually not be the time limiting step and a region of interest can then be chosen freely.
+We recommend using GIST grids with a similar size to the simulation box, as the GIST calculation will usually not be the time limiting step and a region of interest can then be chosen freely in post-analysis.
 However, if computation resources and disk space are limited, it might be beneficial to reduce the grid size.
 The minimum recommended grid size depends on the solvent and its interactions with the solute.
 Generally, a grid encompassing 2 to 3 solvent layers around the solute is sufficient. 
 For TIP3P water, this corresponds to a buffer zone of around \SI{10}{\angstrom} around the solute. 
-However, larger grids might be necessary for example for strongly charged solutes.
-
+Larger grids might be necessary, for example for strongly charged solutes.
 
 
 Using \inlinecode{cpptraj's } \inlinecode{bounds} command, boundaries can be output to a file. 
@@ -375,7 +374,13 @@ The water boxes were prepared with \software{tleap} to a size of \SI{100}{\angst
 
 Due to the different sizes of the boxes, the reference energies used in this tutorial may not align with those specified in the Amber manual. 
 Generally, it is advisable to conduct your own reference calculations, especially for systems that are either very large or very small. 
-The reference values can be extracted from MD trajectories of bulk solvent by calculating the density-weighted average energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$.  
+The reference values can be extracted from unrestrained MD trajectories of pure bulk solvent by calculating the average potential energy per solvent molecule ($E_{ww, norm}$) and the average solvent density $\rho_0$:
+\begin{equation}
+	E_{ww, norm} = \frac{\bar{E}_{pot,\ total}}{N_{WAT}}
+\end{equation}	
+\begin{equation}
+	\rho_0 = \frac{N_{WAT}}{\bar{V}_{box}}
+\end{equation}
 It is recommended that the size of the reference solvent box closely matches that of the production system.
 While the impact on the density is not as pronounced, deviations from the production settings can lead to differences of up to 0.005 kcal/mol in the energy per solvent molecule ($E_{ww, norm}$) for water boxes. 
 These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
