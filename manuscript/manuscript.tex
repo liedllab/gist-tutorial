@@ -780,36 +780,53 @@ After that, check whether your free energy contributions become negligible far a
 In a plot like Figure~\ref{fig_ewwref} based on the \inlinecode{A\_dens} column, the values should tend to zero.
 However, it is more informative to plot the cumulative free energy contribution against the distance to the solute molecule, to check the convergence (see Figure~\ref{fig_radial_convergence}).
 If the curve flattens out, the converged value is your final $\dgsolv$\@.
-If the curve diverges even for large integration distances you might need to tweak the $E_{ww}$ reference, or introduce a reference value for the entropy.
-
+If the curve diverges even for large integration distances, it depends on which of the contributing parts diverges. 
 \begin{lstlisting}[style=python]
-from gisttools.gist import load_gist_file
-import matplotlib.pyplot as plt
-import numpy as np
-# adapt eww_ref according to the used solvent model! 
-gist = load_gist_file('gist.dat',
-    struct='solute-centered.pdb', eww_ref=-9.533)
-bins, (dg, esw, eww, s) = gist.rdf(
-    ['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
-    bins=100, rmax=20., normalize='none')
-plt.plot(bins, np.cumsum(eww), label='Eww')
-plt.plot(bins, np.cumsum(esw), label='Esw')
-plt.plot(bins, np.cumsum(dg), label='dG')
-plt.plot(bins, np.cumsum(s), label='dS')
-plt.legend()
-plt.xlabel("distance cutoff []")
-plt.ylabel("free energy contribution [kcal/mol]")
-\end{lstlisting}
+	from gisttools.gist import load_gist_file
+	import matplotlib.pyplot as plt
+	import numpy as np
+	# adapt eww_ref according to the used solvent model! 
+	gist = load_gist_file('gist.dat',
+		struct='solute-centered.pdb', eww_ref=-9.5398)
+	bins, (dg, esw, eww, s) = gist.rdf(
+		['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
+		bins=100, rmax=20., normalize='none')
+	plt.plot(bins, np.cumsum(eww), label='$\Delta$E$_{ww}$')
+	plt.plot(bins, np.cumsum(esw), label='$\Delta$E$_{sw}$')
+	plt.plot(bins, np.cumsum(dg), label='$\Delta$G')
+	plt.plot(bins, np.cumsum(s), label='T$\Delta$S')
+	plt.legend()
+	plt.xlabel("distance cutoff [$\AA$]")
+	plt.ylabel("free energy contribution [kcal/mol]")
+	\end{lstlisting}
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
-Especially the solvent-solvent energy is not perfectly flat, indicating that the reference value is not optimal.
-%but is also complicated because the solute is charged.
-Both the entropy and $E_{sw}$ can be considered converged around \SI{10}{\angstrom}.
-While this is not true for $E_{ww}$, we will see below that the energy difference upon binding converges more readily than its individual contributions.
-
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\linewidth]{figures/A_E_S_convergence.eps}
+	\includegraphics[width=0.8\linewidth]{figures/biotin-contributions_noref.png}
 	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute molecule. All quantities are cumulative, i.e., summed up to the respective radius. Computed from the biotin calculation.}\label{fig_radial_convergence}
+\end{figure}
+Here we see two effects: First, that the solute-solvent energy $E_{sw}$ converges only slowly, due to the charged nature of biotin.
+Second, that the solvent entropy diverges, even at large distances.
+Most of the time, this happens due to a bias in the Nearest-Neighbor entropy calculation\cite{Chen2021,Huggins2014-entropy}.
+This can be fixed by either calculating the bias per water molecule (as was done in \cite{Chen2021}) or referencing the entropy in the same manner as the $E_{ww, norm}$:
+\begin{lstlisting}[style=python]
+	def reference_entropy(gf):
+    if 'dTSsix_unref_norm' not in gf.data.columns:
+        gf['dTSsix_unref_norm'] = gf['dTSsix_norm']
+        gf['dTSsix_unref_dens'] = gf['dTSsix_dens']
+    refval = gf.detect_reference_value('dTSsix_unref_dens')
+    gf['dTSsix_norm'] = gf.get_referenced('dTSsix_unref_norm', refval)
+    gf['dTSsix_dens'] = gf.get_referenced('dTSsix_unref_dens', refval)
+
+reference_entropy(biotin)
+\end{lstlisting}
+When we recreate the plot from Figure~\ref{fig_radial_convergence} with the referenced entropy in Figure~\ref{fig_radial_convergence_ref}, we see that the divergence is removed.
+
+While $E_{ww}$ converges nicely here when using the tabulated $E_{ww, norm}$, if it diverges you might need to tweak the $E_{ww}$ reference by either using the automatic referencing, using a different tabulated $E_{ww, norm}$ value or running a pure bulk solvent reference calculation.
+\begin{figure}
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/biotin-contributions_ref.png}
+	\caption{Convergence of $\dgsolv$ and its contributions with increasing distance to the solute molecule. The entropy was referenced, so it converges to zero for voxels far away from the solute.}\label{fig_radial_convergence_ref}
 \end{figure}
 
 \subsubsection{Visualizing $\dgsolv$}
