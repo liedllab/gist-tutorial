@@ -279,7 +279,12 @@ We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
 Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
 Its usage and some examples were shown in a previous tutorial on GIST \cite{Ramsey2016}.
-
+For help with the listed cpptraj commands, AMBER atom mask syntax and other AMBER-specific commands, we recommend the following webresources:\\
+\begin{itemize}
+\item The website https://amberhub.chpc.utah.edu/ which is managed by the Cheatham III group, 
+\item The cpptraj manual at https://raw.githubusercontent.com/Amber-MD/cpptraj/master/doc/CpptrajManual.pdf 
+\item and the AMBER manual \cite{amber24} at https://ambermd.org/Manuals.php.
+\end{itemize}
 \pagebreak %TODO: pagebreak, maybe remove these by better formatting
 
 \section{Running GIST}
@@ -317,12 +322,12 @@ For TIP3P water, this corresponds to a buffer zone of around \SI{10}{\angstrom} 
 Larger grids might be necessary, for example for strongly charged solutes.
 
 Using \inlinecode{cpptraj's } \inlinecode{bounds} command, boundaries can be output to a file. 
-For example, here is the command for a boundary of \SI{10}{\angstrom} around the ligand LIG:
-
+For example, here is the command for a boundary of \SI{15}{\angstrom} around the ligand LIG:
 \begin{lstlisting}[style=cpptraj]
-bounds :LIG dx 0.5 offset 20 name Grid out bounds.dat
+bounds :LIG dx 0.5 offset 30 name Grid out bounds.dat
 \end{lstlisting}
-\begin{minipage}{\linewidth} %TODO: maybe find a better way to keep listing on same page?
+The atom mask \inlinecode{:LIG} specifies the residue named LIG to build the boundaries around, with dx and offset providing the actual dimensions of the boundaries, i.e. an offset of 30 times 0.5\AA.
+\begin{minipage}{\linewidth} 
 Make sure that the \inlinecode{bounds} command is supplied with the exact same trajectory as in the GIST calculation. 
 Any preprocessing steps need to match between the \inlinecode{bounds} command and the \inlinecode{gist} calculation. 
 A helper script called \inlinecode{findcentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
@@ -471,7 +476,7 @@ For the sake of simplicity, you can download prepared and solvated Amber topolog
 git clone git@github.com:liedllab/gist-tutorial.git
 \end{lstlisting}
 This will download the tutorial files, including both the manuscript and the examples in the \inlinecode{code} folder.
-
+Additionally, a link to download the original MD trajectory files is provided in the GitHub repository.
 \subsection{Running GIST for Biotin}
 \label{subsec:gist_biotin}
 In this example, we will be running a simple GIST calculation of the biotin solute molecule to get familiar with the usage of GIST in \software{cpptraj}.
@@ -565,11 +570,13 @@ The grid parameters can be directly calculated using \software{cpptraj's} \inlin
 parm solvated.parm7
 trajin md-01.nc 1 1 1
 autoimage !(:WAT) origin
-bounds !(:WAT) dx 0.5 offset 30 name MyGrid out bounds.dat
+bounds !(:WAT) dx 0.5 offset 30 name Grid out bounds.dat
 run
 \end{lstlisting}
 In the above snippet, we calculate the bounds around the whole protein for a grid with \SI{0.5}{\angstrom} side-length voxels and a buffer zone of \SI{15.0}{\angstrom}. 
-Note that the offset is given in terms of number of additional voxels, not length dimension. By varying the atom mask in the \inlinecode{bound} command, it is possible to center the grid on a region of interest, similar to the \software{findcentroid.py} script.
+The atom mask !(:WAT) specifies that the grid should be calculated around all atoms that are not water residues.
+Note that the offset is given in terms of number of additional voxels, not length dimension. 
+By varying the atom mask in the \inlinecode{bound} command, it is possible to center the grid on a region of interest, similar to the \software{findcentroid.py} script.
 
 Now, you can run the actual GIST analysis.
 Reimage and center the solute molecule as above, to verify that its position matches the grid parameters you decided on.
