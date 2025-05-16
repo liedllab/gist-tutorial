@@ -306,7 +306,8 @@ The grid center is defined by its center coordinates \inlinecode{gridcntr}, the 
 \begin{lstlisting}[style=cpptraj]
 gist gridcntr <x> <y> <z> griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
-Additionally, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and reimaging to account for periodic boundary conditions.
+If the solute is already centered at the origin (0, 0, 0), the grid center does not need to be specified.
+As such, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and reimaging to account for periodic boundary conditions.
 Often, the region of interest will be defined as the surrounding of a molecule, for example a ligand in the binding pocket or a whole protein. 
 We recommend using GIST grids with a similar size to the simulation box, as the GIST calculation will usually not be the time limiting step and a region of interest can then be chosen freely in post-analysis.
 However, if computation resources and disk space are limited, it might be beneficial to reduce the grid size.
@@ -314,7 +315,6 @@ The minimum recommended grid size depends on the solvent and its interactions wi
 Generally, a grid encompassing 2 to 3 solvent layers around the solute is sufficient. 
 For TIP3P water, this corresponds to a buffer zone of around \SI{10}{\angstrom} around the solute. 
 Larger grids might be necessary, for example for strongly charged solutes.
-
 
 Using \inlinecode{cpptraj's } \inlinecode{bounds} command, boundaries can be output to a file. 
 For example, here is the command for a boundary of \SI{10}{\angstrom} around the ligand LIG:
@@ -822,7 +822,9 @@ reference_entropy(biotin)
 \end{lstlisting}
 When we recreate the plot from Figure~\ref{fig_radial_convergence} with the referenced entropy in Figure~\ref{fig_radial_convergence_ref}, we see that the divergence is removed.
 
-While $E_{ww}$ converges nicely here when using the tabulated $E_{ww, norm}$, if it diverges you might need to tweak the $E_{ww}$ reference by either using the automatic referencing, using a different tabulated $E_{ww, norm}$ value or running a pure bulk solvent reference calculation.
+While $E_{ww}$ converges nicely here when using the tabulated $E_{ww, norm}$, if it diverges one might need to tweak the $E_{ww}$ reference by either using the automatic referencing, using a different tabulated $E_{ww, norm}$ value or running a pure bulk solvent reference calculation.
+The most common error for strong divergence of $E_{ww}$ is that the reference value is set to a value of a different solvent model.
+
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/biotin-contributions_ref.png}
