@@ -15,6 +15,8 @@ If you notice any issues or have suggestions, please raise them as an [Issue](ht
 * [numpy](https://numpy.org/) (Tested with version 1.23.5)
 * [pandas](pandas.pydata.org) (Tested with version 1.5.3)
 
+The molecular dynamics simulations used in the tutorial are hosted under the DOI [10.48323/4mbrd-67m83](https://doi.org/10.48323/4mbrd-67m83)
+
 The tutorial code is provided as a Jupyter Notebook at `code/tutorial-gist.ipynb`.<br/> 
 We recommend using [JupyterLab](https://jupyter.org/) or [VS Code](https://code.visualstudio.com/) (with the Jupyter extensions) for editing and working with the notebook.
 
