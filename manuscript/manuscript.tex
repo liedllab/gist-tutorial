@@ -275,6 +275,7 @@ Furthermore, a recent Python version (3.6 or newer) should be available with the
 	\item \software{pandas} (\url{https://pandas.pydata.org/}, $\geq$ 1.5.3) \cite{pandas-2023_8239932}
 \end{itemize}
 If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
+Additionally, the MD simulation files and raw GIST output files can be found at \url{https://doi.org/10.48323/4mbrd-67m83}, to reproduce the results shown in this tutorial.
 We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
 Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
@@ -476,7 +477,7 @@ For the sake of simplicity, you can download prepared and solvated Amber topolog
 git clone git@github.com:liedllab/gist-tutorial.git
 \end{lstlisting}
 This will download the tutorial files, including both the manuscript and the examples in the \inlinecode{code} folder.
-Additionally, a link to download the original MD trajectory files is provided in the GitHub repository.
+Additionally, the original MD trajectory files and raw GIST output files are provided under the DOI \url{https://doi.org/10.48323/4mbrd-67m83}.
 \subsection{Running GIST for Biotin}
 \label{subsec:gist_biotin}
 In this example, we will be running a simple GIST calculation of the biotin solute molecule to get familiar with the usage of GIST in \software{cpptraj}.
