@@ -270,7 +270,7 @@ While no programming experience is necessary to follow the tutorial, a basic und
 \subsection{Software/system requirements}
 The main implementation of GIST is part of the MD analysis software \software{cpptraj} released with AmberTools \cite{amber24, Case2023-ambertools}.
 A recent version of \software{cpptraj} should be used. We recommend using at least version 6.24, which was released with AmberTools24 \cite{Case2023-ambertools}. 
-An overview of how to work with \software{cpptraj} is provided in the program's documentation \cite{cpptraj_doc}, AMBER tutorials \cite{amber_tut_cpptraj} and on the AMBER-hub website \cite{amber_hub}.
+An overview of how to work with \software{cpptraj} is provided in the program's documentation \cite{cpptraj_doc}, AMBER manual \cite{amber24}, AMBER tutorials \cite{amber_tut_cpptraj} and on the AMBER-hub website \cite{amber_hub}.
 
 The Amber simulation engine is used in this tutorial to run the MD simulations.
 While Amber is free for non-commercial use, it might not always be available in industrial settings.
@@ -286,18 +286,12 @@ Furthermore, a recent Python version (3.6 or newer) should be available with the
 	\item \software{numpy} (\url{https://numpy.org/}, $\geq$ 1.23.5) \cite{harris2020-numpy}
 	\item \software{pandas} (\url{https://pandas.pydata.org/}, $\geq$ 1.5.3) \cite{pandas-2023_8239932}
 \end{itemize}
-If the reader prefers to skip the MD and GIST calculation, we also provide the GIST output files with this tutorial, such that the post-processing can be done without any expensive calculations.
+If the reader prefers to skip the MD and GIST calculation, GIST output files are provided with this tutorial, such that the post-processing can be done without any expensive calculations.
 Additionally, the MD simulation files and raw GIST output files can be found at \url{https://doi.org/10.48323/4mbrd-67m83}, to reproduce the results shown in this tutorial.
 We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021-jupyter} with the presented analyses. 
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
 Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
 Its usage and some examples were shown in a previous tutorial on GIST \cite{Ramsey2016}.
-For help with the listed cpptraj commands, AMBER atom mask syntax and other AMBER-specific commands, we recommend the following webresources:\\
-\begin{itemize}
-\item The website https://amberhub.chpc.utah.edu/ which is managed by the Cheatham III group, 
-\item The cpptraj manual at https://raw.githubusercontent.com/Amber-MD/cpptraj/master/doc/CpptrajManual.pdf 
-\item and the AMBER manual \cite{amber24} at https://ambermd.org/Manuals.php.
-\end{itemize}
 \pagebreak %TODO: pagebreak, maybe remove these by better formatting
 
 \section{Running GIST}
