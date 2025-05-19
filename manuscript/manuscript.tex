@@ -839,7 +839,7 @@ The most common error for strong divergence of $E_{ww}$ is that the reference va
 \end{figure}
 
 \subsubsection{Visualizing $\dgsolv$}
-Next, we visualize the 3-dimensional contributions to the free energy of hydration, as well as the entropy and enthalpy contributions.
+Next, we visualize the enthalpic contributions to the free energy of solvation.
 You can use PyMol\cite{pymol} or VMD\cite{vmd} to visualize the .dx files from GIST\@.
 With \software{gisttools}, you can create one using e.g., \inlinecode{gist.save\_dx('A\_dens', 'A\_dens.dx')}.
 It might also be interesting to visualize the average energy of a water solvent molecule at each grid voxel.
@@ -850,6 +850,7 @@ An OpenDX file can be produced using \software{gisttools} as follows:
 
 \begin{lstlisting}[style=python]
 import gisttools as gt
+# Load the GIST data, make sure to set the correct reference energy
 gist = gt.gist.load_gist_file('gist.dat',
     struct='solute-centered.pdb', eww_ref=-9.533)
 gist['E_norm'] = gist['Eww_norm'] * 2 + gist['Esw_norm']
@@ -857,15 +858,17 @@ gist.loc[gist['population'] == 0, 'E_norm'] = 0
 gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 \end{lstlisting}
 The OpenDX files can then be imported into your molecular viewer of choice.
-A visualization of entropy and energy contributions to the free energy of solvation of the streptavidin binding pocket is shown in Figure~\ref{fig_binding_pocket_pymol}. 
+A visualization of enthalpy contributions to the free energy of solvation of the streptavidin binding pocket is shown in Figure~\ref{fig_binding_pocket_pymol}. 
+Enthalpywise, the streptavidin binding pocket is notably hydrophobic (red) in most parts except for where biotin is also interacting polarly with the protein (green).
+Nothe that this is "norm" data, so not density-weighted but rather comparing voxels on a per-molecule basis.
+The surfaces are therefore disjointed since even voxels seldomly sampled by the water are shown.
 PyMOL input scripts to generate such visualizations are available in the GitHub repository for this tutorial.
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/binding_pocket_norm_quants.png}
-	\caption{Free energy contributions in the streptavidin binding pocket. Red: high solvent energy (at +2.5 
-	kcal/mol/molecule). Green: low solvent energy (at -2.5 kcal/mol/molecule). Blue: low solvent entropy $T\Delta S^{six}$ 
-	(at -2.5 kcal/mol/molecule).}\label{fig_binding_pocket_pymol}
+	\caption{Enthalpy contributions using "norm" data in the streptavidin binding pocket overlayed with biotin. Red: high solvent energy (at +3 
+	kcal/mol/molecule). Green: low solvent energy (at -3 kcal/mol/molecule). The enthalpy density is based on the apo structure and is shown only when within 1.5\AA of biotin.}\label{fig_binding_pocket_pymol}
 \end{figure}
 
 \subsubsection{Contribution of Hydration to Binding}
@@ -1190,7 +1193,8 @@ isomesh sas, gist-gO, 0.1
 Specific regions in a protein can be defined to calculate the thermodynamic quantities for that region.
 This is significant especially when calculating the properties of water that will be expelled when a ligand binds to the protein.\\
 For example, voxels that are located within the binding pocket can be defined using a ligand solute molecule and a distance criteria. 
-In section~\ref{sec:binding_contributions}, we show how to integrate over regions such as the binding pocket. To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. Here, we show what this would look like for a radius of \SI{3.5}{\angstrom} around the heavy atoms of biotin. 
+In section~\ref{sec:binding_contributions}, we show how to integrate over regions such as the binding pocket. 
+To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. Here, we show what this would look like for a radius of \SI{3.5}{\angstrom} around the heavy atoms of biotin. 
 
 \begin{lstlisting}[style=python]
 import gisttools as gt
@@ -1372,7 +1376,7 @@ Furthermore, a long-range correction term is computed that accounts for the cont
 	E_\text{lj} = E_\text{lj,\ short} +  E_\text{lj,\ corr}
 \end{equation}
 
-\section{Checklists and Cheat Sheats} \label{sec:checklists}
+\section{Checklists, Cheat Sheats ad Flowcharts} \label{sec:checklists}
 %Tutorials do not necessarily require the use of a checklist as in Best Practices documents; however, they can include these if desired.
 %Several useful checklist formats are available, with examples presented in \texttt{sample-document.tex} in \url{github.com/livecomsjournal/article_templates/templates}.
 %One example is shown here.
@@ -1567,7 +1571,16 @@ order & & Average tetrahedral order parameter \\
 \end{tabularx}
 \end{checklist}
 \end{Checklists*}
+
+\begin{Checklists*}
+	\includegraphics[width=0.9\linewidth,page=1]{figures/flowchart_GIST.pdf}
+\end{Checklists*}
+	\pagebreak
+	\begin{Checklists*}
+	\includegraphics[width=0.9\linewidth,page=2]{figures/flowchart_GIST.pdf}
+\end{Checklists*}
 \FloatBarrier
+
 \section*{Author Contributions}
 
 %%%%%%%%%%%%%%%%
