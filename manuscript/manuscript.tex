@@ -176,10 +176,12 @@ For example, solvation thermodynamics govern aqueous solubility and hydrophobic 
 Grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012} is a method to compute the free energy of solvation, with applications in the context of drug design and biophysical property description.
 It computes the solvent density from an MD trajectory and estimates localized entropic and enthalpic contributions on a grid around the solute molecule.
 Since these contributions are spatially resolved, GIST improves interpretability and offers more detailed insights into the solvation of the investigated solute.
-A schematic of this is shown in Figure~\ref{fig:carbazole}.  
+A schematic of this is shown in Figure~\ref{fig:carbazole}.
+The enthalpic contributions are computed from the intermolecular interactions of the solvent with the solute and as well as other solvent. 
+As they are derived from the force field, pairwise additivity of the underlying intermolecular interactions is assumed.
 The entropy is computed from orientational and translational distributions of the solvent around the solute molecule, in a first-order approximation. 
 The calculation of higher-order entropy terms is computationally demanding but was realized in recent works \cite{Nguyen2016-gist-second-order, Waibl2021-gist-salt}.
-It has been found that solvation free energies of small molecule solutes can be computed at high accuracy using linear scaling factors for the higher-order terms, such as $\Delta S = 0.6\, \Delta S^\text{1st-order}$ for water \cite{Chen2021,Waibl2022-gist-solvents}.
+However, it has been found that solvation free energies of small molecule solutes can be computed at high accuracy using linear scaling factors for the higher-order terms, such as $\Delta S = 0.6\, \Delta S^\text{1st-order}$ for water \cite{Chen2021,Waibl2022-gist-solvents}.
 Since its initial development, GIST has been used to describe the thermodynamics of water displacement in protein binding pockets \cite{Nguyen2016-gist-second-order,Ramsey2016,Balius2017-gist-ligand-discovery,Hufner-Wulsdorf2020-gist-drug-design}.
 It has been used for a large-scale investigation of the hydration properties of proteins found in SARS-CoV-2 \cite{Olson2020-covid-gist}.
 Furthermore, recent works used GIST to describe biophysical properties of serine proteases \cite{Kraml2019-gigist}, macrocycles \cite{Kamenik2020-gist-macrocycles}, or antibody fragements \cite{Waibl2021-gist-antibodies}.
@@ -208,7 +210,8 @@ Molecular dynamics (MD) simulations provide an accurate way of modeling solvent 
 The free energy of solvation can be calculated in a statistically rigorous way using alchemical methods \cite{Liu2016-md-solubility,Mobley2009-dgsolv,Mobley2014-freesolv} such as free energy perturbation (FEP) \cite{Zwanzig1954-reweighting} or thermodynamic integration (TI) \cite{Kirkwood1935-ti}.
 However, those methods are unable to provide a spatial interpretation of the results.
 Furthermore, splitting the free energy into enthalpy and entropy contributions is challenging \cite{Peter2004-alchemical-entropy}.\\
-Methods derived from statistical mechanics bridge this gap by providing three-dimensional resolution.
+Methods derived from statistical mechanics bridge this gap by providing three-dimensional resolution. 
+It is important to note that while the total solvation free energy is a well-defined thermodynamic quantity, its spatial decomposition is not unique and depends on the theoretical framework\cite{Persson02092022}.
 These methods most commonly are based on either the Ornstein–Zernike (OZ) equation, or \cite{Hansen2013-simple-liquids} inhomogeneous fluid solvation theory (IST) \cite{Lazaridis1998}.
 The most important example of OZ-based methods is the reference interaction site model (RISM) \cite{Chandler1972-rism} as well as its extension to three dimensions (3D-RISM) \cite{Kovalenko1998-3drism}.
 Those methods compute the atomic solvent distributions by self-consistently solving the OZ integral equation to predict solvation thermodynamics.
@@ -219,7 +222,8 @@ The main limitation of those methods is that the entropy is approximated through
 Within GIST and other more recent methods, these entropy contributions are calulated via a k-nearest-neighbor (kNN) approach.  
 Due to the high computational effort required to converge the higher order terms, the entropy expansion is usually truncated after the first or, sometimes, the second \cite{Nguyen2016-gist-second-order,Waibl2022-gist-solvents} term, thereby introducing an error.
 While there are approximations available to deal with those problems, most noteworthy the mutual information expansion (MIE) and Maximum Information Spanning Tree (MIST) approaches, they are not currently implemented in GIST. 
-Recent kNN implementations to calculate solvation entropy further improve phase space sampling by relabeling the solvent molecules in the simulation, treating the solvent molecules as distinguishable \cite{reinhard2007estimation,heinz2019computing,heinz2021permut,fogolari2021optimal}. For a recent review of kNN methods to calculate entropy in a molecular context, see \cite{fogolari2024k}.
+Recent kNN implementations to calculate solvation entropy further improve phase space sampling by relabeling the solvent molecules in the simulation, treating the solvent molecules as distinguishable \cite{reinhard2007estimation,heinz2019computing,heinz2021permut,fogolari2021optimal}. 
+For a recent review of kNN methods to calculate entropy in a molecular context, see \cite{fogolari2024k}.
 Furthermore, IST does not consider the internal degrees of freedom of the solvent.
 Therefore, IST-based approaches currently can only be used with sufficiently rigid solvents, although a recent paper provides the theory needed to generalize to flexible solvent molecules \cite{gilson2024freeenergy}.
 Nevertheless, they have been applied on a wide variety of problems involving both small molecules and biological systems as solute molecules.\\
@@ -229,7 +233,15 @@ This implies a higher versatility, but also puts more responsibility on the user
 Since the density is computed from an explicit solvent MD simulation, GIST provides an accurate picture of solvation at an atomistic level, even for demanding systems such as drug binding sites in proteins.
 While the need for MD simulations comes at a large computational cost, GIST is still more efficient than end-state approaches such as TI \cite{Kirkwood1935-ti} or FEP \cite{Zwanzig1954-reweighting}, with applications to large systems such as serine proteases \cite{Kraml2019-gigist} or antibody fragments \cite{Waibl2021-gist-antibodies}.
 On the other hand, the first-order approximation means that the solvation entropy is less accurately described than in TI or FEP \cite{Chen2021,Waibl2021-gist-salt}. 
-Similar to the self-consistent integral theories, GIST only considers a single solute conformation and  multiple computations of representative structures are necessary to describe ensemble properties. 
+Similar to the self-consistent integral theories, GIST only considers a single solute conformation and multiple computations of representative structures are necessary to describe ensemble properties. 
+
+Aside from the previously mentioned methods, there is a large variety of other methods to compute enthalpy and entropy contributions to the solvation free energy, as recently reviewed \cite{Heyden2019-localsolvation,Mukherjee2022-ReviewSpatialWatersBiomolecule}.
+Approaches like SZMAP \cite{Bayden2015-SZMAP} trade the accuracy of all-atom MD simulation for speed by using a faster probe-based approach.
+SPAM ("maps" in reverse) is more akin to WaterMaps, investigating distinct hydration sites based on high local water densities \cite{Cui2013-SPAM}. 
+However, it approximates the water entropies from the water interaction enthalpy distributions.
+Another group of methods builds on the cell theory for liquids \cite{henchman2003partition}, which derives independent effective potentials for each molecule in its' neighbors mean field.
+Conceptually close to GIST is Grid Cell Theory (GCT), which also adopts a grid-based approach but differs in the assumptions made its' entropy calculations \cite{Gerogiokas2014-GCT}.
+More recently, Multiscale Cell Correlation (MCC) has been developed, generalizing and pushing the method from simple liquids up to large biomolecules \cite{henchman2007free, Hensen2014, Ali2021-hc, Kalayan2022-MCCBiomol}. 
 
 \subsection{Scope}
 The purpose of this tutorial is to help users run GIST calculations and interpret the results.

@@ -736,6 +736,20 @@ year = {2012}
  issn = {1549-9618, 1549-9626},
 }
 
+@article{Persson02092022,
+author = {Rasmus A. X. Persson and},
+title = {Note on the physical basis of spatially resolved thermodynamic functions},
+journal = {Molecular Simulation},
+volume = {48},
+number = {13},
+pages = {1186--1191},
+year = {2022},
+publisher = {Taylor \& Francis},
+doi = {10.1080/08927022.2022.2074994},
+URL = {https://doi.org/10.1080/08927022.2022.2074994},
+eprint = {https://doi.org/10.1080/08927022.2022.2074994}
+}
+
 @book{ben-naim-book,
  author = {Ben-Naim, Arieh},
  title = {Solvation Thermodynamics},
@@ -1055,6 +1069,95 @@ eprint = {https://doi.org/10.1021/ct500415g}
  source = {Crossref},
  url = {https://doi.org/10.1002/aic.690210607},
  issn = {0001-1541, 1547-5905},
+}
+@article{Hensen2014,
+author = {Hensen, Ulf and Gräter, Frauke and Henchman, Richard H.},
+title = {Macromolecular Entropy Can Be Accurately Computed from Force},
+journal = {Journal of Chemical Theory and Computation},
+volume = {10},
+number = {11},
+pages = {4777-4781},
+year = {2014},
+doi = {10.1021/ct500684w},
+note ={PMID: 26584364},
+URL = {https://doi.org/10.1021/ct500684w},
+eprint = {https://doi.org/10.1021/ct500684w}
+}
+
+@article{henchman2003partition,
+  title={Partition function for a simple liquid using cell theory parametrized by computer simulation},
+  author={Henchman, Richard H},
+  journal={The Journal of chemical physics},
+  volume={119},
+  number={1},
+  pages={400--406},
+  year={2003},
+  publisher={American Institute of Physics}
+}
+
+@article{henchman2007free,
+  title={Free energy of liquid water from a computer simulation via cell theory},
+  author={Henchman, Richard H},
+  journal={The Journal of chemical physics},
+  volume={126},
+  number={6},
+  year={2007},
+  publisher={AIP Publishing}
+}
+
+@article{Bayden2015-SZMAP,
+author = {Bayden, Alexander S. and Moustakas, Demetri T. and Joseph-McCarthy, Diane and Lamb, Michelle L.},
+title = {Evaluating Free Energies of Binding and Conservation of Crystallographic Waters Using SZMAP},
+journal = {Journal of Chemical Information and Modeling},
+volume = {55},
+number = {8},
+pages = {1552-1565},
+year = {2015},
+doi = {10.1021/ci500746d},
+note ={PMID: 26176600},
+URL = {https://doi.org/10.1021/ci500746d},
+eprint = {https://doi.org/10.1021/ci500746d}
+}
+
+@ARTICLE{Ali2021-hc,
+  title     = "Energy-entropy method using multiscale cell correlation to
+               calculate binding free energies in the {SAMPL8} host-guest
+               challenge",
+  author    = "Ali, Hafiz Saqib and Chakravorty, Arghya and Kalayan, Jas and de
+               Visser, Samuel P and Henchman, Richard H",
+  abstract  = "Free energy drives a wide range of molecular processes such as
+               solvation, binding, chemical reactions and conformational
+               change. Given the central importance of binding, a wide range of
+               methods exist to calculate it, whether based on scoring
+               functions, machine-learning, classical or electronic structure
+               methods, alchemy, or explicit evaluation of energy and entropy.
+               Here we present a new energy-entropy (EE) method to calculate
+               the host-guest binding free energy directly from molecular
+               dynamics (MD) simulation. Entropy is evaluated using Multiscale
+               Cell Correlation (MCC) which uses force and torque covariance
+               and contacts at two different length scales. The method is
+               tested on a series of seven host-guest complexes in the SAMPL8
+               (Statistical Assessment of the Modeling of Proteins and Ligands)
+               ``Drugs of Abuse'' Blind Challenge. The EE-MCC binding free
+               energies are found to agree with experiment with an average
+               error of 0.9 kcal mol-1. MCC makes clear the origin of the
+               entropy changes, showing that the large loss of positional,
+               orientational, and to a lesser extent conformational entropy of
+               each binding guest is compensated for by a gain in orientational
+               entropy of water released to bulk, combined with smaller
+               decreases in vibrational entropy of the host, guest and
+               contacting water.",
+  journal   = "J. Comput. Aided Mol. Des.",
+  publisher = "Springer Science and Business Media LLC",
+  volume    =  35,
+  number    =  8,
+  pages     = "911--921",
+  month     =  aug,
+  year      =  2021,
+  keywords  = "Entropy; Free energy methods; Host-guest binding; Molecular
+               dynamics simulation",
+  copyright = "https://creativecommons.org/licenses/by/4.0",
+  language  = "en"
 }
 
 @article{Pratt2016-hydrophobicity,
@@ -1399,6 +1502,79 @@ year = {2022}
 	pages={290a},
 	year={2021},
 	publisher={Elsevier}
+}
+
+@article{Heyden2019-localsolvation,
+author = {Heyden, Matthias},
+title = {Disassembling solvation free energies into local contributions—Toward a microscopic understanding of solvation processes},
+journal = {WIREs Computational Molecular Science},
+volume = {9},
+number = {2},
+pages = {e1390},
+keywords = {entropy, free energy, molecular dynamics, solvation, water},
+doi = {https://doi.org/10.1002/wcms.1390},
+url = {https://wires.onlinelibrary.wiley.com/doi/abs/10.1002/wcms.1390},
+eprint = {https://wires.onlinelibrary.wiley.com/doi/pdf/10.1002/wcms.1390},
+abstract = {Solvation free energies contribute to the driving force of molecular processes in solution and play a significant role for the relative stability of biomolecular conformations or the formation of complexes. Changes in solvation free energy are the origin of solvent-mediated interactions such as the hydrophobic effect in water. However, an accurate description of solvation free energies, specifically in aqueous solution, without explicit representation of the solvent is a challenging task in computer simulations. To improve existing models detailed microscopic information on solute–solvent interactions is required, which is not directly accessible from experiments. Explicit solvent simulations include solvent-mediated effects, however, at a considerable computational cost. Computational tools have been proposed in recent years to extract information on solvation free energies and solute–solvent interactions from explicit solvent simulations. The latter includes spatial decompositions of the solvation enthalpy and entropy, which may eventually lead to an improved theoretical understanding of solvation thermodynamics. This article is categorized under: Molecular and Statistical Mechanics> Free Energy Methods Theoretical and Physical Chemistry > Statistical Mechanics Structure and Mechanism > Computational Biochemistry and Biophysics},
+year = {2019}
+}
+
+@article{Mukherjee2022-ReviewSpatialWatersBiomolecule,
+author = {Mukherjee, Saumyak and Schäfer, Lars V.},
+title = {Spatially Resolved Hydration Thermodynamics in Biomolecular Systems},
+journal = {The Journal of Physical Chemistry B},
+volume = {126},
+number = {20},
+pages = {3619-3631},
+year = {2022},
+doi = {10.1021/acs.jpcb.2c01088},
+note ={PMID: 35534011},
+URL = {https://doi.org/10.1021/acs.jpcb.2c01088
+},
+eprint = {https://doi.org/10.1021/acs.jpcb.2c01088}
+}
+
+@article{Kalayan2022-MCCBiomol,
+author = {Kalayan, Jas and Chakravorty, Arghya and Warwicker, Jim and Henchman, Richard H.},
+title = {Total free energy analysis of fully hydrated proteins},
+journal = {Proteins: Structure, Function, and Bioinformatics},
+volume = {91},
+number = {1},
+pages = {74-90},
+keywords = {entropy, free energy calculation, multiscale cell correlation, protein hydration, statistical mechanics},
+doi = {https://doi.org/10.1002/prot.26411},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/prot.26411},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/prot.26411},
+abstract = {Abstract The total free energy of a hydrated biomolecule and its corresponding decomposition of energy and entropy provides detailed information about regions of thermodynamic stability or instability. The free energies of four hydrated globular proteins with different net charges are calculated from a molecular dynamics simulation, with the energy coming from the system Hamiltonian and entropy using multiscale cell correlation. Water is found to be most stable around anionic residues, intermediate around cationic and polar residues, and least stable near hydrophobic residues, especially when more buried, with stability displaying moderate entropy-enthalpy compensation. Conversely, anionic residues in the proteins are energetically destabilized relative to singly solvated amino acids, while trends for other residues are less clear-cut. Almost all residues lose intraresidue entropy when in the protein, enthalpy changes are negative on average but may be positive or negative, and the resulting overall stability is moderate for some proteins and negligible for others. The free energy of water around single amino acids is found to closely match existing hydrophobicity scales. Regarding the effect of secondary structure, water is slightly more stable around loops, of intermediate stability around β strands and turns, and least stable around helices. An interesting asymmetry observed is that cationic residues stabilize a residue when bonded to its N-terminal side but destabilize it when on the C-terminal side, with a weaker reversed trend for anionic residues.},
+year = {2023}
+}
+
+@article{Cui2013-SPAM,
+author = {Cui, Guanglei and Swails, Jason M. and Manas, Eric S.},
+title = {SPAM: A Simple Approach for Profiling Bound Water Molecules},
+journal = {Journal of Chemical Theory and Computation},
+volume = {9},
+number = {12},
+pages = {5539-5549},
+year = {2013},
+doi = {10.1021/ct400711g},
+note ={PMID: 26592287},
+URL = { https://doi.org/10.1021/ct400711g},
+eprint = { https://doi.org/10.1021/ct400711g}
+}
+
+@article{Gerogiokas2014-GCT,
+author = {Gerogiokas, Georgios and Calabro, Gaetano and Henchman, Richard H. and Southey, Michelle W. Y. and Law, Richard J. and Michel, Julien},
+title = {Prediction of Small Molecule Hydration Thermodynamics with Grid Cell Theory},
+journal = {Journal of Chemical Theory and Computation},
+volume = {10},
+number = {1},
+pages = {35-48},
+year = {2014},
+doi = {10.1021/ct400783h},
+note ={PMID: 26579889},
+URL = {https://doi.org/10.1021/ct400783h},
+eprint = {https://doi.org/10.1021/ct400783h}
 }
 
 @article{heinz2019computing,
