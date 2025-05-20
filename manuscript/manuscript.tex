@@ -578,8 +578,8 @@ parm solvated.parm7
 trajin md-01.nc 1 1 1
 # Reimage and center the solute (not water residues) to the origin
 autoimage !(:WAT) origin
-# Calculate the grid bounds around the solute with a buffer of 15\AA
-# and a voxel size of 0.5\AA
+# Calculate the grid bounds with a buffer of 15Å
+# and a voxel size of 0.5Å
 bounds !(:WAT) dx 0.5 offset 30 name Grid out bounds.dat
 run
 \end{lstlisting}
@@ -594,6 +594,10 @@ We recommend using either the GPU implementation or MPI-accelerated PME implemen
 While the GPU version is faster when limited CPU resources are available, the PME implementation matches the energy of the Amber MD engine more closely.
 The MPI implementation \cite{Roe2023-mpi-gist} scales well over multiple CPU cores and can be combined with either the GPU or PME implementations for maximum efficiency. 
 A speed comparison of the various parallelization implementations is shown in \cite{Roe2023-mpi-gist}.
+The reason for the many different implementations is that GIST is a very expensive calculation, and historically, the CPU version was the only one available.
+The GPU version improved the speed of GIST calculations significantly, allowing for grids encompassing whole biomolecules for the first time.
+The PME version came after with the intention to match the energy of the AMBER MD engine more closely to compare with other free energy methods.
+Most recently, the MPI parallelization provided another significant speedup for all implementations.
 
 \begin{lstlisting}[style=cpptraj]
 # Load the topology ('parm') and coordinates of the full trajectory
@@ -676,7 +680,7 @@ It is good practice to check your restrained MD simulation or solvent population
 Crystal structures may not represent the dominant solution structure for a given target.
 In our example, we only use a single equilibrated structure.
 However, in practice the target may be flexible and a single structure may not be representative of the conformational ensemble.
-A more sophisticated approach would identify several dominant structures in the ensemble and run a separate MD simulation and GIST calculation for each structure. 
+A more sophisticated approach would identify several dominanÅt structures in the ensemble and run a separate MD simulation and GIST calculation for each structure. 
 Such dominant structures could either be identified from experimental ensembles or by clustering an unrestrained MD simulation. 
 When the probabilities of the different conformations are known, one can then use a weighted average of the GIST results to obtain a free energy of solvation for the ensemble \cite{Waibl2021-gist-antibodies}:
 \begin{equation}
@@ -773,12 +777,15 @@ Although it has a simple convergence check built-in, it is always recommended to
 \begin{lstlisting}[style=python]
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
+# Load the GIST data, setting the reference water-water energy directly
 gist = load_gist_file(
     'gist.dat', struct='solute-centered.pdb')
+# Run an rdf calculation to show the unref. Eww 
 bins, eww = gist.rdf(
     'Eww_unref_norm', bins=100, rmax=20.,
     normalize='norm')
 plt.plot(bins, eww)
+# Run the Eww autodetection
 eww_auto = gist.detect_reference_value()
 plt.axhline(eww_auto, color='k')
 plt.gca().set(
@@ -838,6 +845,9 @@ Most of the time, this happens due to a bias in the Nearest-Neighbor entropy cal
 This can be fixed by either calculating the bias per water molecule (as was done in \cite{Chen2021}) or referencing the entropy in the same manner as the $E_{ww, norm}$:
 \begin{lstlisting}[style=python]
 	def reference_entropy(gf):
+	'''
+	Reference the entropy to zero at large distances.
+	'''
     if 'dTSsix_unref_norm' not in gf.data.columns:
         gf['dTSsix_unref_norm'] = gf['dTSsix_norm']
         gf['dTSsix_unref_dens'] = gf['dTSsix_dens']
@@ -873,8 +883,11 @@ import gisttools as gt
 # Load the GIST data, make sure to set the correct reference energy
 gist = gt.gist.load_gist_file('gist.dat',
     struct='solute-centered.pdb', eww_ref=-9.533)
+# Generate a new column with the energy without accounting for double counting
 gist['E_norm'] = gist['Eww_norm'] * 2 + gist['Esw_norm']
+# Set the energy to zero for all voxels with no population
 gist.loc[gist['population'] == 0, 'E_norm'] = 0
+# Save the new energy to a dx file
 gist.save_dx('E_norm', 'gist-E-per-mol-norm.dx')
 \end{lstlisting}
 The OpenDX files can then be imported into your molecular viewer of choice.
@@ -905,7 +918,8 @@ Load the files and double check the frame numbers and reference density.
 import numpy as np
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
-
+# Load the GIST data, setting no reference energy
+# since we will calculate it later
 compl = load_gist_file('complex/gist/gist.dat', \
     struct='complex/gist/solute-centered.pdb')
 print(compl.n_frames, compl.rho0)
@@ -919,6 +933,7 @@ print(strept.n_frames, strept.rho0)
 Assign reference energies and check them for plausibility.
 
 \begin{lstlisting}[style=python]
+# Set the reference density for the solvent by automatic detection
 biotin.eww_ref = biotin.detect_reference_value()
 print('Biotin:', biotin.eww_ref)
 strept.eww_ref = strept.detect_reference_value()
@@ -929,13 +944,6 @@ print('Complex:', compl.eww_ref)
 Subtract a reference entropy from the \inlinecode{dTSsix} columns.
 
 \begin{lstlisting}[style=python]
-def reference_entropy(gf):
-    if 'dTSsix_unref_norm' not in gf.data.columns:
-        gf['dTSsix_unref_norm'] = gf['dTSsix_norm']
-        gf['dTSsix_unref_dens'] = gf['dTSsix_dens']
-    gf['dTSsix_norm'] = gf['dTSsix_unref_norm'] \
-        - gf.detect_reference_value('dTSsix_unref_dens')
-    gf['dTSsix_dens'] = gf.norm2dens(gf['dTSsix_norm'])
 reference_entropy(biotin)
 reference_entropy(strept)
 reference_entropy(compl)
@@ -953,13 +961,17 @@ def select(traj, sel):
 # we multiply by 10 to convert nm to Angstrom.
 biotin_mask = 'resname BTN and not element H'
 strept_mask = 'not resname BTN and not resname WAT and not element H'
+# select the biotin atoms
 compl_x = select(compl.struct, biotin_mask).xyz[0] * 10.
-biotin_x = select(biotin.struct, biotin_mask).xyz[0]*10.
+biotin_x = select(biotin.struct, biotin_mask).xyz[0] * 10.
+# align the complex to streptavidin
+# and select the streptavidin atoms
 aligned = compl.struct[:].superpose(strept.struct, \
     atom_indices=strept.struct.top.select(strept_mask))
 aligned = select(aligned, biotin_mask)
 strept_x = aligned.xyz[0] * 10.
 
+# Now we can calculate the radial distribution functions
 bins, biotin_rdf = biotin.rdf( \
     col, centers=biotin_x, bins=100, rmax=24)
 bins, strept_rdf = strept.rdf( \
@@ -971,10 +983,14 @@ Now, subtract the monomer histograms from the complex, and compute the sum of yo
 If you also visualize the individual histograms, you will notice that the difference converges much better with increasing radius than the single contributions.
 
 \begin{lstlisting}[style=python]
+# Endstate approach: complex - monomers
 difference = compl_rdf - biotin_rdf - strept_rdf
+# Set integration cutoff
 cutoff = 12
+# Integrate the difference
 integral = difference[bins < cutoff].sum()
 print('Integral = {}'.format(integral))
+# Plot the cumulative sum of the difference
 plt.plot(bins, np.cumsum(difference))
 plt.axvline(cutoff)
 plt.xlabel('distance to biotin [Å]')
@@ -1013,6 +1029,7 @@ Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contrib
  To make this easier, gisttool includes a function to integrate in a radius around atom centers:
 \begin{lstlisting}[style=python]
 import pandas as pd
+# Integrate the energy and entropy contributions
 centers = {'biotin': biotin_x, 
     'strept': strept_x, 
     'compl': compl_x}
@@ -1032,8 +1049,10 @@ Using the \inlinecode{energy} command in \software{cpptraj}, you can compute thi
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST to be in line with the different ways the energy is calculated in the two GIST methods.
 An example \software{cpptraj} is then:
 \begin{lstlisting}[style=cpptraj]
+# Load the topology and trajectory of the complex
 parm solvated.parm7
 trajin md-01.nc 1 last 100
+# Calculate the interaction energy of the complex and the monomers
 energy complex ^1,2 # etype pme
 energy strept ^1 # etype pme
 energy biotin ^2 # etype pme
@@ -1253,10 +1272,10 @@ Here, we only provide a short overview of the theory behind GIST.
 For more technical information (such as implementation details), we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021,Roe2023-mpi-gist}.
 \subsection{On thermodynamic quantities}
 Throughout this tutorial, we have refered to the free energy of solvation as $\dasolv$.
-Strictly speaking, the GIST enthalpic term is an energy not an enthalpy, and the GIST free energy of solvation is not the Gibbs free energy of solvation $\DeltaG_solv$ but the Helmholtz free energy of solvation $\DeltaA_solv$.
+Strictly speaking, the GIST enthalpic term is an energy not an enthalpy, and the GIST free energy of solvation is not the Gibbs free energy of solvation $\Delta G_solv$ but the Helmholtz free energy of solvation $\Delta A_solv$.
 However, the difference between the two is negligible for condensed phase systems at ambient conditions, since the PV term is small under these conditions.
-As such, $E \approx H$ and $\dasolv \approx \DeltaG_solv$.
-Similarly, the entropy columms are named dTS, rather than the more correct $T\DeltaS$.'
+As such, $E \approx H$ and $\dasolv \approx \Delta G_solv$.
+Similarly, the entropy columms are named dTS, rather than the more correct $T\Delta S$.
 \subsection{Solvation Entropy}
 
 %\begin{equation}
@@ -1280,7 +1299,7 @@ In a slightly simplified view, the first order is the log solvent density $ln\le
 The first-order entropy omits all solvent-solvent (and higher) correlations, while the solute-solvent correlation is taken into account because the coordinates are relative to the solute.
 Thus, it is called the solute-water entropy $S_{sw}$.
 Note that this definition is different and more direct than the one used originally by Ben-Naim \cite{ben-naim-book}, as recently discussed in \cite{heinz2023solvent}.
-%The second order is the pair density, i.e., the probability of finding two solvent molecules in positions $\textbf{r}$ and $\textbf{r}^\prime$.
+%The second order is the pairF density, i.e., the probability of finding two solvent molecules in positions $\textbf{r}$ and $\textbf{r}^\prime$.
 The solvent density is expressed relative to the bulk density $\rho^0$. %$g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
 %pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water solvent molecule,  
 %$\omega$ represents the Euler angles, and 
