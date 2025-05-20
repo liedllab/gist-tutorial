@@ -531,11 +531,12 @@ restrained 100 ns NPT
 	ntwr=50000, ntwx=5000, ntpr=5000,
 /
 \end{lstlisting}
+For a full explenation of the input parameters, please refer to the Amber manual \cite{amber24}.
 This file will run a \SI{100}{\nano\second} NPT MD simulation while keeping all atoms except for hydrogens and waters restrained.
 Note that these are very standard MD settings except for the restraints.
 Run the MD using \software{pmemd.cuda}:
 \begin{lstlisting}[style=bash]
-pmemd.cuda \
+pmemd.cuda \ 
 -O \
 -i 100ns-npt-restraint.in \
 -o md-01.out \
@@ -553,9 +554,12 @@ As we ran our MD simulation with periodic boundaries, we always need to reimage 
 We also recommend that you center the biotin solute molecule to the coordinate origin, as this simplifies the definition of our grid origin later on:
 
 \begin{lstlisting}[style=cpptraj]
+# Load the topology ('parm') and coordinates of the first frame
 parm solvated.parm7 
 trajin md-01.nc 1 1 1 
+# Reimage and center the solute (not water residues) to the origin
 autoimage !(:WAT) origin 
+# Strip all water molecules and write out a pdb file
 strip :WAT 
 trajout biotin-centered.pdb 
 run
@@ -569,9 +573,13 @@ To decide on a grid size, find the extent (minimum and maximum) of the x-, \mbox
 To get bulk-like water properties at the grid border, a buffer distance of \SI{15}{\angstrom} is reasonable for biotin.
 The grid parameters can be directly calculated using \software{cpptraj's} \inlinecode{bound} command:
 \begin{lstlisting}[style=cpptraj]
+# Load the topology ('parm') and coordinates of the first frame
 parm solvated.parm7
 trajin md-01.nc 1 1 1
+# Reimage and center the solute (not water residues) to the origin
 autoimage !(:WAT) origin
+# Calculate the grid bounds around the solute with a buffer of 15\AA
+# and a voxel size of 0.5\AA
 bounds !(:WAT) dx 0.5 offset 30 name Grid out bounds.dat
 run
 \end{lstlisting}
@@ -588,9 +596,13 @@ The MPI implementation \cite{Roe2023-mpi-gist} scales well over multiple CPU cor
 A speed comparison of the various parallelization implementations is shown in \cite{Roe2023-mpi-gist}.
 
 \begin{lstlisting}[style=cpptraj]
+# Load the topology ('parm') and coordinates of the full trajectory
 parm solvated.parm7
 trajin md-01.nc
+# Reimage and center the solute (not water residues) to the origin
 autoimage !(:WAT) origin
+# Run GIST with a grid centered at the origin
+# and a grid size of 100x100x100 voxels with 0.5\AA spacing
 # optionally remove the 'pme' option
 gist griddim 100 100 100 out gist.dat \
 refdens 0.03287 pme
@@ -602,9 +614,11 @@ To interact with your GIST data, we recommend the gisttools library for python3.
 \begin{lstlisting}[style=python]
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
+# Load the GIST data, setting the reference water-water energy directly
 gist = load_gist_file(
 'gist.dat', struct='solute-centered.pdb',  
 eww_ref=-9.539)
+# Print the number of frames and the reference density
 print(f'n_frames = {gist.n_frames}')
 print(f'rho0 = {gist.rho0}')
 \end{lstlisting}
@@ -617,6 +631,7 @@ Gisttools provides access to single or multiple voxels through a \code{.loc} pro
 GIST quantity data for all voxels can be accessed by directly indexing the gist object, either by providing a single name or a list of names.
 Indexing with \code{.loc} works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
 \begin{lstlisting}[style=python]
+# GIST objects contain pandas dataframes
 gist.loc[0, 'population'] # single value
 gist.loc[0] # Series
 gist.loc[[0,1], ['x', 'y', 'z']] # DataFrame
@@ -632,6 +647,7 @@ gist.struct # mdtraj.Trajectory object
 Gisttools also provides OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities (X\_dens):
 
 \begin{lstlisting}[style=python]
+# Write out the column A_dens (the free solvation energy) to a dx file
 gist.save_dx('A_dens','A.dx')
 \end{lstlisting}
 Section~\ref{sec:visualization} discusses the visualization of OpenDX files.
@@ -696,8 +712,10 @@ Use the \software{equilibration.py} script (or your own procedure) to perform sh
 Note that the equilibration script contains unrestrained NPT steps, because restraining two molecules at the same time might interfere with the pressure equilibration.
 Then, use \software{cpptraj} to produce biotin and streptavidin structures based on the complex by stripping the respective other molecule like this:
 \begin{lstlisting}[style=cpptraj]
+# Load the topology ('parm') and coordinates of the complex after equilibration
 parm complex/solvated.parm7
 trajin complex/equil/EQUIL-DONE.rst
+# Remove the biotin molecule (Nr.2) from the complex, save the topology and coordinates
 strip ^2 parmout streptavidin/solvated.parm7
 trajout streptavidin/pre-equil.ncrst
 \end{lstlisting}
@@ -1261,6 +1279,7 @@ The entropy can be approximated as an infinite expansion of correlations of incr
 In a slightly simplified view, the first order is the log solvent density $ln\left(g_\textit{sw}\left(\textbf{r},\omega \right)\right)$ at each position $\textbf{r}$ and orientation $\omega$.
 The first-order entropy omits all solvent-solvent (and higher) correlations, while the solute-solvent correlation is taken into account because the coordinates are relative to the solute.
 Thus, it is called the solute-water entropy $S_{sw}$.
+Note that this definition is different and more direct than the one used originally by Ben-Naim \cite{ben-naim-book}, as recently discussed in \cite{heinz2023solvent}.
 %The second order is the pair density, i.e., the probability of finding two solvent molecules in positions $\textbf{r}$ and $\textbf{r}^\prime$.
 The solvent density is expressed relative to the bulk density $\rho^0$. %$g_\textit{sw}\left(\textbf{r},\omega \right)$ is the solute-water 
 %pair correlation function in the solute's frame of reference, \textbf{r} is the coordinates of the oxygen atom of the water solvent molecule,  
