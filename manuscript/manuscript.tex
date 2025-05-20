@@ -281,12 +281,6 @@ We additionally provide a Jupyter notebook \cite{Kluyver2016-jupyter,Granger2021
 For the visualization of three-dimensional contributions we require molecular visualization software that can handle \software{OpenDX} files, such as \software{PyMol} \cite{pymol} or \software{VMD} \cite{vmd}.
 Most of the visualisations and results in this tutorial can also be obtained using the \software{gistpp} program, which is available from \url{https://github.com/KurtzmanLab/Gist-Post-Processing} (code and documentation). \software{Gistpp} can directly manipulate \software{OpenDX} files from the GIST output. 
 Its usage and some examples were shown in a previous tutorial on GIST \cite{Ramsey2016}.
-For help with the listed cpptraj commands, AMBER atom mask syntax and other AMBER-specific commands, we recommend the following webresources:\\
-\begin{itemize}
-\item The website https://amberhub.chpc.utah.edu/ which is managed by the Cheatham III group, 
-\item The cpptraj manual at https://raw.githubusercontent.com/Amber-MD/cpptraj/master/doc/CpptrajManual.pdf 
-\item and the AMBER manual \cite{amber24} at https://ambermd.org/Manuals.php.
-\end{itemize}
 \pagebreak %TODO: pagebreak, maybe remove these by better formatting
 
 \section{Running GIST}
@@ -328,16 +322,13 @@ For example, here is the command for a boundary of \SI{15}{\angstrom} around the
 \begin{lstlisting}[style=cpptraj]
 bounds :LIG dx 0.5 offset 30 name Grid out bounds.dat
 \end{lstlisting}
-The atom mask \inlinecode{:LIG} specifies the residue named LIG to build the boundaries around, with dx and offset providing the actual dimensions of the boundaries, i.e. an offset of 30 times 0.5\AA.
-\begin{minipage}{\linewidth} 
+The atom mask \inlinecode{:LIG} specifies the residue named LIG to build the boundaries around, with dx and offset providing the actual dimensions of the boundaries, i.e. an offset of 30 times 0.5Å.
 Make sure that the \inlinecode{bounds} command is supplied with the exact same trajectory as in the GIST calculation. 
 Any preprocessing steps need to match between the \inlinecode{bounds} command and the \inlinecode{gist} calculation. 
 A helper script called \inlinecode{findcentroid.py} for the same purpose is supplied with this tutorial, and can be used as follows:
-~
 \begin{lstlisting}[style=bash]
 python findcentroid.py -i structure.pdb
 \end{lstlisting}
-\end{minipage}
 \paragraph{Run GIST using cpptraj}
 GIST is implemented in \software{cpptraj} which requires the topology and the trajectory of the MD simulation to be analyzed.
 The command needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience.
@@ -1270,7 +1261,7 @@ GIST is an implementation of inhomogeneous fluid solvation theory (IST) \cite{La
 It was first devised by Nguyen et al.\ \cite{Nguyen2012} and its implementation in \software{cpptraj} was thoroughly described by Ramsey et al.\ \cite{Ramsey2016}.
 Here, we only provide a short overview of the theory behind GIST.
 For more technical information (such as implementation details), we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021,Roe2023-mpi-gist}.
-\subsection{On thermodynamic quantities}
+\subsection{On Thermodynamic Quantities}
 Throughout this tutorial, we have refered to the free energy of solvation as $\dasolv$.
 Strictly speaking, the GIST enthalpic term is an energy not an enthalpy, and the GIST free energy of solvation is not the Gibbs free energy of solvation $\Delta G_solv$ but the Helmholtz free energy of solvation $\Delta A_solv$.
 However, the difference between the two is negligible for condensed phase systems at ambient conditions, since the PV term is small under these conditions.
