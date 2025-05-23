@@ -3,6 +3,7 @@
 import numpy as np
 
 load ../streptavidin/gist.pdb, apo
+load ../complex/gist.pdb, complex
 load ../streptavidin/gist-E-per-mol-norm.dx.gz, gist-E-norm
 load ../streptavidin/gist-dTSsix-norm.dx.gz, gist-S-norm
 
@@ -27,23 +28,28 @@ set two_sided_lighting, 1
 
 show surface, apo
 set surface_color, gray90, apo
-
+hide everything, complex
+show lines, complex and resn BTN and not elem H
 ### GIST Isosurfaces
-isosurface dTS, gist-S-norm, -2.5
-isosurface E_neg, gist-E-norm, -2.5
-isosurface E_pos, gist-E-norm, 2.5
+isosurface TdS, gist-S-norm, -3, resn BTN, carve=1.5
+isosurface E_neg, gist-E-norm, -3, resn BTN, carve=1.5
+isosurface E_pos, gist-E-norm, 3, resn BTN, carve=1.5
 
-color tv_blue, dTS
+color tv_blue, TdS
 color tv_green, E_neg
 color tv_red, E_pos
+util.cba(104,"complex")
 
+set transparency, 0.5, TdS
+set transparency, 0.5, E_neg
+set transparency, 0.5, E_pos
 ### Finalize visualisations
 
 set_view (\
-     0.205722868,    0.776433945,   -0.595664322,\
-     0.586023986,   -0.585219085,   -0.560436904,\
-    -0.783742607,   -0.233781740,   -0.575405777,\
-    -0.000007818,   -0.000018828,  -38.208305359,\
-    -0.446677208,   -3.751610994,   -9.882472992,\
-    15.505332947,   60.907680511,  -20.000000000 )
+     0.140216514,    0.832905710,   -0.535343587,\
+     0.577019334,   -0.508109510,   -0.639421225,\
+    -0.804602742,   -0.219248921,   -0.551851571,\
+     0.000021984,   -0.000045859,  -40.345500946,\
+     4.724672794,    1.572793007,   -4.651573181,\
+    17.642587662,   63.044929504,  -20.000000000 )
 
