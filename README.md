@@ -15,21 +15,23 @@ If you notice any issues or have suggestions, please raise them as an [Issue](ht
 * [numpy](https://numpy.org/) (Tested with version 1.23.5)
 * [pandas](pandas.pydata.org) (Tested with version 1.5.3)
 
+The molecular dynamics simulations used in the tutorial are hosted here: [![DOI](https://researchdata.uibk.ac.at/badge/DOI/10.48323/4mbrd-67m83.svg)](https://doi.org/10.48323/4mbrd-67m83)
+
 The tutorial code is provided as a Jupyter Notebook at `code/tutorial-gist.ipynb`.<br/> 
 We recommend using [JupyterLab](https://jupyter.org/) or [VS Code](https://code.visualstudio.com/) (with the Jupyter extensions) for editing and working with the notebook.
 
 Molecular visualisations are generated with [PyMol](https://pymol.org/) and input scripts are provided in the `output/visualization` folder.
 # Authors
 In the same order as in the manuscript:
-* Valentin J Hoerschinger
+* Valentin J. Egger-Hoerschinger
 * Franz Waibl
 * Vjay Molino
 * Helmut Carter
-* Monica L Fernández-Quintero
+* Monica L. Fernández-Quintero
 * Steven Ramsey
-* Daniel R Roe
-* Klaus R Liedl
-* Michael K Gilson
+* Daniel R. Roe
+* Klaus R. Liedl
+* Michael K. Gilson
 * Tom Kurtzman
   
 The repository is currently managed by Valentin ([@vhoer](https://www.github.com/vhoer)).
