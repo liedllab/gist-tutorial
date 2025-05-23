@@ -419,7 +419,7 @@ These discrepancies, when summing over large grid regions, have the potential to
 		\bottomrule
 	\end{tabularx}
 \end{table}
-\pagebreak %TODO: pagebreak
+
 \paragraph{Postprocessing and Analyzing GIST results}
 Cpptraj outputs grid quantities in OpenDX (.dx) file format which can be visualized in PyMOL or VMD.
 Aside from thermodynamic quantities, GIST also calculates the number density of each atomic element in the solvent.
@@ -449,7 +449,6 @@ To convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \i
 \end{equation}
 with $V^k$, the volume of voxel $k$, $N^k_{solvent}$, the number of solvent molecules in $k$ over all simulation frames, and $N_{frames}$, the number of frames.
 
-\pagebreak
 \section{Tutorial}
 Here, we aim to guide the reader through a GIST analysis of the streptavidin-biotin complex.
 The tutorial is structured as follows:
@@ -626,7 +625,7 @@ To interact with your GIST data, we recommend the gisttools library for python3.
 \begin{lstlisting}[style=python]
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
-# Load the GIST data, setting the reference water-water energy directly to -9.539 for TIP3P water
+# Load the GIST data, setting the reference water-water energy
 gist = load_gist_file(
 'gist.dat', struct='solute-centered.pdb',  
 eww_ref=-9.539)
@@ -659,7 +658,7 @@ gist.struct # mdtraj.Trajectory object
 Gisttools also provides OpenDX writing capabilities to visualize the calculated or modified GIST data. For visualization, you'll most likely want to write out the density-normalized GIST quantities (X\_dens):
 
 \begin{lstlisting}[style=python]
-# Write out the column A_dens (the free solvation energy) to a dx file
+# Write the column A_dens (the free solvation energy) to a dx file
 gist.save_dx('A_dens','A.dx')
 \end{lstlisting}
 Section~\ref{sec:visualization} discusses the visualization of OpenDX files.
@@ -724,11 +723,11 @@ Use the \software{equilibration.py} script (or your own procedure) to perform sh
 Note that the equilibration script contains unrestrained NPT steps, because restraining two molecules at the same time might interfere with the pressure equilibration.
 Then, use \software{cpptraj} to produce biotin and streptavidin structures based on the complex by stripping the respective other molecule like this:
 \begin{lstlisting}[style=cpptraj]
-# Load the topology ('parm') and coordinates of the complex after equilibration
+# Load complex topology and coordinates after equilibration
 parm complex/solvated.parm7
 trajin complex/equil/EQUIL-DONE.rst
-# Assuming biotin is residue 2 in the complex topology (selection ^2):
-# Remove biotin from the complex, save the topology and coordinates
+# Assuming biotin is residue 2 in the complex topology:
+# Remove biotin (^2) from the complex, save topology and coordinates
 strip ^2 parmout streptavidin/solvated.parm7
 trajout streptavidin/pre-equil.ncrst
 \end{lstlisting}
@@ -782,11 +781,10 @@ If this value converges with increasing distance from the solute, it can be used
 \software{gisttools} contains functions to facilitate this analysis.
 There is also a method \inlinecode{detect\_reference\_value} that automatically tries to find the converged value.
 Although it has a simple convergence check built-in, it is always recommended to check the convergence by hand. A handy way to check this is to calculate the radial distribution of this GIST property, i.e. a histogram in relation to the distance to the solute. Due to the conceptual similarity with classical radial distribution functions, describing the density of distances between two particle types, this function is exposed to the user as the \inlinecode{rdf} method.
-
 \begin{lstlisting}[style=python]
 from gisttools.gist import load_gist_file
 import matplotlib.pyplot as plt
-# Load the GIST data, setting the reference water-water energy directly
+# Load the GIST data without Eww set
 gist = load_gist_file(
     'gist.dat', struct='solute-centered.pdb')
 # Run an rdf calculation to show the unref. Eww 
@@ -798,7 +796,9 @@ plt.plot(bins, eww)
 eww_auto = gist.detect_reference_value()
 plt.axhline(eww_auto, color='k', linestyle='--')
 plt.gca().set(
-    xlabel='Distance [$\AA$]', ylabel='Avg. E$_{ww}$ per molecule [kcal/mol]', xlim=(1, 15))
+    xlabel='Distance [$\AA$]', 
+	ylabel='Avg. E$_{ww}$ per molecule [kcal/mol]', 
+	xlim=(1, 15))
 plt.show()
 \end{lstlisting}
 The expected output of this code is shown in Figure~\ref{fig_ewwref}.
@@ -828,23 +828,23 @@ However, it is more informative to plot the cumulative free energy contribution 
 If the curve flattens out, the converged value is your final $\dasolv$\@.
 If the curve diverges even for large integration distances, it depends on which of the contributing parts diverges. 
 \begin{lstlisting}[style=python]
-	from gisttools.gist import load_gist_file
-	import matplotlib.pyplot as plt
-	import numpy as np
-	# adapt eww_ref according to the used solvent model! 
-	gist = load_gist_file('gist.dat',
-		struct='solute-centered.pdb', eww_ref=-9.5398)
-	bins, (da, esw, eww, s) = gist.rdf(
-		['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
-		bins=100, rmax=20., normalize='none')
-	plt.plot(bins, np.cumsum(eww), label='$\Delta$E$_{ww}$')
-	plt.plot(bins, np.cumsum(esw), label='$\Delta$E$_{sw}$')
-	plt.plot(bins, np.cumsum(da), label='$\Delta$A')
-	plt.plot(bins, np.cumsum(s), label='T$\Delta$S')
-	plt.legend()
-	plt.xlabel("distance cutoff [$\AA$]")
-	plt.ylabel("free energy contribution [kcal/mol]")
-	\end{lstlisting}
+from gisttools.gist import load_gist_file
+import matplotlib.pyplot as plt
+import numpy as np
+# adapt eww_ref according to the used solvent model! 
+gist = load_gist_file('gist.dat',
+	struct='solute-centered.pdb', eww_ref=-9.5398)
+bins, (da, esw, eww, s) = gist.rdf(
+	['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
+	bins=100, rmax=20., normalize='none')
+plt.plot(bins, np.cumsum(eww), label='$\Delta$E$_{ww}$')
+plt.plot(bins, np.cumsum(esw), label='$\Delta$E$_{sw}$')
+plt.plot(bins, np.cumsum(da), label='$\Delta$A')
+plt.plot(bins, np.cumsum(s), label='T$\Delta$S')
+plt.legend()
+plt.xlabel("distance cutoff [$\AA$]")
+plt.ylabel("free energy contribution [kcal/mol]")
+\end{lstlisting}
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
 \begin{figure}
 	\centering
@@ -856,16 +856,16 @@ Second, that the solvent entropy diverges, even at large distances.
 Most of the time, this happens due to a bias in the Nearest-Neighbor entropy calculation\cite{Chen2021,Huggins2014-entropy}.
 This can be fixed by either calculating the bias per water molecule (as was done in \cite{Chen2021}) or referencing the entropy in the same manner as the $E_{ww, norm}$:
 \begin{lstlisting}[style=python]
-	def reference_entropy(gf):
-	'''
-	Reference the entropy to zero at large distances.
-	'''
-    if 'dTSsix_unref_norm' not in gf.data.columns:
-        gf['dTSsix_unref_norm'] = gf['dTSsix_norm']
-        gf['dTSsix_unref_dens'] = gf['dTSsix_dens']
-    refval = gf.detect_reference_value('dTSsix_unref_dens')
-    gf['dTSsix_norm'] = gf.get_referenced('dTSsix_unref_norm', refval)
-    gf['dTSsix_dens'] = gf.get_referenced('dTSsix_unref_dens', refval)
+def reference_entropy(gf):
+'''
+Reference the entropy to zero at large distances.
+'''
+if 'dTSsix_unref_norm' not in gf.data.columns:
+	gf['dTSsix_unref_norm'] = gf['dTSsix_norm']
+	gf['dTSsix_unref_dens'] = gf['dTSsix_dens']
+refval = gf.detect_reference_value('dTSsix_unref_dens')
+gf['dTSsix_norm'] = gf.get_referenced('dTSsix_unref_norm', refval)
+gf['dTSsix_dens'] = gf.get_referenced('dTSsix_unref_dens', refval)
 
 reference_entropy(biotin)
 \end{lstlisting}
@@ -895,7 +895,7 @@ import gisttools as gt
 # Load the GIST data, make sure to set the correct reference energy
 gist = gt.gist.load_gist_file('gist.dat',
     struct='solute-centered.pdb', eww_ref=-9.533)
-# Generate a new column with the energy without accounting for double counting
+# Calculate the total energy without double counting
 gist['E_norm'] = gist['Eww_norm'] * 2 + gist['Esw_norm']
 # Set the energy to zero for all voxels with no population
 gist.loc[gist['population'] == 0, 'E_norm'] = 0
@@ -1064,7 +1064,8 @@ An example \software{cpptraj} is then:
 # Load the topology and trajectory of the complex
 parm solvated.parm7
 trajin md-01.nc 1 last 100
-# Calculate the interaction energy of the complex (^1,2) and the monomers (^1 for streptavidin, ^2 for biotin)
+# Calculate the interaction energy of the complex (^1,2) 
+# and the monomers (^1 for streptavidin, ^2 for biotin)
 energy complex ^1,2 # etype pme
 energy strept ^1 # etype pme
 energy biotin ^2 # etype pme
@@ -1654,7 +1655,7 @@ neighbor &  & Mean number of solvent molecules neighboring the solvent molecules
 % for more information on deciding on authorship and author order.
 %%%%%%%%%%%%%%%%
 All authors were involved in reviewing and editing the original manuscript. \\  
-VJH and FW conceptualized the research and co-wrote the initial draft.\\
+VJEH and FW conceptualized the research and co-wrote the initial draft.\\
 VM contributed the original drafts of sections \ref{sec:theory} and \ref{sec:visualization}.\\
 HC helped with code curation and validation.\\
 MLFQ helped with conceptualization and gave writing input for the initial draft. \\
