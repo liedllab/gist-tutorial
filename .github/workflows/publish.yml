@@ -18,10 +18,11 @@ jobs:
         uses: xu-cheng/latex-action@v3
         with:
           root_file: manuscript.tex
+          working_directory: /manuscript/
       - name: Copy
         run: |
           mkdir out
-          cp ./manuscript.pdf ./out/gist_tutorial.pdf
+          cp ./manuscript/manuscript.pdf ./out/gist_tutorial.pdf
       - uses: actions/upload-artifact@v4
         with:
           name: gist_tutorial
