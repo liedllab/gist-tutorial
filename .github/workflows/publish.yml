@@ -22,7 +22,13 @@ jobs:
       - name: Copy
         run: |
           mkdir out
-          cp ./manuscript/manuscript.pdf ./out/gist_tutorial.pdf
+          cp ./manuscript/manuscript.pdf ./out/manuscript.pdf
+      - name: Compress PDF
+        uses: jy95/ghostscript-action@v1  
+        with:  
+            file: './out/manuscript.pdf'  
+            output: './out/gist_tutorial.pdf'  
+            arbitrary-parameters: '-dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer'
       - uses: actions/upload-artifact@v4
         with:
           name: gist_tutorial
