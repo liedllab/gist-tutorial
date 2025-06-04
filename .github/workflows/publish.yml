@@ -1,0 +1,39 @@
+name: Create PDF
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout
+      - name: Build
+        uses: xu-cheng/latex-action
+        with:
+          root_file: manuscript.tex
+      - name: Copy
+        run: |
+          mkdir out
+          cp ./manuscript.pdf ./out/gist_tutorial.pdf
+      - uses: actions/upload-artifact@v2
+        with:
+          name: gist_tutorial
+          path: out/gist_tutorial.pdf
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY-NAME: liedllab/liedllab.github.io
+          BRANCH: main
+          CLEAN: true
+          SINGLE_COMMIT: true
+          FOLDER: files
+          GIT_CONFIG_NAME: vhoer-bot
+          GIT_CONFIG_EMAIL: bot@noreply.vhoer.com
