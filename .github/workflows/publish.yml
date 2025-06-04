@@ -30,7 +30,7 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.GH_REPO_ACCESS }}
           REPOSITORY-NAME: liedllab/liedllab.github.io
           BRANCH: main
           CLEAN: true
