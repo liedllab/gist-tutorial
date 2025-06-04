@@ -30,11 +30,11 @@ jobs:
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB-TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPOSITORY-NAME: liedllab/liedllab.github.io
           BRANCH: main
           CLEAN: true
-          SINGLE_COMMIT: true
-          FOLDER: files
-          GIT_CONFIG_NAME: vhoer-bot
-          GIT_CONFIG_EMAIL: bot@noreply.vhoer.com
+          FOLDER: out
+          target-folder: files
+          GIT-CONFIG-NAME: vhoer-bot
+          GIT-CONFIG-EMAIL: bot@noreply.vhoer.com
