@@ -35,6 +35,6 @@ jobs:
           BRANCH: main
           CLEAN: true
           FOLDER: out
-          target-folder: files
+          target-folder: files/gist_tutorial/
           GIT-CONFIG-NAME: vhoer-bot
           GIT-CONFIG-EMAIL: bot@noreply.vhoer.com
