@@ -2,7 +2,7 @@
 A tutorial for Grid Inhomogenous Solvation Theory (GIST) as implemented in AmberTool's cpptraj.
 The tutorial aims to teach how to apply GIST for small molecules and proteins, with biotin-streptavidin as a showcase example.
 
-The current version of the manuscript is found in `manuscript/manuscript.pdf`. 
+The current version of the manuscript is found on our GitHub page [liedlab.github.io](https://liedllab.github.io/gist/). 
 The manuscript is not currently published, but is aimed at the Living Journal of Computational Molecular Science. 
 
 As such, the tutorial is developed in line with LiveCoMS guidelines on [Paper Writing as Code Development ](https://livecomsjournal.github.io/about/paper_code/) and will be further updated in correspondence with the community. 
