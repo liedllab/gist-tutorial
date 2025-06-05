@@ -751,7 +751,7 @@ If one is only interested in solvent in the binding site, smaller grids encompas
 While this saves calculation time for the GIST analysis, it complicates the post-processing.
 Since the GIST analysis is usually less time-demanding than the MD simulation, we recommend using larger grids.
 Furthermore, we recommend that you center the solute molecule to the coordinate origin to simplify the analysis.
-Calculate the GIST grid parameters as outlined in the biotin section for the complex and streptavidin and run the GIST analysis.
+Calculate the GIST grid parameters as outlined in the biotin section for the complex and run the GIST analysis. 
 
 For larger systems like whole proteins you can usually get away with a smaller buffer region for the GIST grid compared to small molecule solutes.
 To test whether your grid is large enough, look at solvent properties close to the grid edges, e.g. the solvent-solvent energies.
@@ -1287,10 +1287,10 @@ It was first devised by Nguyen et al.\ \cite{Nguyen2012} and its implementation 
 Here, we only provide a short overview of the theory behind GIST.
 For more technical information (such as implementation details), we recommend one of the more recent publications on developments in GIST \cite{Kraml2020,Chen2021,Roe2023-mpi-gist}.
 \subsection{On Thermodynamic Quantities}
-Throughout this tutorial, we have refered to the free energy of solvation as $\dasolv$.
-Strictly speaking, the GIST enthalpic term is an energy not an enthalpy, and the GIST free energy of solvation is not the Gibbs free energy of solvation $\Delta G_solv$ but the Helmholtz free energy of solvation $\Delta A_solv$.
+Throughout this tutorial, we have referred to the free energy of solvation as $\dasolv$.
+Strictly speaking, the GIST enthalpic term is an energy not an enthalpy, and the GIST free energy of solvation is not the Gibbs free energy of solvation $\Delta G_(solv)$ but the Helmholtz free energy of solvation $\dasolv$.
 However, the difference between the two is negligible for condensed phase systems at ambient conditions, since the PV term is small under these conditions.
-As such, $E \approx H$ and $\dasolv \approx \Delta G_solv$.
+As such, $E \approx H$ and $\dasolv \approx \Delta G_(solv)$.
 Similarly, the entropy columns are named dTS, rather than the more correct $T\Delta S$, due to historical reasons.
 \subsection{Solvation Entropy}
 
