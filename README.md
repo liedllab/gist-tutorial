@@ -29,16 +29,17 @@ To install the dependencies, we recommend using [mamba](https://mamba.readthedoc
 mamba create -n gist-tutorial python=3.10 numpy pandas mdtraj dacase::ambertools-dac=25
 mamba activate gist-tutorial
 ```
-Note that `gisttools` is not available via mamba/conda, and must be installed manually. You can do this by cloning the repository and installing it with pip:
+Note that `gisttools` is not available via mamba/conda, and must be installed manually. You can do this by cloning its repository and installing it with pip:
 ```bash
 git clone https://github.com/liedllab/gisttools.git
 cd gisttools
 pip install .
 ```
 
-The molecular dynamics simulations used in the tutorial are hosted here: [![DOI](https://researchdata.uibk.ac.at/badge/DOI/10.48323/4mbrd-67m83.svg)](https://researchdata.uibk.ac.at/doi/10.48323/4mbrd-67m83)
+The molecular dynamics simulations used in the tutorial are hosted here:   
+[![DOI](https://researchdata.uibk.ac.at/badge/DOI/10.48323/4mbrd-67m83.svg)](https://researchdata.uibk.ac.at/doi/10.48323/4mbrd-67m83)
 
-The tutorial code is provided as a Jupyter Notebook at `code/tutorial-gist.ipynb`.<br/> 
+The tutorial code is provided as a Jupyter Notebook at `code/tutorial-gist.ipynb`.    
 We recommend using [JupyterLab](https://jupyter.org/) or [VS Code](https://code.visualstudio.com/) (with the Jupyter extensions) for editing and working with the notebook.
 
 Molecular visualisations are generated with [PyMol](https://pymol.org/) and input scripts are provided in the `output/visualization` folder.
