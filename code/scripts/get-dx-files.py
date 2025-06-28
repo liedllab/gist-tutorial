@@ -12,7 +12,7 @@ def main():
     parser.add_argument("pdb")
     parser.add_argument("out_base", help="Base name for output files, e.g. OUT_BASE-Eall_dens.dx")
     parser.add_argument("--ewwref", default=0)
-    parser.add_argument("--columns", nargs="+", default=["A_dens", "Eall_dens", "Eall2_dens", "A2_dens"])
+    parser.add_argument("--columns", nargs="+", default=["A_dens", "Eall_dens", "Eall2_dens", "A2_dens", "dTSsix_dens"])
     args = parser.parse_args()
     gistfile = gt.gist.load_gist_file(args.gistfile, struct=args.pdb)
     gistfile.struct = remove_solvent(gistfile.struct)
