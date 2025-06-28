@@ -5,9 +5,9 @@ A `make` workflow to create the inputs necessary to run the GIST calculation.
 A working installation of the [AMBER Molecular Dynamics Package](https://ambermd.org/) as well as [AmberTools](https://ambermd.org/AmberTools.php) is required.   
 The following commands are available:
               
-              make equilibration-targets   
-              make gist-md-inputs   
-              make gist-inputs
+        make equilibration-targets   
+        make gist-md-inputs   
+        make gist-inputs
   
 These create the equilibrated structural files, run the restrained MD simulation and run the GIST calculation, respectively.   
 
