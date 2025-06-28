@@ -8,6 +8,13 @@ The manuscript is not currently published, but is aimed at the Living Journal of
 As such, the tutorial is developed in line with LiveCoMS guidelines on [Paper Writing as Code Development ](https://livecomsjournal.github.io/about/paper_code/) and will be further updated in correspondence with the community. 
 If you notice any issues or have suggestions, please raise them as an [Issue](https://github.com/liedllab/gist-tutorial/issues) or write up a [Pull Request](https://github.com/liedllab/gist-tutorial/pulls).
 
+# Repository Content
+This repository contains the following folders and files:
+- [code](https://github.com/liedllab/gist-tutorial/tree/main/code): Input files and scripts to run the Biotin/Streptavidin example shown in the manuscript.
+- [manuscript](https://github.com/liedllab/gist-tutorial/tree/main/manuscript): LaTeX files for the manuscript and bibliography.
+- [manuscript/figures](https://github.com/liedllab/gist-tutorial/tree/main/manuscript/figures): Figures and plots used in the manuscript.
+- [output](https://github.com/liedllab/gist-tutorial/tree/main/output): GIST output for the example provided in the manuscript.
+- 
 # Dependencies and Installation
 * [cpptraj](https://github.com/Amber-MD/cpptraj) (Version 6.24 or higher)
 * [gisttools](https://github.com/liedllab/gisttools) (Version 0.2 or higher)
