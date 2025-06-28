@@ -11,12 +11,16 @@ def main():
     parser.add_argument("gistfile")
     parser.add_argument("pdb")
     parser.add_argument("out_base", help="Base name for output files, e.g. OUT_BASE-Eall_dens.dx")
+    parser.add_argument("--ewwref", default=0)
     parser.add_argument("--columns", nargs="+", default=["A_dens", "Eall_dens", "Eall2_dens", "A2_dens"])
     args = parser.parse_args()
     gistfile = gt.gist.load_gist_file(args.gistfile, struct=args.pdb)
     gistfile.struct = remove_solvent(gistfile.struct)
     assert 0.03 < gistfile.rho0 < 0.04, "Unusual reference density!"
-    gistfile.eww_ref = gistfile.detect_reference_value()
+    if args.ewwref != 0:
+        gistfile.eww_ref = args.ewwref
+    else:
+        gistfile.eww_ref = gistfile.detect_reference_value()
     gistfile["Eww2_dens"] = gistfile["Eww_dens"] * 2
     gistfile["Eall2_dens"] = gistfile["Eww2_dens"] + gistfile["Esw_dens"]
     gistfile["A2_dens"] = gistfile["Eall2_dens"] - gistfile["dTSsix_dens"]
