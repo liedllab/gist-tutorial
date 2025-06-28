@@ -9,7 +9,7 @@ The following commands are available:
         make gist-md-inputs   
         make gist-inputs
   
-These create the equilibrated structural files, run the restrained MD simulation and run the GIST calculation, respectively.   
+  These create the equilibrated structural files, run the restrained MD simulation and run the GIST calculation, respectively.   
 
 - complex/prep: contains the prepared structures of the biotin-streptavidin complex to run the example presented in the manuscript.   
 - visualization: contains PyMOL scripts to create some of the figures shown in the manuscript.   
