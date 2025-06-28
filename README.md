@@ -14,7 +14,7 @@ This repository contains the following folders and files:
 - [manuscript](https://github.com/liedllab/gist-tutorial/tree/main/manuscript): LaTeX files for the manuscript and bibliography.
 - [manuscript/figures](https://github.com/liedllab/gist-tutorial/tree/main/manuscript/figures): Figures and plots used in the manuscript.
 - [output](https://github.com/liedllab/gist-tutorial/tree/main/output): GIST output for the example provided in the manuscript.
-- 
+  
 # Dependencies and Installation
 * [cpptraj](https://github.com/Amber-MD/cpptraj) (Version 6.24 or higher)
 * [gisttools](https://github.com/liedllab/gisttools) (Version 0.2 or higher)
