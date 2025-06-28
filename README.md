@@ -1,3 +1,4 @@
+![A image showing a thermodynamic solvent densitie around a carbazole molecule](./manuscript/figures/carbazole-figure.png "Grid Inhomogenous Solvation Theory - GIST")
 # GIST-Tutorial
 A tutorial for Grid Inhomogenous Solvation Theory (GIST) as implemented in AmberTool's cpptraj.
 The tutorial aims to teach how to apply GIST for small molecules and proteins, with biotin-streptavidin as a showcase example.
@@ -21,7 +22,19 @@ This repository contains the following folders and files:
 * [gisttools](https://github.com/liedllab/gisttools) (Version 0.2 or higher)
 * [mdtraj](https://github.com/mdtraj/mdtraj) (Version 1.9.7 or higher)
 * [numpy](https://numpy.org/) (Tested with version 1.23.5)
-* [pandas](pandas.pydata.org) (Tested with version 1.5.3)
+* [pandas](https://pandas.pydata.org) (Tested with version 1.5.3)
+
+To install the dependencies, we recommend using [mamba](https://mamba.readthedocs.io/en/latest/) or [conda](https://docs.conda.io/en/latest/). A python environment can then be created with the following command:
+```bash
+mamba create -n gist-tutorial python=3.10 numpy pandas mdtraj dacase::ambertools-dac=25
+mamba activate gist-tutorial
+```
+Note that `gisttools` is not available via mamba/conda, and must be installed manually. You can do this by cloning the repository and installing it with pip:
+```bash
+git clone https://github.com/liedllab/gisttools.git
+cd gisttools
+pip install .
+```
 
 The molecular dynamics simulations used in the tutorial are hosted here: [![DOI](https://researchdata.uibk.ac.at/badge/DOI/10.48323/4mbrd-67m83.svg)](https://researchdata.uibk.ac.at/doi/10.48323/4mbrd-67m83)
 
@@ -43,3 +56,7 @@ In the same order as in the manuscript:
 * Tom Kurtzman
   
 The repository is currently managed by Valentin ([@vhoer](https://www.github.com/vhoer)).
+
+# Citation
+If you want to cite the tutorial or readapt any code from this project, please cite us:
+TODO - Add citation once the manuscript is published.
