@@ -787,9 +787,11 @@ import numpy as np
 # adapt eww_ref according to the used solvent model! 
 gist = load_gist_file('gist.dat',
 	struct='solute-centered.pdb', eww_ref=-9.5398)
+# The rdf function allows muktiples columns to be calculated at once
 bins, (da, esw, eww, s) = gist.rdf(
 	['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
 	bins=100, rmax=20., normalize='none')
+# Plot the bins vs the cumulative sum of the free energy contributions
 plt.plot(bins, np.cumsum(eww), label='$\Delta$E$_{ww}$')
 plt.plot(bins, np.cumsum(esw), label='$\Delta$E$_{sw}$')
 plt.plot(bins, np.cumsum(da), label='$\Delta$A')
@@ -867,7 +869,7 @@ PyMOL input scripts to generate such visualizations are available in the GitHub 
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/pocket_norm_volume.png}
 	\caption{Water energy using "norm" data represented as volume in the streptavidin binding pocket overlayed with biotin. Red: high solvent energy (from +3.5 
-	to +2.5 kcal/mol/molecule). Blue: low solvent energy (from -3.5 to -2.5 kcal/mol/molecule). The energy density is based on the apo structure and is shown only within \qty{1}{\angstrom} of biotin.}\label{fig_binding_pocket_pymol}
+	to +2.5 kcal/mol/molecule). Blue: low solvent energy (from -3.5 to -2.5 kcal/mol/molecule). The energy density is based on the apo structure without double-counting and is shown only within \qty{1}{\angstrom} of biotin.}\label{fig_binding_pocket_pymol}
 \end{figure}
 
 \subsubsection{Contribution of Hydration to Binding}
