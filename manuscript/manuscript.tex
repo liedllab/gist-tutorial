@@ -926,10 +926,10 @@ col = 'dTSsix_dens'
 def select(traj, sel):
     # Slice a Trajectory by selection mask.
     return traj.atom_slice(traj.top.select(sel))
-# we multiply by 10 to convert nm to Angstrom.
+# Define atom masks in mdtraj syntax for biotin and streptavidin
 biotin_mask = 'resname BTN and not element H'
 strept_mask = 'not resname BTN and not resname WAT and not element H'
-# select the biotin atoms
+# select the biotin atoms, we multiply by 10 to convert nm to Angstrom.
 compl_x = select(compl.struct, biotin_mask).xyz[0] * 10.
 biotin_x = select(biotin.struct, biotin_mask).xyz[0] * 10.
 # align the complex to streptavidin
@@ -969,6 +969,7 @@ Finally, you can also plot the difference between the complex and monomer contri
 \begin{lstlisting}[style=python]
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4))
 cutoff = 12
+# In the first plot, we show the cumulative sum of the contributions
 ax1.plot(bins, np.cumsum(biotin_rdf), label='biotin')
 ax1.plot(
     bins, np.cumsum(strept_rdf), label='streptavidin')
@@ -979,6 +980,7 @@ ax1.set_xlabel('distance to biotin [Å]')
 ax1.set_ylabel('$\Delta A$ contributions [Å]')
 ax1.grid()
 
+# In the second plot, we show the difference of the cumulative sums
 difference = compl_rdf - biotin_rdf - strept_rdf
 ax2.plot(bins, np.cumsum(difference))
 ax2.axvline(cutoff, color='k', linestyle='--')
