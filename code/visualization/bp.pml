@@ -2,8 +2,8 @@
 ### Imports and loading
 import numpy as np
 
-load ../complex/gist.pdb, complex
-load ../complex/binding_pocket.dx.gz, BP
+load ../../output/complex/gist.pdb, complex
+load ../../output/complex/binding_pocket.dx.gz, BP
 
 ### Pymol settings
 set ray_shadow, off

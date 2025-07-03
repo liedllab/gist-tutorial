@@ -2,12 +2,12 @@
 ### Imports and loading
 import numpy as np
 
-load ../complex/gist.pdb, complex
-load ../streptavidin/gist.pdb, apo
-load ../streptavidin/gist-Eall-dens.dx.gz, gist-E
-load ../streptavidin/gist-Eall2-dens.dx.gz, gist-E2
-load ../streptavidin/gist-dTSsix-dens.dx.gz, gist-S
-load ../streptavidin/gist-gO.dx.gz, gist-gO
+load ../../output/complex/gist.pdb, complex
+load ../../output/streptavidin/gist.pdb, apo
+load ../../output/streptavidin/gist-Eall-dens.dx.gz, gist-E
+load ../../output/streptavidin/gist-Eall2-dens.dx.gz, gist-E2
+load ../../output/streptavidin/gist-dTSsix-dens.dx.gz, gist-S
+load ../../output/streptavidin/gist-gO.dx.gz, gist-gO
 
 ### Pymol settings
 set ray_shadow, off

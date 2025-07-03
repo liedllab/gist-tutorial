@@ -795,8 +795,8 @@ plt.plot(bins, np.cumsum(esw), label='$\Delta$E$_{sw}$')
 plt.plot(bins, np.cumsum(da), label='$\Delta$A')
 plt.plot(bins, np.cumsum(s), label='T$\Delta$S')
 plt.legend()
-plt.xlabel("distance cutoff [$\AA$]")
-plt.ylabel("free energy contribution [kcal/mol]")
+plt.xlabel("Distance Cutoff [$\AA$]")
+plt.ylabel("Free Energy Contribution [kcal/mol]")
 \end{lstlisting}
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
 \begin{figure}
@@ -865,9 +865,9 @@ PyMOL input scripts to generate such visualizations are available in the GitHub 
 
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\linewidth]{figures/binding_pocket_norm_quants.png}
-	\caption{Water energy using "norm" data in the streptavidin binding pocket overlayed with biotin. Red: high solvent energy (at +3 
-	kcal/mol/molecule). Green: low solvent energy (at -3 kcal/mol/molecule). The energy density is based on the apo structure and is shown only when within \qty{1.5}{\angstrom} of biotin.}\label{fig_binding_pocket_pymol}
+	\includegraphics[width=0.8\linewidth]{figures/pocket_norm_volume.png}
+	\caption{Water energy using "norm" data represented as volume in the streptavidin binding pocket overlayed with biotin. Red: high solvent energy (from +3.5 
+	to +2.5 kcal/mol/molecule). Blue: low solvent energy (from -3.5 to -2.5 kcal/mol/molecule). The energy density is based on the apo structure and is shown only within \qty{1}{\angstrom} of biotin.}\label{fig_binding_pocket_pymol}
 \end{figure}
 
 \subsubsection{Contribution of Hydration to Binding}
