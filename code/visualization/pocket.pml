@@ -1,4 +1,3 @@
-
 ### Imports and loading
 import numpy as np
 

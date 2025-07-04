@@ -10,4 +10,4 @@ This directory contains the LaTeX source code and assets for the GIST tutorial m
 
 - **`vancouver-livecoms.bst`**: A BibTeX style file that controls the formatting of the citations and the bibliography list. It is a customized version of the Vancouver citation style, adapted specifically for LiveCoMS publications.
 
-The other files in this directory (e.g., `.aux`, `.bbl`, `.log`, `.pdf`) are auxiliary files generated during the LaTeX compilation process or are part of the final output. The `figures` subdirectory contains all the image files included in the
+The other files in this directory (e.g., `.aux`, `.bbl`, `.log`, `.pdf`) are auxiliary files generated during the LaTeX compilation process or are part of the final output. The `figures` subdirectory contains all the image files included in the manuscript.
