@@ -819,17 +819,18 @@ import numpy as np
 # adapt eww_ref according to the used solvent model! 
 gist = load_gist_file('gist.dat',
 	struct='solute-centered.pdb', eww_ref=-9.5398)
-# The rdf function allows multiple columns to be calculated at once
-bins, (da, esw, eww, s) = gist.rdf(
+# Calculate rdfs for multiple columns
+bins, (da, esw, eww, s) = gist.multiple_rdfs(
 	['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
 	bins=100, rmax=20., normalize='none')
 # Plot the bins vs the cumulative sum of the free energy contributions
-plt.plot(bins, np.cumsum(eww), label='$\Delta$E$_{ww}$')
-plt.plot(bins, np.cumsum(esw), label='$\Delta$E$_{sw}$')
-plt.plot(bins, np.cumsum(da), label='$\Delta$A')
-plt.plot(bins, np.cumsum(s), label='T$\Delta$S')
+# Note the sign change for the entropy, to plot -TdS instead of TdS
+plt.plot(bins, np.cumsum(eww), label=r'$\Delta$E$_{ww}$')
+plt.plot(bins, np.cumsum(esw), label=r'$\Delta$E$_{sw}$')
+plt.plot(bins, np.cumsum(da), label=r'$\Delta$A')
+plt.plot(bins, np.cumsum(-s), label=r'-T$\Delta$S')
 plt.legend()
-plt.xlabel("Distance Cutoff [$\AA$]")
+plt.xlabel(r"Distance Cutoff [$\AA$]")
 plt.ylabel("Free Energy Contribution [kcal/mol]")
 \end{lstlisting}
 The expected output of this code is shown in Figure~\ref{fig_radial_convergence}.
@@ -885,7 +886,7 @@ An OpenDX file can be produced using \software{gisttools} as follows:
 import gisttools as gt
 # Load the GIST data, make sure to set the correct reference energy
 gist = gt.gist.load_gist_file('gist.dat',
-    struct='solute-centered.pdb', eww_ref=-9.533)
+    struct='solute-centered.pdb', eww_ref=-9.5398)
 # Calculate the total energy without double counting
 gist['E_norm'] = gist['Eww_norm'] * 2 + gist['Esw_norm']
 # Set the energy to zero for all voxels with no population
@@ -1016,16 +1017,16 @@ ax1.plot(
 ax1.plot(bins, np.cumsum(compl_rdf), label='complex')
 ax1.legend()
 ax1.axvline(cutoff, color='k', linestyle='--')
-ax1.set_xlabel('distance to biotin [Å]')
-ax1.set_ylabel('$\Delta A$ contributions [Å]')
+ax1.set_xlabel(r'Distance to Biotin [Å]')
+ax1.set_ylabel(r'$\Delta A$ contributions [Å]')
 ax1.grid()
 
 # In the second plot, we show the difference of the cumulative sums
 difference = compl_rdf - biotin_rdf - strept_rdf
 ax2.plot(bins, np.cumsum(difference))
 ax2.axvline(cutoff, color='k', linestyle='--')
-ax2.set_xlabel('distance to biotin [Å]')
-ax2.set_ylabel('$\Delta \Delta A$ [kcal/mol]')
+ax2.set_xlabel(r'Distance to Biotin [Å]')
+ax2.set_ylabel(r'$\Delta \Delta A$ [kcal/mol]')
 ax2.grid()
 plt.show()
 \end{lstlisting}
@@ -1046,16 +1047,18 @@ import pandas as pd
 centers = {'biotin': biotin_x, 
     'strept': strept_x, 
     'compl': compl_x}
-gist_objs = {'biotin': biotin, 
-    'strept': strept, 
-    'compl': compl}
+gist_objs = {
+	'compl': compl,
+	'strept': strept,
+	'biotin': biotin, 
+    }
 cols = ['Eall_dens','dTSsix_dens']
 rmax = 12
 results = {
     name: gist.integrate_around(
     cols, rmax, centers[name])
     for name, gist in gist_objs.items()}
-print(pd.DataFrame(results))
+print(pd.DataFrame(results).T)
 \end{lstlisting}
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
