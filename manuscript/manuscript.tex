@@ -449,7 +449,7 @@ The output file is organized by voxel and sorted according to their x, y, and z 
 Energy and entropy quantities are reported in two different ways.
 The \inlinecode{\_dens} quantities are normalized by the voxel volume and can be used to compute integrals.
 The \inlinecode{\_norm} quantities are instead normalized by the solvent number density in the respective voxel averaged over all considered frames, and are useful to visualize local water properties.
-To convert from a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \inlinecode{\_dens} quantity $X^k_{dens}$, the following equation can be applied:
+Converting a \inlinecode{\_norm} quantity $X^k_{norm}$ in voxel $k$ to a \inlinecode{\_dens} quantity $X^k_{dens}$, works as follows:
 \begin{equation}
 	X^k_{dens} = \frac{X^k_{norm}}{V^k} \cdot \frac{N^k_{solvent}}{N_{frames}}
 \end{equation}
@@ -529,8 +529,7 @@ For qualitative mapping of solvation thermodynamic quantities, however, signific
 For integrated quantities, we recommend \qty{100}{\nano\second} trajectories and, for mapping, trajectories of \qtyrange{5}{10}{\nano\second} are generally sufficient. 
 We note that storing solvent configurations too frequently from MD trajectories can lead to systematic bias in the nearest neighbors entropy estimates (see Huggins \cite{Huggins2014-entropy}).
 We recommend that configurations be stored no more frequently than every \qty{2}{\pico\second}. 
-
-An example Amber input file for GIST might look like this:
+An example AMBER input file for GIST might look like this:
 \begin{lstlisting}[style=amber-in]
 restrained 100 ns NPT
 &cntrl
@@ -1005,6 +1004,7 @@ plt.axvline(cutoff)
 plt.xlabel('distance to biotin [Å]')
 plt.ylabel('$\Delta A$ contribution [kcal/mol]')
 \end{lstlisting}
+\pagebreak
 Finally, you can also plot the difference between the complex and monomer contributions against the distance to biotin, using the complex coordinates for the holo structure:
 
 \begin{lstlisting}[style=python]
@@ -1031,14 +1031,7 @@ ax2.grid()
 plt.show()
 \end{lstlisting}
 The expected result is shown in Figure~\ref{fig-dg-sums}.
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=1.0\linewidth]{figures/deltaA-difference.png}
-	\caption{Left: $\dasolv$ contributions around the location of biotin in the binding pocket, evaluated in the biotin, streptavidin, and complex systems. 
-	Each line represents a cumulative sum plotted against the distance to biotin. Right: The hydration contribution to binding, evaluated as the difference between the lines in the left panel. 
-	The vertical dashed line is at \qty{12}{\angstrom} and represents the chosen integration cutoff.}
-	\label{fig-dg-sums}
-\end{figure}
+
 Compute the energy (\inlinecode{Eall}) and entropy (\inlinecode{dTSsix}) contributions separately.
  To make this easier, gisttool includes a function to integrate in a radius around atom centers:
 \begin{lstlisting}[style=python]
@@ -1060,9 +1053,19 @@ results = {
     for name, gist in gist_objs.items()}
 print(pd.DataFrame(results).T)
 \end{lstlisting}
+\begin{figure} %moved this figure here to avoid breaking the page in the code listing
+	\centering
+	\includegraphics[width=1.0\linewidth]{figures/deltaA-difference.png}
+	\caption{Left: $\dasolv$ contributions around the location of biotin in the binding pocket, evaluated in the biotin, streptavidin, and complex systems. 
+	Each line represents a cumulative sum plotted against the distance to biotin. Right: The hydration contribution to binding, evaluated as the difference between the lines in the left panel. 
+	The vertical dashed line is at \qty{12}{\angstrom} and represents the chosen integration cutoff.}
+	\label{fig-dg-sums}
+\end{figure}
 You will find that the energy disfavors binding, because we do not yet include the interaction energy between biotin and streptavidin.
 Using the \inlinecode{energy} command in \software{cpptraj}, you can compute this interaction energy.
 We recommend using PME in combination with PME-GIST, but not with GPU-GIST to be in line with the different ways the energy is calculated in the two GIST methods.
+
+\begin{minipage}{\linewidth} %force these lines to be on the same page
 An example \software{cpptraj} is then:
 \begin{lstlisting}[style=cpptraj]
 # Load the topology and trajectory of the complex
@@ -1082,6 +1085,7 @@ avg(strept[total])
 avg(biotin[total])
 avg(diff)
 \end{lstlisting}
+\end{minipage}
 It has been shown \cite{Chen2021,Waibl2022-gist-solvents} that the solvation entropy in water is best approximated by 0.6 times the first order entropy provided by GIST.
 So we also compute the scaled entropy and check the effect on the binding affinity.
 The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
@@ -1202,21 +1206,21 @@ color slate, gO_high
 \end{lstlisting}
 A more sophisticated visualization, including the energy, entropy, and free energy of removing a single water solvent 
 molecule, is found in Figure~\ref{fig-binding-pocket}.
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{figures/streptavidin_gO_high_surf.png}
 	\caption{Oxygen density around streptavidin at an isolevel of twice the reference density (i.e., bulk)}
 	\label{fig-streptavidin_gO}
 \end{figure}
-\begin{figure}
+\begin{figure}[H]
 	\centering
-	\begin{subfigure}[b]{0.45\textwidth}
+	\begin{subfigure}[b]{0.49\textwidth}
 	\includegraphics[width=\linewidth]{figures/binding_pocket_E.png}
 	\caption{GIST solvent energy (based on $E_{sw} + 2E_{ww}$).}
 	\label{fig-binding-pocket-energy}
     \end{subfigure}
 	\hfill
-	\begin{subfigure}[b]{0.45\textwidth}
+	\begin{subfigure}[b]{0.49\textwidth}
 		\includegraphics[width=\linewidth]{figures/binding_pocket_S.png}
 		\caption{GIST solvent entropy}
 		\label{fig-binding-pocket-entropy}
@@ -1241,7 +1245,7 @@ load ../gist-gO.dx
 isomesh sas, gist-gO, 0.1
 \end{lstlisting}
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1\linewidth]{figures/sasa-simple.png}
 	\caption{SAS for streptavidin focused on the binding pocket}\label{fig-streptavidin_sasa}
@@ -1253,7 +1257,6 @@ For example, voxels that are located within the binding pocket can be defined us
 In section~\ref{sec:binding_contributions}, we show how to integrate over regions such as the binding pocket. 
 To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. 
 Here, we show what this would look like for a radius of \qty{3.5}{\angstrom} around the heavy atoms of biotin. 
-
 \begin{lstlisting}[style=python]
 import gisttools as gt
 def select(traj, sel):
@@ -1277,7 +1280,7 @@ compl.loc[ind, 'BP'] = 1
 compl.save_dx('BP', 'binding_pocket.dx')
 \end{lstlisting}
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=1.0\linewidth]{streptavidin_bp_close.png}
 	\caption{Volume of streptavidin defined around \qty{3.5}{\angstrom} of biotin. }\label{streptavidin_volume}
