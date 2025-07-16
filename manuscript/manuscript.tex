@@ -121,7 +121,7 @@
 	inputencoding=utf8,
 	extendedchars=true,
 	literate={Å}{{\AA}}1,
-	backgroundcolor = \color[rgb]{0.9, 0.9, 0.9},
+	backgroundcolor = \color[rgb]{0.9, 0.9, 0.9}, 
 	showstringspaces=false,
 	columns=fullflexible,
 }
@@ -239,7 +239,7 @@ Similar to the self-consistent integral theories, GIST only considers a single s
 
 Aside from the previously mentioned methods, there is a large variety of other methods to compute energetic and entropic contributions to the solvation free energy, as recently reviewed \cite{Heyden2019-localsolvation,Mukherjee2022-ReviewSpatialWatersBiomolecule}.
 Approaches like SZMAP \cite{Bayden2015-SZMAP} trade the accuracy of all-atom MD simulation for speed by using a faster probe-based approach.
-SPAM ("maps" in reverse) is more akin to WaterMaps, investigating distinct hydration sites based on high local water densities \cite{Cui2013-SPAM}. 
+SPAM ("maps" in reverse) is more akin to WaterMap, investigating distinct hydration sites based on high local water densities \cite{Cui2013-SPAM}. 
 However, it approximates the water entropies from the water interaction energy distributions.
 Another group of methods builds on the cell theory for liquids \cite{henchman2003partition}, which derives independent effective potentials for each molecule in its neighbors' mean field.
 Conceptually close to GIST is Grid Cell Theory (GCT), which also adopts a grid-based approach but differs in the assumptions made in its entropy calculations \cite{Gerogiokas2014-GCT}.
@@ -323,7 +323,7 @@ gist gridcntr <x> <y> <z> griddim <Nx> <Ny> <Nz> gridspacn <val>
 \end{lstlisting}
 
 If the solute is already centered at the origin (0, 0, 0), the grid center does not need to be specified.
-As such, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and reimaging to account for periodic boundary conditions.
+As such, the GIST calculation should usually be preceded by centering the solute molecule in the unit cell and re-imaging to account for periodic boundary conditions.
 Often, the region of interest will be defined as the surroundings of a molecule, for example a ligand in the binding pocket, or an entire protein.
 We recommend using GIST grids with a similar size to the simulation box, as the GIST calculation will usually not be the time limiting step and a region of interest can then be chosen freely in post-analysis.
 However, if computational resources and disk space are limited, it might be beneficial to reduce the grid size.
@@ -347,7 +347,7 @@ python findcentroid.py -i structure.pdb
 \paragraph{Run GIST using cpptraj}
 GIST is implemented in \software{cpptraj} which requires the topology and the trajectory of the MD simulation to be analyzed.
 
-The command needed to run GIST in cpptraj can be written in an input file (e.g gist.in) for convenience and reproducibility.
+The command needed to run GIST in cpptraj can be written in an input file (e.g. gist.in) for convenience and reproducibility.
 The basic command, assuming a grid centered at coordinates (x=\qty{10.5}{\angstrom}, y=\qty{20.1}{\angstrom}, z=\qty{30.1}{\angstrom}) and a grid size of $30\times30\times30$ voxels with \qty{0.5}{\angstrom} spacing, is:
 
 \begin{lstlisting}[style=cpptraj]
@@ -359,7 +359,7 @@ Additionally, .dx files for some default thermodynamic densities are generated a
 
 To use OpenMP, MPI or GPU-accelerated (using CUDA) versions of cpptraj, a different executable name such as \inlinecode{cpptraj.OMP}, \inlinecode{cpptraj.MPI} or \inlinecode{cpptraj.cuda} is often used.
 Therefore, make sure to use the right compilation and executable, to get the full benefit of the various improvements to GIST as implemented in cpptraj.
-The \inlinecode{gist} action has a large number of options to modify the GIST calculation or its output.
+The \inlinecode{gist} action has numerous options to modify the GIST calculation or its output.
 A full list is provided at the end of this tutorial or through the \software{cpptraj} manual.
 The most important options are summarized in the following table:
 
@@ -374,7 +374,7 @@ The most important options are summarized in the following table:
 		gridcntr    & <x> <y> <z> & Coordinates of the grid center in \AA{} & 0 0 0  \\
 		griddim     & <nx> <ny> <nz> & Number of voxels per axis & 40 40 40\\
 		gridspacn & <dval> &Grid spacing / voxel dimensions in  \AA{} & 0.5    \\
-		refdens         & <rdval> & Reference density of the bulk water in molecules/\AA{}$^3$ . & 0.0334    \\
+		refdens         & <rdval> & Reference density of the bulk water in molecules/\AA{}$^3$. & 0.0334    \\
 		temp & <tval> & System temperature in Kelvin & 300 \\
 		\bottomrule
 	\end{tabularx}
@@ -468,7 +468,7 @@ The tutorial is structured as follows:
 \end{enumerate}
 In the first part, we show how to run GIST calculations for small molecule solutes and interpret the output. 
 This provides an example of a simple GIST workflow, without too many details.
-Afterwards, we apply this to a protein binding pocket and estimate a free energy of ligand binding using an end-states approach based on GIST. 
+Afterward, we apply this to a protein binding pocket and estimate a free energy of ligand binding using an end-states approach based on GIST. 
 In addition, we discuss all steps shown in the first example in further detail. 
 
 
@@ -484,9 +484,9 @@ The binding to the closed conformation of the tetramer has been estimated to hav
 
 \subsection{Tutorial data}
 We will use the crystal structure of streptavidin (PDB code: 1STP \cite{Weber1989-streptavidin-structure}) to start our calculations.
-For section \ref{subsec:gist_biotin}, we will use the biotin ligand extracted from the crystal structure.
+In section \ref{subsec:gist_biotin}, we will use the biotin ligand extracted from the crystal structure.
 For the second part in section \ref{subsec:gist_complex}, we will use the whole crystal structure.
-For simplicity, prepared and solvated Amber topologies based on 1STP can be downloaded by running
+Alternatively, prepared and solvated Amber topologies based on 1STP can be downloaded by running
 \begin{lstlisting}[style=bash]
 git clone git@github.com:liedllab/gist-tutorial.git
 \end{lstlisting}
@@ -565,7 +565,7 @@ pmemd.cuda \
 
 To start our GIST analysis of biotin, we will first have to decide on the parameters defining the GIST grid during the analysis.
 We will need a solute structure without water for the analysis of our future GIST results. 
-Since we ran our MD simulation with periodic boundaries, we always need to reimage all molecules to the original box using cpptraj's \inlinecode{autoimage} function. 
+Since we ran our MD simulation with periodic boundaries, we always need to re-image all molecules to the original box using cpptraj's \inlinecode{autoimage} function. 
 We also recommend that you center the biotin solute molecule to the coordinate origin, as this simplifies the definition of our grid origin later on:
 
 \begin{lstlisting}[style=cpptraj]
@@ -580,7 +580,7 @@ trajout biotin-centered.pdb
 run
 \end{lstlisting}
 In this code snippet, the first two lines load the topology and coordinates of the first frame of our MD simulation.
-In the third line, we reimage the coordinates to the first box and center the biotin at the origin. 
+In the third line, we re-image the coordinates to the first box and center the biotin at the origin. 
 Then, we strip all water solvent molecules in the fourth line and write out a pdb file in the fifth line. 
 Finally, we start the analysis with the "run" command.
 
@@ -599,14 +599,14 @@ bounds !(:WAT) dx 0.5 offset 30 name Grid out bounds.dat
 run
 \end{lstlisting}
 First, we load the topology and coordinates of the first frame of our MD simulation (1 1 1 meaning start=1, stop=1, and stride=1).
-Then, we reimage the coordinates and center the solute at the origin.
+Then, we re-image the coordinates and center the solute at the origin.
 Here, dx 0.5 sets a voxel spacing of 0.5 Å for the boundary determination, and offset 30 adds a buffer of 30 voxels (i.e., $30 \times 0.5 \AA = 15 \AA$) to each dimension.
 The atom mask !(:WAT) specifies that the grid should be calculated around all atoms that are not water residues.
 Note that the offset is given in terms of the number of additional voxels, not in length dimensions. 
 By varying the atom mask in the \inlinecode{bound} command, it is possible to center the grid on a region of interest, similar to the \software{findcentroid.py} script.
 
 Now, you can run the actual GIST analysis.
-Reimage and center the solute molecule as above, to verify that its position matches the grid parameters you decided on.
+Re-image and center the solute molecule as above, to verify that its position matches the grid parameters you decided on.
 We recommend using either the GPU implementation or MPI-accelerated PME implementation of GIST.
 While the GPU version is faster when limited CPU resources are available, the PME implementation matches the energy of the Amber MD engine more closely.
 The MPI implementation \cite{Roe2023-mpi-gist} scales well over multiple CPU cores and can be combined with either the GPU or PME implementations for maximum efficiency. 
@@ -614,7 +614,7 @@ A speed comparison of the various parallelization implementations is shown in \c
 The reason for the many different implementations is that GIST is a very computationally expensive calculation, and historically, the CPU version was the only one available.
 The GPU version improved the speed of GIST calculations significantly, allowing for grids encompassing whole biomolecules for the first time.
 The PME version came after with the intention to match the energy of the AMBER MD engine more closely to compare with other free energy methods.
-Most recently, the MPI parallelization provided another significant speedup for all implementations.
+Most recently, the MPI parallelization provided another significant speed up for all implementations.
 
 \begin{lstlisting}[style=cpptraj]
 # Load the topology ('parm') and coordinates of the full trajectory
@@ -650,7 +650,7 @@ We will discuss a way to similarly detect the reference energy of the solvent-so
 The GIST data can be accessed and modified from the gist object in various ways.
 Gisttools provides access to single or multiple voxels through a \code{.loc} property similar to the pandas library. 
 GIST quantity data for all voxels can be accessed by directly indexing the gist object, either by providing a single name or a list of names.
-Indexing with \code{.loc} works by providing a voxel index (either a index number or list of numbers) and optionally a column index (column name or list of names). 
+Indexing with \code{.loc} works by providing a voxel index (either an index number or list of numbers) and optionally a column index (column name or list of names). 
 Indices start from 0 and indexing will return a single entry, pandas series or pandas dataframe depending on the query:
 \begin{lstlisting}[style=python]
 # GIST objects contain pandas dataframes
@@ -678,7 +678,7 @@ Section~\ref{sec:visualization} discusses the visualization of OpenDX files.
 \subsection{Applying GIST for the Streptavidin-Biotin complex}
 \label{subsec:gist_complex}
 In this section we will apply GIST to the full complex and discuss each step of the process in more detail to outline potential pitfalls.
-We will afterwards introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
+We will afterward introduce advanced analysis workflows which allow you to modify and better visualize the resulting data.
 \subsubsection{System Preparation}
 If you want to skip this section, you can run 
 \begin{lstlisting}[style=bash]
@@ -904,7 +904,7 @@ PyMOL input scripts to generate such visualizations are available in the GitHub 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.8\linewidth]{figures/pocket_norm_volume.png}
-	\caption{Water energy using "norm" data represented as volume in the streptavidin binding pocket overlayed with biotin. 
+	\caption{Water energy using "norm" data represented as volume in the streptavidin binding pocket overlaid with biotin. 
 	Red: high solvent energy (from +3.5 
 	to +2.5 kcal/mol/molecule). Blue: low solvent energy (from -3.5 to -2.5 kcal/mol/molecule).
 	The energy density is based on the apo structure without double-counting and is shown only within \qty{1}{\angstrom} of biotin.}
@@ -920,7 +920,7 @@ To avoid inconsistencies, it is important to choose exactly the same integration
 Although we kept the systems rigid, the center of mass might have been shifted during pressure equilibration.
 Therefore, we align the complex structure to streptavidin and use the shifted biotin coordinates to define the integration region.
 We recommend using a \software{Jupyter Notebook} for the following analyses.
-Load the files and double check the frame numbers and reference density.
+Load the files and double-check the frame numbers and reference density.
 \begin{lstlisting}[style=python]
 import numpy as np
 from gisttools.gist import load_gist_file
@@ -1109,7 +1109,7 @@ The expected results are summarized in Table~\ref{tab_dg_monomers_dimer}.
 	\end{tabular}
 \end{table}
 Although streptavidin-biotin is known to be a very stable complex, the free solvation energy ($\Delta E^{GIST}-T\Delta S^{scaled}$) favors the dissociation.
-This is expected: the binding of biotin to streptavidin is facilitated through a large number of H-bonds and over polar interactions. 
+This is expected: the binding of biotin to streptavidin is facilitated through numerous H-bonds and over polar interactions. 
 As such, water favorably solvates both biotin and streptavidin and an energetic penalty is paid when displacing the water during the binding process. 
 In this case, we find that the changes in the energy of solvation and of the internal energy $\Delta E^{internal}$ more or less cancel out, indicating that binding is largely entropy-driven.
 At first glance, this is surprising, since isothermal titration calorimetry (ITC) of biotin-streptavidin shows significant enthalpic binding contributions \cite{mpye2020-biotin-itc,hyre2006-biotin-itc}.
@@ -1121,10 +1121,9 @@ To improve the agreement with ITC measurements, the conformational changes of th
 
 \subsubsection{Further steps}
 In this tutorial, we obtained a value for the binding of biotin into the closed conformation of the streptavidin binding pocket.
-To investigate the effect of different conformations on the binding affinity, you can perform molecular dynamics simulations of the complex and/or monomers and perform GIST on multiple cluster representatives.
-To include the effect of lid closing in the binding process, free energy calculation methods such as umbrella sampling can be used.
-To speed up the calculation, smaller GIST grids could be used by focusing on the binding pocket, or by rotating the solute molecule along its principal axes to fit the cuboid grid more exactly.
-However, this should be done \emph{before} the MD simulation, since rotating the trajectory compromises the periodic box information.
+Investigating the effect of different conformations on the binding affinity can be achieved by performing molecular dynamics simulations of the complex and/or monomers, followed by GIST analysis on multiple cluster representatives.
+Including the effect of lid closing in the binding process may require free energy calculation methods such as umbrella sampling.
+For faster calculations, consider using smaller GIST grids focused on the binding pocket, or rotating the solute molecule along its principal axes to fit the cuboid grid more exactly; note that such adjustments should be made \emph{before} the MD simulation, as rotating the trajectory compromises the periodic box information.
 
 \section{Recent developments}
 In recent years, several updates to the original GIST implementation have been published.
@@ -1253,7 +1252,7 @@ isomesh sas, gist-gO, 0.1
 \subsection{Defining the binding pocket}
 Specific regions in a protein can be defined to calculate the thermodynamic properties for that region.
 This is especially significant when calculating the properties of water that will be expelled when a ligand binds to the protein.
-For example, voxels that are located within the binding pocket can be defined using a ligand solute molecule and a distance criteria. 
+For example, voxels that are located within the binding pocket can be defined using a ligand solute molecule and a distance criterion. 
 In section~\ref{sec:binding_contributions}, we show how to integrate over regions such as the binding pocket. 
 To visualize the considered region, we can create a OpenDX file where we set the considered voxels to 1 and all others to 0. 
 Here, we show what this would look like for a radius of \qty{3.5}{\angstrom} around the heavy atoms of biotin. 
@@ -1405,7 +1404,7 @@ The total solvent-solvent energy of the system is as follows:
 	\Delta E_{ww} = \sum_{k}^\text{voxels} \frac{E_{ww,k}^\text{corr}}{2}
 %	\Delta E^R_{ww} = n^R E^\text{bulk}_{ww} - E^\textit{R,corr}_{ww}
 \end{equation}
-However, when water is replaced from a small region $R$ of interest, such as a single water solvent molecule, almost all interactions are with water solvent molecules outside of this region.
+However, when water is replaced from a small region $R$ of interest, such as a single water solvent molecule, almost all interactions are with water solvent molecules outside this region.
 Therefore, there is no double counting, and the full solvent-solvent energy should be used.
 
 \begin{equation}
@@ -1423,7 +1422,7 @@ However, when integrating over a small region, this process is less well-defined
 This depends on the local environment and on \emph{what} the solvent would be replaced by.
 Therefore, the effect of reorganization must be judged for each case individually.
 One way to treat reorganization is an end-state approach as shown in the tutorial: all states before and after solvent reorganization are considered. 
-In the tutorial, this corresponds to the solvation of biotin and streptavidin seperated (initial states) and in complex (end-state). 
+In the tutorial, this corresponds to the solvation of biotin and streptavidin separated (initial states) and in complex (end-state). 
 Note that all solvent contributions must be considered to obtain thermodynamically accurate results in such a case. 
 In practice, this therefore requires the integration over the whole grid or at least all voxels with solvent properties different from bulk (i.e. setting a large cutoff).
 \subsubsection{PME energy}
@@ -1527,7 +1526,7 @@ Angstroms. Default is \qty{0.5}{\angstrom}.\\
 rmsfit <mask> & If specified, grid will be rotated and translated to follow the atoms selected by mask. \\
 \textbf{GIST Calculation Options} &\\
 
-skipE & Skip all the energy calculations (cannot be specified with ’doeij’)\\
+skipE & Skip all the energy calculations (cannot be specified with 'doeij')\\
 skipS & Skip all the entropy calculations.\\
 refdens <val> & Reference density of bulk solvent, used in computing 
 $g_O, g_H$, and the translational entropy. Default is 0.0334 molecules/\unit{\cubic\angstrom}. \\
@@ -1582,9 +1581,9 @@ doorder & Calculate the water order parameter [reference] for each voxel\\
 
 
 \textbf{Output}\\
-GIST calculations write a variety of data sorted by voxel into an outputfile specified by the 'out' keyword. 
-Some of the output data is also automatically written to 'open data explorer' (.dx) files for convenient visualiZation in software such as VMD or PyMOL. 
-Note that some columns will be written out both with '\_norm' and '\_dens' suffixes, refereing to normalization by solvent molecule or voxel volume respectively.
+GIST calculations write a variety of data sorted by voxel into an output file specified by the 'out' keyword. 
+Some of the output data is also automatically written to 'open data explorer' (.dx) files for convenient visualization in software such as VMD or PyMOL. 
+Note that some columns will be written out both with '\_norm' and '\_dens' suffixes, referring to normalization by solvent molecule or voxel volume respectively.
 The following columns can be found in the output file:
 \medskip
 
