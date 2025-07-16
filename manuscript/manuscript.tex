@@ -55,23 +55,24 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \title{Tutorial: Quantifying Spatially Resolved Hydration Thermodynamics Using Grid Inhomogeneous Solvation Theory [Article v\versionnumber]}
 
-\author[1\authfn{1}]{Valentin J Egger-Hoerschinger}
+\author[1\authfn{1}]{Valentin J. Egger-Hoerschinger}
 \author[1\authfn{1}]{Franz Waibl}
 \author[2]{Vjay Molino}
-\author[2]{Helmut Carter}
-\author[1]{Monica L Fern{\'a}ndez-Quintero}
-\author[2]{Steven Ramsey}
-\author[4]{Daniel R Roe}
-\author[1*]{Klaus R Liedl}
-\author[3*]{Michael K Gilson}
-\author[5,6*]{Tom Kurtzman}
+\author[3]{Helmut Carter}
+\author[1]{Monica L. Fern{\'a}ndez-Quintero}
+\author[7]{Steven Ramsey}
+\author[5]{Daniel R. Roe}
+\author[1*]{Klaus R. Liedl}
+\author[4*]{Michael K. Gilson}
+\author[6,7*]{Tom Kurtzman}
 
 \affil[1]{Department of General, Inorganic and Theoretical Chemistry, University of Innsbruck, Austria}
 \affil[2]{Ph.D. Program in Biochemistry, The Graduate Center of the City University of New York, New York, USA 10016}
-\affil[3]{Skaggs School of Pharmacy and Pharmaceutical Sciences, University of California, San Diego, USA}
-\affil[4]{Laboratory of Computational Biology, National Heart, Lung, and Blood Institute, National Institutes of Health, Bethesda, Maryland, USA}
-\affil[5]{Ph.D. Programs in Biochemistry, Chemistry, and Biology, The Graduate Center of the City University of New York, New York, USA 10016}
-\affil[6]{Department of Chemistry, Lehman College, The City University of New York, Bronx, New York, USA 10468}
+\affil[3]{Ph.D. Program in Biology, The Graduate Center of the City University of New York, New York, USA 10016}
+\affil[4]{Skaggs School of Pharmacy and Pharmaceutical Sciences, University of California, San Diego, USA}
+\affil[5]{Laboratory of Computational Biology, National Heart, Lung, and Blood Institute, National Institutes of Health, Bethesda, Maryland, USA}
+\affil[6]{Ph.D. Programs in Biochemistry, Chemistry, and Biology, The Graduate Center of the City University of New York, New York, USA 10016}
+\affil[7]{Department of Chemistry, Lehman College, The City University of New York, Bronx, New York, USA 10468}
 
 \corr{klaus.liedl@uibk.ac.at}{KRL}
 \corr{mgilson@health.ucsd.edu}{MKG}
@@ -361,7 +362,7 @@ To use OpenMP, MPI or GPU-accelerated (using CUDA) versions of cpptraj, a differ
 Therefore, make sure to use the right compilation and executable, to get the full benefit of the various improvements to GIST as implemented in cpptraj.
 The \inlinecode{gist} action has numerous options to modify the GIST calculation or its output.
 A full list is provided at the end of this tutorial or through the \software{cpptraj} manual.
-The most important options are summarized in the following table:
+The most important options are summarized in table~\ref{tab:GIST_options}.
 
 \begin{table}[h]
 	\caption{The main options for GIST in \software{cpptraj}.}\label{tab:GIST_options}
@@ -520,7 +521,7 @@ To minimize the entropy overestimate, we recommend that RMSD of the solute durin
 In AMBER, the harmonic restraint potential takes the form $U = k_r \cdot (r - r_0)^2$ for each cartesian coordinate of each restrained atom, where $r_0$ is its reference position. 
 The force constant $k_r$ should be chosen strong enough to prevent significant deviation. 
 Here, we apply a harmonic restraint of \qty{100}{\kilo\calorie\per\mole\per\angstrom\squared} to all heavy atoms. 
-We recommend of at least \qty{2.5}{\kilo\calorie\per\mole\per\angstrom\squared} restraints. 
+We recommend at least \qty{2.5}{\kilo\calorie\per\mole\per\angstrom\squared} restraints. 
 
 The longer the simulations, the better the convergence of GIST energy and entropy estimates with the entropy values converging more slowly. 
 An analysis of the convergence of the entropy in GIST can be found in Ramsey et al. \cite{Ramsey2016}. 
@@ -1137,7 +1138,7 @@ However, PME-GIST is not supported on the GPU, and no GPU code will be used when
 \subsection{PME implementation}
 In reference~\cite{Chen2021}, a PME implementation of the GIST energy was presented.
 For typical systems, this implementation is slightly slower than GPU-GIST, but much faster than the original CPU code.
-Furthermore, PME-GIST offers the best agreement between GIST energies and those observed in an classical MD simulation.
+Furthermore, PME-GIST offers the best agreement between GIST energies and those observed in a classical MD simulation.
 To run PME-GIST, the \inlinecode{pme} flag to the \inlinecode{gist} command can be used in \software{cpptraj}.
 The output will contain two additional columns: \inlinecode{PME\_dens} and \inlinecode{PME\_norm}.
 They contain the potential of solute molecule and solvent evaluated at the solvent positions and divided by two.
