@@ -823,8 +823,8 @@ gist = load_gist_file('gist.dat',
 bins, (da, esw, eww, s) = gist.multiple_rdfs(
 	['A_dens', 'Esw_dens', 'Eww_dens', 'dTSsix_dens'],
 	bins=100, rmax=20., normalize='none')
-# Plot the bins vs the cumulative sum of the free energy contributions
-# Note the sign change for the entropy, to plot -TdS instead of TdS
+# Plot the cumulative sum of the free energy contributions
+# Note the sign change for the entropy (plots -TdS instead of TdS)
 plt.plot(bins, np.cumsum(eww), label=r'$\Delta$E$_{ww}$')
 plt.plot(bins, np.cumsum(esw), label=r'$\Delta$E$_{sw}$')
 plt.plot(bins, np.cumsum(da), label=r'$\Delta$A')
