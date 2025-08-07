@@ -14,3 +14,5 @@ manuscript/manuscript.pdf
 gist_revs.txt
 *.docx
 */.DS_Store
+.vscode/ltex.dictionary.en-US.txt
+.vscode/ltex.hiddenFalsePositives.en-US.txt

@@ -3,7 +3,7 @@
 %%% ADAPTED FROM ELIFE ARTICLE TEMPLATE (8/10/2017)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% PREAMBLE
-\documentclass[9pt,tutorial]{livecoms}
+\documentclass[9pt,tutorial,pubversion]{livecoms}
 % Use the 'onehalfspacing' option for 1.5 line spacing
 % Use the 'doublespacing' option for 2.0 line spacing
 % Use the 'lineno' option for adding line numbers.
@@ -77,15 +77,15 @@
 \corr{klaus.liedl@uibk.ac.at}{KRL}
 \corr{mgilson@health.ucsd.edu}{MKG}
 \corr{thomas.kurtzman@lehman.cuny.edu}{TK}
-\orcid{Valentin J Egger-Hoerschinger}{0000-0002-4469-3238}
+\orcid{Valentin J. Egger-Hoerschinger}{0000-0002-4469-3238}
 \orcid{Franz Waibl}{0000-0003-0527-0803}
 \orcid{Vjay Molino}{0009-0005-2055-9295}
 \orcid{Helmut Carter}{0000-0003-0273-4107}
-\orcid{Monica L Fern{\'a}ndez-Quintero}{0000-0002-6811-6283}
+\orcid{Monica L. Fernández-Quintero}{0000-0002-6811-6283}
 \orcid{Steven Ramsey}{0000-0001-7441-3228}
-\orcid{Daniel R Roe}{0000-0002-5834-2447}
-\orcid{Klaus R Liedl}{0000-0002-0985-2299}
-\orcid{Michael K Gilson}{0000-0002-3375-1738}
+\orcid{Daniel R. Roe}{0000-0002-5834-2447}
+\orcid{Klaus R. Liedl}{0000-0002-0985-2299}
+\orcid{Michael K. Gilson}{0000-0002-3375-1738}
 \orcid{Tom Kurtzman}{0000-0003-0900-772X}
 
 \contrib[\authfn{1}]{These authors contributed equally to this work}
@@ -98,13 +98,13 @@
 %%% Fill out these parameters when available
 %%% These are used when the "pubversion" option is invoked
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\pubDOI{10.XXXX/YYYYYYY}
-\pubvolume{<volume>}
-\pubissue{<issue>}
-\pubyear{<year>}
-\articlenum{<number>}
-\datereceived{Day Month Year}
-\dateaccepted{Day Month Year}
+\pubDOI{11.33011/livecoms.6.1.3059}
+\pubvolume{6}
+\pubissue{1}
+\pubyear{2025}
+\articlenum{3059}
+\datereceived{12 July 2024}
+\dateaccepted{07 July 2025}
 
 
 %%% Shortcuts and macros
@@ -173,8 +173,8 @@ This tutorial assumes familiarity with molecular dynamics simulations and the Am
 \end{figure}
 \section{Introduction}
 
-Solvation thermodynamics play a central role in many biological and chemical processes, particularly those involving aqueous solutions, hydrophobic effects, and partitioning between environments. Water is especially important, as most biological processes occur in aqueous conditions. The thermodynamics of solvation govern aqueous solubility and hydrophobic effects, which in turn influence numerous biological functions including ligand binding, protein folding, and the physical properties of cell membranes.
-
+Solvation thermodynamics play a central role in many biological and chemical processes, particularly those involving aqueous solutions, hydrophobic effects, and partitioning between environments. Water is especially important, as most biological processes occur in aqueous conditions. 
+The thermodynamics of solvation govern aqueous solubility and hydrophobic effects, which in turn influence numerous biological functions including ligand binding, protein folding, and the physical properties of cell membranes.
 Grid inhomogeneous solvation theory (GIST) \cite{Nguyen2012} is a method to compute the free energy of solvation, with applications in the context of drug design and biophysical property description.
 It computes the solvent density from an MD trajectory and estimates localized entropic and energetic contributions on a grid around the solute molecule.
 Since these contributions are spatially resolved, GIST improves interpretability and offers more detailed insights into the solvation of the investigated solute.
