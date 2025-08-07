@@ -1,4 +1,4 @@
-![A image showing a thermodynamic solvent densitie around a carbazole molecule](./manuscript/figures/carbazole-figure.png "Grid Inhomogenous Solvation Theory - GIST")
+![A image showing a thermodynamic solvent densitie around a carbazole molecule](./releases/header_v1.0.png "Grid Inhomogenous Solvation Theory - GIST")
 # GIST-Tutorial
 A tutorial for Grid Inhomogenous Solvation Theory (GIST) as implemented in AmberTool's cpptraj.
 The tutorial aims to teach how to apply GIST for small molecules and proteins, with biotin-streptavidin as a showcase example.
