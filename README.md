@@ -4,9 +4,8 @@ A tutorial for Grid Inhomogenous Solvation Theory (GIST) as implemented in Amber
 The tutorial aims to teach how to apply GIST for small molecules and proteins, with biotin-streptavidin as a showcase example.
 
 The current version of the manuscript is found on our GitHub page [liedlab.github.io](https://liedllab.github.io/gist/). 
-The manuscript is not currently published, but is aimed at the Living Journal of Computational Molecular Science. 
 
-As such, the tutorial is developed in line with LiveCoMS guidelines on [Paper Writing as Code Development ](https://livecomsjournal.github.io/about/paper_code/) and will be further updated in correspondence with the community. 
+The tutorial is developed in line with LiveCoMS guidelines on [Paper Writing as Code Development ](https://livecomsjournal.github.io/about/paper_code/) and will be further updated in correspondence with the community. 
 If you notice any issues or have suggestions, please raise them as an [Issue](https://github.com/liedllab/gist-tutorial/issues) or write up a [Pull Request](https://github.com/liedllab/gist-tutorial/pulls).
 
 # Repository Content
@@ -59,5 +58,15 @@ In the same order as in the manuscript:
 The repository is currently managed by Valentin ([@vhoer](https://www.github.com/vhoer)).
 
 # Citation
-If you want to cite the tutorial or readapt any code from this project, please cite us:
-TODO - Add citation once the manuscript is published.
+```
+@article{EggerHoerschinger2025,
+author = {Egger-Hoerschinger, Valentin J. and Waibl, Franz and Molino, Vjay and Carter, Helmut and Fernández-Quintero, Monica L. and Ramsey, Steven and Roe, Daniel R. and Liedl, Klaus R. and Gilson, Michael K. and Kurtzman, Tom},
+title = {Quantifying Spatially Resolved Hydration Thermodynamics Using Grid Inhomogeneous Solvation Theory [Article v1.0]},
+journal = {Living Journal of Computational Molecular Science},
+volume = {6},
+number = {1},
+pages = {3059},
+year = {2025},
+doi = {11.33011/livecoms.6.1.3059},
+}
+```
