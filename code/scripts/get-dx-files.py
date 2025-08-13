@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+# This script processes GIST files to generate density maps in .dx format.
+
+
 import gisttools as gt
 
 
@@ -8,11 +11,11 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("gistfile")
-    parser.add_argument("pdb")
+    parser.add_argument("gistfile", help="GIST output file to process, e.g. gist.dat")
+    parser.add_argument("pdb", help="PDB file of the system for which the GIST file was generated, without solvent")
     parser.add_argument("out_base", help="Base name for output files, e.g. OUT_BASE-Eall_dens.dx")
-    parser.add_argument("--ewwref", default=0)
-    parser.add_argument("--columns", nargs="+", default=["A_dens", "Eall_dens", "Eall2_dens", "A2_dens", "dTSsix_dens"])
+    parser.add_argument("--ewwref", default=0, help="Eww reference value, if not set (or 0), it will be detected from the GIST file")
+    parser.add_argument("--columns", nargs="+", default=["A_dens", "Eall_dens", "Eall2_dens", "A2_dens", "dTSsix_dens"], help="Columns to save in .dx format, default: A_dens Eall_dens Eall2_dens A2_dens dTSsix_dens")
     args = parser.parse_args()
     gistfile = gt.gist.load_gist_file(args.gistfile, struct=args.pdb)
     gistfile.struct = remove_solvent(gistfile.struct)
