@@ -27,6 +27,7 @@ Optional arguments:
   --refdens FLOAT         Reference density for water (default: 0.03287)
   --solute-mask STRING    Solute mask for cpptraj (default: '!(:WAT)')
   --system-dir PATH       System directory path (default: ../<system_name>)
+  --griddims "X Y Z"      Specify grid dimensions directly (skips bounds calculation)
   --pme                   Use PME for GIST calculation (default: no PME)
   --cpptraj-exec PATH     Name of cpptraj executable 
                           (default: cpptraj.cuda, for GPU support
@@ -35,8 +36,9 @@ Optional arguments:
 
 Examples:
   $0 biotin system.prmtop production.nc
-  $0 complex complex.prmtop prod.nc --grid-spacing 0.3 --offset 25
-  $0 biotin topology.parm7 trajectory.mdcrd --refdens 0.033 --solute-mask '!(:WAT,Cl-,Na+)'"
+  $0 complex complex.prmtop prod.nc --grid-spacing 0.5 --offset 40
+  $0 biotin topology.parm7 trajectory.mdcrd --griddims "100 100 140" --pme
+  $0 biotin topology.parm7 trajectory.mdcrd --refdens 0.03287 --solute-mask '!(:WAT,Cl-,Na+)'"
 
 # Default values
 GRID_SPACING="0.5" # Default grid spacing in Angstroms
@@ -45,6 +47,7 @@ REFDENS="0.03287" # Default reference density for TIP3P water
 SOLUTE_MASK="!(:WAT)"
 PME='' # No PME per default, set to 'pme' if needed or via command line
 CPPTRAJ_EXEC="cpptraj.cuda" # Default to cpptraj with CUDA support for GPU GIST
+GRIDDIMS="" # User-specified grid dimensions (optional)
 
 # Parse command line arguments
 if [ "$#" -lt 2 ]; then
@@ -77,6 +80,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --system-dir)
             SYSTEM_DIR="$2"
+            shift 2
+            ;;
+        --griddims)
+            GRIDDIMS="$2"
             shift 2
             ;;
         --help|-h)
@@ -118,42 +125,63 @@ fi
 mkdir -p "${GIST_DIR}"
 cd "${GIST_DIR}"
 
-echo "--- Step 1: Determining grid boundaries for ${SYSTEM} ---"
-
-# Create cpptraj input for calculating bounds
-BOUNDS_IN="bounds.in"
-BOUNDS_DAT="bounds.dat"
+# Always create a stripped PDB for reference
+echo "--- Creating centered solute PDB for reference ---"
 CENTERED_PDB="${SYSTEM}-centered.pdb"
+STRIP_IN="strip.in"
 
-cat > "${BOUNDS_IN}" <<EOF
+cat > "${STRIP_IN}" <<EOF
 # Load topology and a single frame
 parm ${TOPOLOGY}
 trajin ${TRAJECTORY} 1 1 1
 
 # Reimage and center the solute at the origin
-autoimage
-center ${SOLUTE_MASK} origin
+autoimage${SOLUTE_MASK} origin
 
 # Create a PDB of the centered solute for reference
 strip :WAT
 trajout ${CENTERED_PDB}
+go
+EOF
+
+${CPPTRAJ_EXEC} -i "${STRIP_IN}" > strip.log
+
+# Determine grid dimensions
+if [ -n "${GRIDDIMS}" ]; then
+    echo "--- Using user-specified grid dimensions: ${GRIDDIMS} ---"
+    GRID_DIMS="${GRIDDIMS}"
+else
+    echo "--- Determining grid boundaries for ${SYSTEM} ---"
+
+    # Create cpptraj input for calculating bounds only
+    BOUNDS_IN="bounds.in"
+    BOUNDS_DAT="bounds.dat"
+
+    cat > "${BOUNDS_IN}" <<EOF
+# Load topology and a single frame
+parm ${TOPOLOGY}
+trajin ${TRAJECTORY} 1 1 1
+
+# Reimage and center the solute at the origin
+autoimage ${SOLUTE_MASK} origin
 
 # Calculate grid bounds
 bounds ${SOLUTE_MASK} dx ${GRID_SPACING} offset ${OFFSET} name Grid out ${BOUNDS_DAT}
 go
 EOF
 
-${CPPTRAJ_EXEC} -i "${BOUNDS_IN}" > bounds.log
+    ${CPPTRAJ_EXEC} -i "${BOUNDS_IN}" > bounds.log
 
-# Extract grid dimensions from bounds.dat
-GRID_DIMS=$(grep "griddim" "${BOUNDS_DAT}" | awk '{print $2, $3, $4}')
-if [ -z "${GRID_DIMS}" ]; then
-    echo "Error: Could not determine grid dimensions from ${BOUNDS_DAT}."
-    exit 1
+    # Extract grid dimensions from bounds.dat
+    GRID_DIMS=$(awk -F'Bins=' '{print $2}' ${BOUNDS_DAT} | tr '\n' ' ' | awk '{print $1, $2, $3}')
+    if [ -z "${GRID_DIMS}" ]; then
+        echo "Error: Could not determine grid dimensions from ${BOUNDS_DAT}."
+        exit 1
+    fi
+    echo "Determined grid dimensions: ${GRID_DIMS}"
 fi
-echo "Determined grid dimensions: ${GRID_DIMS}"
 
-echo "--- Step 2: Running GIST analysis for ${SYSTEM} ---"
+echo "--- Running GIST analysis for ${SYSTEM} ---"
 
 # Create cpptraj input for GIST calculation
 GIST_IN="gist.in"
