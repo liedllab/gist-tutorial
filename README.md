@@ -1,5 +1,7 @@
 ![A image showing a thermodynamic solvent densitie around a carbazole molecule](./releases/header_v1.0.png "Grid Inhomogenous Solvation Theory - GIST")
+
 # GIST-Tutorial
+
 A tutorial for Grid Inhomogenous Solvation Theory (GIST) as implemented in AmberTool's cpptraj.
 The tutorial aims to teach how to apply GIST for small molecules and proteins, with biotin-streptavidin as a showcase example.
 
@@ -9,6 +11,7 @@ The tutorial is developed in line with LiveCoMS guidelines on [Paper Writing as 
 If you notice any issues or have suggestions, please raise them as an [Issue](https://github.com/liedllab/gist-tutorial/issues) or write up a [Pull Request](https://github.com/liedllab/gist-tutorial/pulls).
 
 # Repository Content
+
 This repository contains the following folders and files:
 - [code](https://github.com/liedllab/gist-tutorial/tree/main/code): Input files and scripts to run the Biotin/Streptavidin example shown in the manuscript.
 - [manuscript](https://github.com/liedllab/gist-tutorial/tree/main/manuscript): LaTeX files for the manuscript and bibliography.
@@ -42,7 +45,9 @@ The tutorial code is provided as a Jupyter Notebook at `code/tutorial-gist.ipynb
 We recommend using [JupyterLab](https://jupyter.org/) or [VS Code](https://code.visualstudio.com/) (with the Jupyter extensions) for editing and working with the notebook.
 
 Molecular visualisations are generated with [PyMol](https://pymol.org/) and input scripts are provided in the `output/visualization` folder.
+
 # Authors
+
 In the same order as in the manuscript:
 * Valentin J. Egger-Hoerschinger
 * Franz Waibl
@@ -58,6 +63,7 @@ In the same order as in the manuscript:
 The repository is currently managed by Valentin ([@vhoer](https://www.github.com/vhoer)).
 
 # Citation
+
 ```
 @article{EggerHoerschinger2025,
 author = {Egger-Hoerschinger, Valentin J. and Waibl, Franz and Molino, Vjay and Carter, Helmut and Fernández-Quintero, Monica L. and Ramsey, Steven and Roe, Daniel R. and Liedl, Klaus R. and Gilson, Michael K. and Kurtzman, Tom},
@@ -70,3 +76,12 @@ year = {2025},
 doi = {11.33011/livecoms.6.1.3059},
 }
 ```
+
+# Changelog
+
+The following changes were made after the LiveCoMS version (v1.0):
+
+## v1.1
+* Corrected $`E_{ww, norm}`$ calculation for solvents other than water in section 'Running GIST'
+
+
