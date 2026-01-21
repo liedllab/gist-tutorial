@@ -394,6 +394,8 @@ The reference values can be extracted from unrestrained MD trajectories of pure 
 where $\bar{E}_{NB,\ total}$ is the average inter-molecule, non-bonded energy of all solvent molecules, $N_{WAT}$ is the number of solvent molecules, and $\bar{V}_{box}$ is the average volume of the simulation box.
 Note that $\bar{E}_{NB,\ total}$ might be a sum of various other energy terms, depending on the force field and simulation engine used. For AMBER, this includes van der Waals (VDWAALS) and electrostatic interactions (EELEC).
 It is recommended that the size of the reference solvent box closely matches that of the production system.
+To align more closely with GISTs energy calculation, $E_{ww, norm}$ can also be calculated by running a GIST calculation on the bulk solvent box and averaging over all inner voxels (i.e. not on the grid border). 
+This approach is advisible when not using PME GIST or using simulation engines different from AMBER, as the energy calculation might then be different between GIST and the simulation.
 While the impact on the density is not as pronounced, deviations from the production settings can lead to differences of up to 0.005 kcal/mol in the energy per solvent molecule ($E_{ww, norm}$) for water boxes. 
 These discrepancies, when summing over large grid regions, have the potential to introduce significant errors due to incorrect referencing.
 
